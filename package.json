@@ -1,7 +1,7 @@
 {
   "name": "elastic-app-functions",
   "version": "1.0.0",
-  "description": "Elastic App search lambda functions ",
+  "description": "Elastic App search lambda functions",
   "main": "serverless.ts",
   "scripts": {
     "t": "ts-node test.ts",
