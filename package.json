@@ -1,0 +1,32 @@
+{
+  "name": "elastic-app-functions",
+  "version": "1.0.0",
+  "description": "Elastic App search lambda functions ",
+  "main": "serverless.ts",
+  "scripts": {
+    "t": "ts-node test.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "engines": {
+    "node": ">=14.15.0"
+  },
+  "dependencies": {
+    "@elastic/enterprise-search": "^8.1.0-beta.1",
+    "@middy/core": "^2.5.3",
+    "@middy/http-json-body-parser": "^2.5.3",
+    "envalid": "^7.3.1",
+    "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "@serverless/typescript": "^3.0.0",
+    "@types/aws-lambda": "^8.10.71",
+    "@types/node": "^14.14.25",
+    "esbuild": "^0.14.11",
+    "json-schema-to-ts": "^1.5.0",
+    "serverless": "^3.0.0",
+    "serverless-esbuild": "^1.23.3",
+    "ts-node": "^10.4.0",
+    "tsconfig-paths": "^3.9.0",
+    "typescript": "^4.1.3"
+  }
+}
