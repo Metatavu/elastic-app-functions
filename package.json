@@ -4,7 +4,6 @@
   "description": "Elastic App search lambda functions",
   "main": "serverless.ts",
   "scripts": {
-    "t": "ts-node test.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "engines": {
