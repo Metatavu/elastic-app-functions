@@ -6,7 +6,7 @@ export default {
     {
       httpApi: {
         method: 'get',
-        path: '/timed-curations'
+        path: '/timed-curations/{id}'
       },
     },
   ],

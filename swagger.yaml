@@ -41,6 +41,28 @@ paths:
                 $ref: "#/components/schemas/TimedCuration"
 
   "/timed-curations/{id}":
+    get:
+      operationId: findTimedCuration
+      summary: Find timed curation
+      description: |
+        Find timed curation
+      tags:
+        - TimedCurations
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: timed curation id
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Found timed curation
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: "#/components/schemas/TimedCuration"
     put:
       operationId: updateTimedCuration
       summary: Updates timed curation

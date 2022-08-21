@@ -1,5 +1,6 @@
 import type { AWS } from '@serverless/typescript';
 
+import findTimedCuration from '@functions/find-timed-curation';
 import listTimedCurations from '@functions/list-timed-curations';
 import createTimedCuration from '@functions/create-timed-curation';
 import updateTimedCuration from '@functions/update-timed-curation';
@@ -13,10 +14,11 @@ const serverlessConfiguration: AWS = {
   plugins: ['serverless-esbuild'],
   provider: {
     name: 'aws',
-    runtime: 'nodejs14.x',
+    runtime: 'nodejs16.x',
     region: 'us-east-2',
     httpApi: {
-      shouldStartNameWithService: true
+      shouldStartNameWithService: true,
+      cors: true
     },
     environment: {
       AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
@@ -47,6 +49,7 @@ const serverlessConfiguration: AWS = {
     }
   },
   functions: { 
+    findTimedCuration,
     listTimedCurations, 
     createTimedCuration, 
     updateTimedCuration,

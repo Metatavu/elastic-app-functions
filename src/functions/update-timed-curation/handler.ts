@@ -1,4 +1,4 @@
-import { formatJSONResponse, ValidatedEventAPIGatewayProxyEvent } from '@libs/api-gateway';
+import { ValidatedEventAPIGatewayProxyEvent } from '@libs/api-gateway';
 import { parseBasicAuth } from '@libs/auth-utils';
 import { middyfy } from '@libs/lambda';
 import { getElastic } from 'src/elastic';
@@ -46,7 +46,10 @@ const updateTimedCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = a
     "endTime": endTime
   });
 
-  return formatJSONResponse(updatedCuration);
+  return {
+    statusCode: 200,
+    body: JSON.stringify(updatedCuration)
+  };
 };
 
 export const main = middyfy(updateTimedCuration);

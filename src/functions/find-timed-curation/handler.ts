@@ -5,12 +5,19 @@ import { timedCurationsService } from "../../database/services";
 import { parseBasicAuth } from '@libs/auth-utils';
 
 /**
- * Lambda for listing timed curations
+ * Lambda for find timed curation
  * 
  * @param event event
  */
-const listTimedCurations: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
-  const { headers: { authorization, Authorization } } = event;
+const findTimedCuration: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
+  const { pathParameters: { id }, headers: { authorization, Authorization } } = event;
+
+  if (!id) {
+    return {
+      statusCode: 404,
+      body: "Not found"
+    };
+  }
 
   const auth = parseBasicAuth(authorization || Authorization);
   if (!auth) {
@@ -28,12 +35,18 @@ const listTimedCurations: ValidatedEventAPIGatewayProxyEvent<any> = async (event
     };
   }
 
-  const timedCurations = await timedCurationsService.listTimedCurations();
+  const timedCuration = await timedCurationsService.findTimedCuration(id);
+  if (!timedCuration) {
+    return {
+      statusCode: 404,
+      body: "Not found"
+    };
+  }
   
   return {
     statusCode: 200,
-    body: JSON.stringify(timedCurations)
+    body: JSON.stringify(timedCuration)
   };
 };
 
-export const main = middyfy(listTimedCurations);
+export const main = middyfy(findTimedCuration);
