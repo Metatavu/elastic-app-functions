@@ -122,6 +122,12 @@ components:
   schemas:
     TimedCuration:
       type: object
+      required:
+        - queries
+        - promoted
+        - hidden
+        - startTime
+        - endTime
       properties:
         id:
           type: string
