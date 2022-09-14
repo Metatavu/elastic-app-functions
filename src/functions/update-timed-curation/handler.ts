@@ -10,8 +10,11 @@ import schema from '../../schema/timed-curation';
  * 
  * @param event event
  */
-const updateTimedCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async (event) => {
-  const { pathParameters: { id }, body: { queries, promoted, hidden, startTime, endTime}, headers: { authorization, Authorization } } = event;
+const updateTimedCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async event => {
+  const { pathParameters, body, headers } = event;
+  const { id } = pathParameters;
+  const { queries, promoted, hidden, startTime, endTime } = body;
+  const { authorization, Authorization } = headers;
   
   const auth = parseBasicAuth(authorization || Authorization);
   if (!auth) {
@@ -39,11 +42,11 @@ const updateTimedCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = a
   
   const updatedCuration = await timedCurationsService.updateTimedCuration({ 
     ...timedCuration,
-    "promoted": promoted,
-    "hidden": hidden,
-    "queries": queries,
-    "startTime": startTime,
-    "endTime": endTime
+    promoted: promoted,
+    hidden: hidden,
+    queries: queries,
+    startTime: startTime,
+    endTime: endTime
   });
 
   return {

@@ -9,8 +9,10 @@ import { parseBasicAuth } from '@libs/auth-utils';
  * 
  * @param event event
  */
-const findTimedCuration: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
-  const { pathParameters: { id }, headers: { authorization, Authorization } } = event;
+const findTimedCuration: ValidatedEventAPIGatewayProxyEvent<any> = async event => {
+  const { pathParameters, headers } = event;
+  const { id } = pathParameters;
+  const { authorization, Authorization } = headers;
 
   if (!id) {
     return {

@@ -11,7 +11,7 @@ import { env } from 'process';
 const serverlessConfiguration: AWS = {
   service: 'elastic-app-functions',
   frameworkVersion: '3',
-  plugins: ['serverless-esbuild'],
+  plugins: [ 'serverless-esbuild' ],
   provider: {
     name: 'aws',
     runtime: 'nodejs16.x',
@@ -41,7 +41,7 @@ const serverlessConfiguration: AWS = {
               "dynamodb:DeleteItem",
             ],
             Resource: [
-              { "Fn::GetAtt": ["TimedCurations", "Arn"] }
+              { "Fn::GetAtt": [ "TimedCurations", "Arn" ] }
             ],
           }
         ]
@@ -62,7 +62,7 @@ const serverlessConfiguration: AWS = {
       bundle: true,
       minify: false,
       sourcemap: true,
-      exclude: ['aws-sdk'],
+      exclude: [ 'aws-sdk' ],
       target: 'node16',
       define: { 'require.resolve': undefined },
       platform: 'node',
