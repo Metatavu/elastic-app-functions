@@ -12,7 +12,9 @@ import { getElastic } from 'src/elastic';
  * @param event event
  */
 const createTimedCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async (event) => {
-  const { body: { queries, promoted, hidden, startTime, endTime}, headers: { Authorization, authorization } } = event;
+  const { body, headers } = event;
+  const { queries, promoted, hidden, startTime, endTime } = body;
+  const { Authorization, authorization } = headers;
 
   const auth = parseBasicAuth(authorization || Authorization);
   if (!auth) {
