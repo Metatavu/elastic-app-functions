@@ -6,6 +6,6 @@ import { cleanEnv, str, url } from "envalid";
 export default cleanEnv(process.env, {
   ELASTIC_URL: url(),
   ELASTIC_APP_ENGINE: str(),
-  ELASTIC_ADMIN_USERNAME: str({default: null}),
-  ELASTIC_ADMIN_PASSWORD: str({default: null})
+  ELASTIC_ADMIN_USERNAME: str({ default: null }),
+  ELASTIC_ADMIN_PASSWORD: str({ default: null })
 });
