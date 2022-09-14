@@ -34,16 +34,18 @@ const createTimedCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = a
 
   const documentIds = [ ...promoted, ...hidden ];
   
-  const documents = await Promise.all(documentIds.map(documentId => elastic.findDocument({
-    documentId: documentId
-  })));
+  const documents = await Promise.all(
+    documentIds.map(async documentId => ({
+      id: documentId,
+      data: await elastic.findDocument({ documentId: documentId })
+    }))
+  );
 
-  for (let i = 0; i < documentIds.length; i++) {
-    const documentId = documentIds[i];
-    if (!documents[i]) {
+  for (const document of documents) {
+    if (!document.data) {
       return {
         statusCode: 404,
-        body: `Document ${documentId} not found`
+        body: `Document ${document.id} not found`
       };
     }
   }
