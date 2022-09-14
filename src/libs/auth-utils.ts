@@ -13,7 +13,7 @@ export interface BasicAuth {
  * @returns basic auth username and password pair
  */
 export const parseBasicAuth = (authorizationHeader?: string): BasicAuth | null => {
-  if (!authorizationHeader || !authorizationHeader.toLocaleLowerCase().startsWith("basic ")) {
+  if (!authorizationHeader?.toLocaleLowerCase().startsWith("basic ")) {
     return null;
   } 
 
