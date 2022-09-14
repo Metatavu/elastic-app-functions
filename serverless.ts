@@ -16,7 +16,7 @@ const serverlessConfiguration: AWS = {
     name: 'aws',
     runtime: 'nodejs16.x',
     deploymentBucket: {
-      name: "elastic-app-functions-${self:provider.stage}.deploys"
+      name: "elastic-app-functions-${opt:stage}.deploys"
     },
     httpApi: {
       shouldStartNameWithService: true,
