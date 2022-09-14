@@ -4,11 +4,11 @@
 export default {
   type: "object",
   properties: {
-    queries: { type: 'array', items: { type: "string"} },
-    promoted: { type: 'array', items: { type: "string"} },
-    hidden: { type: 'array', items: { type: "string"} },
+    queries: { type: 'array', items: { type: "string" } },
+    promoted: { type: 'array', items: { type: "string" } },
+    hidden: { type: 'array', items: { type: "string" } },
     startTime: { type: 'string' },
     endTime: { type: 'string' },
   },
-  required: ['queries', 'promoted', 'hidden', 'startTime', 'endTime']
+  required: [ 'queries', 'promoted', 'hidden', 'startTime', 'endTime' ]
 } as const;
