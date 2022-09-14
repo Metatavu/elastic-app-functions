@@ -9,7 +9,7 @@ import { timedCurationsService } from "../../database/services";
  * 
  * @param event event
  */
-const deleteTimedCuration: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
+const deleteTimedCuration: ValidatedEventAPIGatewayProxyEvent<any> = async event => {
   const { pathParameters: { id }, headers: { Authorization, authorization } } = event;
 
   const auth = parseBasicAuth(authorization || Authorization);
