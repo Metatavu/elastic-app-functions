@@ -39,7 +39,8 @@ const scheduleTimedCuration = async () => {
       });
       
       timedCurationsService.updateTimedCuration({
-        ...timedCuration, curationId: curationId
+        ...timedCuration,
+        curationId: curationId
       });
 
       console.log(`Created curation ${curationId} for scheduled curation ${id}.`);
