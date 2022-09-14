@@ -15,7 +15,9 @@ const serverlessConfiguration: AWS = {
   provider: {
     name: 'aws',
     runtime: 'nodejs16.x',
-    region: 'us-east-2',
+    deploymentBucket: {
+      name: "elastic-app-functions-${self:provider.stage}.deploys"
+    },
     httpApi: {
       shouldStartNameWithService: true,
       cors: true
