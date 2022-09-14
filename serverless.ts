@@ -11,12 +11,13 @@ import { env } from 'process';
 const serverlessConfiguration: AWS = {
   service: 'elastic-app-functions',
   frameworkVersion: '3',
-  plugins: [ 'serverless-esbuild' ],
+  plugins: [ 'serverless-esbuild', 'serverless-deployment-bucket' ],
   provider: {
     name: 'aws',
     runtime: 'nodejs16.x',
+    region: env.AWS_DEFAULT_REGION as any,
     deploymentBucket: {
-      name: "elastic-app-functions-${opt:stage}.deploys"
+      name: "serverless-elastic-app-functions-${opt:stage}-deploy"
     },
     httpApi: {
       shouldStartNameWithService: true,
