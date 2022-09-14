@@ -1,4 +1,5 @@
 import { Client } from "@elastic/enterprise-search";
+import { CreateCurationRequest } from "@elastic/enterprise-search/lib/api/app/types";
 import { BasicAuth } from "@libs/auth-utils";
 import config from "../config";
 
@@ -34,7 +35,7 @@ export class Elastic {
    * @param options options
    * @returns craeted curation
    */
-  public createCuration = async (options: { curation: { queries: string[], promoted: string[], hidden: string[] } }): Promise<string> => {
+  public createCuration = async (options: { curation: CreateCurationRequest["body"] }): Promise<string> => {
     const { curation } = options;
 
     const result = await this.getClient().app.createCuration({
@@ -68,9 +69,9 @@ export class Elastic {
    * @param options options
    * @returns single curation or null if not found
    */
-  public findCuration = async (options: { id: string }) => {
+  public findCuration = (options: { id: string }) => {
     const { id } = options;
-    return await this.getClient().app.getCuration({
+    return this.getClient().app.getCuration({
       engine_name: this.options.engineName,
       curation_id: id
     });
