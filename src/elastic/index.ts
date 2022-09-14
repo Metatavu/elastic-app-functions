@@ -118,10 +118,9 @@ export class Elastic {
       });
 
       return !!result.results;
-    } catch (e) {
+    } catch {
+      return false;
     }
-
-    return false;
   }
 
   /**
