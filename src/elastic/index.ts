@@ -125,6 +125,61 @@ export class Elastic {
   }
 
   /**
+   * Returns whether user has permission to manage scheduled crawls.
+   * 
+   * Check is done by listing crawl requests
+   * 
+   * @returns whether user has permission to manage scheduled crawls
+   */
+  public hasScheduledCrawlAccess = async () => {
+    try {
+      const result = await this.getClient().app.listCrawlerCrawlRequests({
+        engine_name: this.options.engineName,
+        page: {
+          current: 1,
+          size: 1
+        }
+      });
+
+      return !!result.results;
+    } catch (e) {
+    }
+
+    return false;
+  }
+
+  /**
+   * Creates new partial crawl request
+   * 
+   * @param options options
+   * @returns crawl request id
+   */
+  public createCrawlRequest = async (options: { crawl: { seed_urls: string[], max_crawl_depth: number }}): Promise<string> => {
+    const { crawl } = options;
+
+    const result = await this.getClient().app.createCrawlerCrawlRequest({
+      engine_name: this.options.engineName,
+      body: crawl
+    });
+
+    return result.id;
+  }
+
+  /**
+   * Finds details for a crawl request
+   * 
+   * @param options options
+   * @returns crawl details or null if not found
+   */
+  public findCrawlDetails = async (options: { id: string }) => {
+    const { id } = options;
+    return await this.getClient().app.getCrawlerCrawlRequest({
+      engine_name: this.options.engineName,
+      crawl_request_id: id
+    });
+  }
+
+  /**
    * Returns client
    * 
    * @returns client

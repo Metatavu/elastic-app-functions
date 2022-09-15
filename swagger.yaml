@@ -105,6 +105,106 @@ paths:
       responses:
         "204":
           description: Empty content indicating a successful removal
+  
+  "/scheduled-crawl":
+    get:
+      operationId: listScheduledCrawls
+      summary: Lists scheduled crawls
+      description: |
+        Lists scheduled crawls
+      tags:
+        - ScheduledCrawl
+      responses:
+        "200":
+          description: A list of scheduled crawls
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ScheduledCrawl"
+    post:
+      operationId: createScheduledCrawl
+      summary: create new scheduled crawl
+      description: |
+        Creates new scheduled crawl
+      tags:
+        - ScheduledCrawl
+      requestBody:
+        $ref: "#/components/requestBodies/ScheduledCrawl"
+      responses:
+        "200":
+          description: Created scheduled crawl
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: "#/components/schemas/ScheduledCrawl"
+
+  "/scheduled-crawl/{id}":
+    get:
+      operationId: findScheduledCrawl
+      summary: Find scheduled crawl
+      description: |
+        Find scheduled crawl
+      tags:
+        - ScheduledCrawl
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: scheduled crawl id
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Found scheduled crawl
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: "#/components/schemas/ScheduledCrawl"
+    put:
+      operationId: updateScheduledCrawl
+      summary: Updates scheduled crawl
+      description: |
+        Updates scheduled crawl
+      tags:
+        - ScheduledCrawl
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: scheduled crawl id
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        $ref: "#/components/requestBodies/ScheduledCrawl"
+      responses:
+        "200":
+          description: Updated scheduled crawl
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: "#/components/schemas/ScheduledCrawl"
+    delete:
+      operationId: deleteScheduledCrawl
+      summary: Deletes scheduled crawl
+      description: |
+        Deletes scheduled crawl
+      tags:
+        - ScheduledCrawl
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: scheduled crawl id
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Empty content indicating a successful removal
 
 components:
   requestBodies:
@@ -113,6 +213,13 @@ components:
         application/json;charset=utf-8:
           schema:
             $ref: "#/components/schemas/TimedCuration"
+      description: Payload
+      required: true
+    ScheduledCrawl:
+      content:
+        application/json;charset=utf-8:
+          schema:
+            $ref: "#/components/schemas/ScheduledCrawl"
       description: Payload
       required: true
   securitySchemes:
@@ -154,3 +261,29 @@ components:
           type: string
           format: date-time
           description: Start time of curation
+    ScheduledCrawl:
+      type: object
+      required:
+        - id
+        - name
+        - seedURLs
+        - frequency
+        - maxCrawlDepth
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          description: Identifier
+        previousCrawlId:
+          type: string
+        name:
+          type: string
+        seedURLs:
+          type: array
+          items:
+            type: string
+        frequency:
+          type: string
+        maxCrawlDepth:
+          type: number
