@@ -1,12 +1,11 @@
 import { middyfy } from '@libs/lambda';
-import { scheduledCrawlService } from "../../../database/services";
+import { scheduledCrawlService } from "../../../database/services";
 import config from '../../../config';
-import { parseDate } from '@libs/date-utils';
+import { calculateMinutesPassed } from '@libs/date-utils';
 import { getElastic } from 'src/elastic';
+import { GetCrawlerCrawlRequestResponse } from '@elastic/enterprise-search/lib/api/app/types';
 
 const { ELASTIC_ADMIN_USERNAME, ELASTIC_ADMIN_PASSWORD } = config;
-
-// TODO: this file will be updated to trigger the partial crawl.
 
 /**
  * Scheduled lambda for managing curations based on timed curations
@@ -17,98 +16,126 @@ const triggerScheduledCrawl = async () => {
     password: ELASTIC_ADMIN_PASSWORD
   });
 
-  // Get all the schedules
-
   const scheduledCrawls = await scheduledCrawlService.listScheduledCrawls();
 
-  // Have the frequencies elapsed since last trigger?
+  let crawlDetailsMap: { [key: string]: GetCrawlerCrawlRequestResponse } = {  };
 
-    // Need last time it was triggered
-      // Crawler api, for each crawl take elastic crawl id,
-        // View details for a crawl request based on above id and take the completed at (recieving the whole response or null if not found)
-        // NOTE: on partial crawl we get a created at time, but not a completed at (obvs)- if used this would save having to view the details for each crawl request.
-      // If does not yet have a elastic crawl id it will be added to the seed urls
+  /**
+   * Get list of crawls to be executed
+   */
+  const activeCrawls = scheduledCrawls.filter(async crawl => {
+    const { previousCrawlId, frequency, seedURLs } = crawl;
 
-      let seed_urls: string[];
+    if (!crawlDetailsMap[previousCrawlId]) {
+      // IS THIS CORRECT? OR Will it ignore any other 'crawl' with same prevCrawlID, even if that crawl has different seedURLs?
+      // The purpose of prevCrawlId is not for unique identification, but to give us access to the completed_at data
+      const crawlDetails = previousCrawlId ? await elastic.findCrawlDetails({ id: previousCrawlId }) : null;
 
-      // Should this be a map or a for each?
-      await Promise.all(scheduledCrawls.map(async crawl => {
-        const { previousCrawlId, seedURLs } = crawl;
+      // If no previousCrawlId then it should be crawled regardless of frequency
+      if (crawl.previousCrawlId === null) {
+        return seedURLs;
+      } else {
+         // Not passing in empty previousCrawlId's as this would then ignore all new scheduled crawls
+        crawlDetailsMap = { ...crawlDetailsMap, [previousCrawlId] : crawlDetails };
 
-        const crawlDetails = await elastic.findCrawlDetails({ id: previousCrawlId });
+        const { completed_at } = crawlDetails;
+        const difference = calculateMinutesPassed(completed_at);
 
-        // Meaning it has not had a scheduled run before
-        if (!crawlDetails) {
-          // Need to clarify about how the seeds will be stored.
-          seedURLs.forEach(url => seed_urls.push(url));
-        } else {
-          // HERE
-       // How much time has passed since the completed at
-      // Some kind of date now
-    
-      //Compare with frequency, difference between now and completed at Has the frequency elapsed- if so add to seed urls?
+        if (difference >= frequency) {
+          // TODO: How to prevent duplicate seedURLs from being returned here?
+          return seedURLs;
+          // seedURLs.forEach(url => {
+          //   // Prevent duplicates in the seed urls.
+          //   if (!seedUrlObject.seedUrls.includes(url)) {
+          //     seedUrlObject.seedUrls.push(url);
+          //     !seedUrlObject.ids.includes(id) && seedUrlObject.ids.push(id);
+          //   };
+          // });
+        };
+      }
+    };
+  });
 
-          const { completed_at } = crawlDetails;
-        }
+  const urls = activeCrawls.flatMap(activeCrawl => activeCrawl.seedURLs);
 
-      }));
+  const crawlOptions = {
+    crawl: {
+      seed_urls: urls,
+      // Hard coded for now, as not sure how to customize the crawl depth for seed_urls without making multiple requests (and not sure can do this...)
+      max_crawl_depth: 2
+    }
+  };
 
-  // If should be triggered add to the array of seed urls and call the partial crawl request.
+  const crawlResponse = await elastic.createCrawlRequest(crawlOptions);
 
-    // Remove any duplicates in the seed urls.
+  // Update the completed crawls in DDB with previousCrawlId
+  // TODO: how to handle error if already an active crawl ongoing?
+  if (!crawlResponse) {
+    console.warn("Error from creating crawl request");
+  } else {
+    activeCrawls.forEach(activeCrawl => {
+      scheduledCrawlService.updateScheduledCrawl({
+        ...activeCrawl,
+        previousCrawlId: crawlResponse
+      });
+    });
+  };
 
 
-  // Any url/ row in the last crawl is updated with a new elastic crawl ID.
 
-    // Loop through scheduledCrawls, if was added to seed urls, call the update-scheduled-crawl function to update the elastic id.
+  // ORIGINAL LOGIC (JUST IN CASE...)
 
+  // // Should this be a map or a for each?- not returning anything from this??
+  // await Promise.all(scheduledCrawls.map(async crawl => {
+  //   const { previousCrawlId, seedURLs, frequency, id } = crawl;
 
+  //   // NOTE: on partial crawl request response we get a created at time, but not a completed at(is null)- if used created at instead would save having to view the details for each crawl request. But I don't think this is what we want.
+  //   const crawlDetails = previousCrawlId ? await elastic.findCrawlDetails({ id: previousCrawlId }) : null;
 
+  //   // If crawl does not yet have a elastic crawl id it will be added to the seed urls
+  //   if (!crawlDetails) {
+  //     // Need to clarify about how the seeds will be stored.???
+  //     seedURLs.forEach(url => {
+  //       seedUrlObject.seedUrls.push(url);
+  //       !seedUrlObject.ids.includes(id) && seedUrlObject.ids.push(id);
+  //     });
+  //   } else {
+  //     const { completed_at } = crawlDetails;
+  //     // completed_at format "Fri, 29 Jan 2021 21:35:20 +0000"
+  //     const difference = calculateMinutesPassed(completed_at);
 
-
-
-  // const timedCurations = await timedCurationsService.listTimedCurations();
-
-  // await Promise.all(timedCurations.map(async timedCuration => {
-  //   const { id, curationId, startTime, endTime, hidden, promoted, queries } = timedCuration;
-    
-  //   const now = new Date();
-  //   const start = parseDate(startTime);
-  //   const end = parseDate(endTime);
-  //   const active = start.getTime() <= now.getTime() && end.getTime() >= now.getTime();
-
-  //   if (!curationId && active) {
-  //     const payload = {
-  //       hidden: hidden, 
-  //       promoted: promoted, 
-  //       queries: queries
+  //     if (difference >= frequency) {
+  //       seedURLs.forEach(url => {
+  //         // Prevent duplicates in the seed urls.
+  //         if (!seedUrlObject.seedUrls.includes(url)) {
+  //           seedUrlObject.seedUrls.push(url);
+  //           !seedUrlObject.ids.includes(id) && seedUrlObject.ids.push(id);
+  //         };
+  //       });
   //     };
-
-  //     console.log(`Creating curation for scheduled curation ${id}...`);
-      
-  //     const curationId = await elastic.createCuration({
-  //       curation: payload
-  //     });
-      
-  //     timedCurationsService.updateTimedCuration({
-  //       ...timedCuration, curationId: curationId
-  //     });
-
-  //     console.log(`Created curation ${curationId} for scheduled curation ${id}.`);
-  //   } else if (curationId && !active) {
-  //     console.log(`Curation ${curationId} scheduled to be deactivated. Removing curation from app search...`);
-
-  //     const curation = await elastic.findCuration({ id: curationId });
-  //     if (curation) {
-  //       await elastic.deleteCuration({ id: curationId });
-  //       console.info(`Curation ${curationId} removed.`);
-  //     } else {
-  //       console.warn(`Could not find curation ${curationId}, cannot remove it.`);
-  //     }
-
-  //     await timedCurationsService.deleteTimedCuration(id);
-  //   }
+  //   };
   // }));
+
+  // const crawlOptions = {
+  //   crawl: {
+  //     seed_urls: seedUrlObject.seedUrls,
+  //     // Hard coded for now, as not sure how to customize the crawl depth for seed_urls without making multiple requests (and not sure can do this...)
+  //     max_crawl_depth: 2
+  //   }
+  // };
+
+  // const crawlResponse = await elastic.createCrawlRequest(crawlOptions);
+
+  // // If a scheduled crawl was triggered update the previousCrawlId
+  // if (crawlResponse) {
+  //   await Promise.all(scheduledCrawls.map(async crawl => {
+  //     if (seedUrlObject.ids.includes(crawl.id))
+  //       scheduledCrawlService.updateScheduledCrawl({
+  //         ...crawl,
+  //         previousCrawlId: crawlResponse
+  //       });
+  //   }));
+  // };
 };
 
 export const main = middyfy(triggerScheduledCrawl);

@@ -6,7 +6,7 @@ export default {
     {
       schedule: {
         rate: [
-          "rate(15 minute)"
+          "rate(15 minutes)"
         ]
       }
     }

@@ -264,7 +264,6 @@ components:
     ScheduledCrawl:
       type: object
       required:
-        - id
         - name
         - seedURLs
         - frequency
@@ -275,8 +274,6 @@ components:
           format: uuid
           readOnly: true
           description: Identifier
-        previousCrawlId:
-          type: string
         name:
           type: string
         seedURLs:
@@ -284,6 +281,6 @@ components:
           items:
             type: string
         frequency:
-          type: string
+          type: number
         maxCrawlDepth:
           type: number
