@@ -33,7 +33,9 @@ const serverlessConfiguration: AWS = {
       AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
       NODE_OPTIONS: '--enable-source-maps --stack-trace-limit=1000',
       ELASTIC_URL: env.ELASTIC_URL,
-      ELASTIC_APP_ENGINE: env.ELASTIC_APP_ENGINE
+      ELASTIC_APP_ENGINE: env.ELASTIC_APP_ENGINE,
+      ELASTIC_ADMIN_USERNAME: env.ELASTIC_ADMIN_USERNAME,
+      ELASTIC_ADMIN_PASSWORD: env.ELASTIC_ADMIN_PASSWORD
     },
     iam: {
       role: {
