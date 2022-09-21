@@ -18,45 +18,34 @@ const triggerScheduledCrawl = async () => {
 
   const scheduledCrawls = await scheduledCrawlService.listScheduledCrawls();
 
-  let crawlDetailsMap: { [key: string]: GetCrawlerCrawlRequestResponse } = {  };
+  let crawlDetailsMap: { [key: string]: GetCrawlerCrawlRequestResponse };
 
-  /**
-   * Get list of crawls to be executed
-   */
+  // Get list of crawls to be executed
   const activeCrawls = scheduledCrawls.filter(async crawl => {
     const { previousCrawlId, frequency, seedURLs } = crawl;
 
+    let crawlDetails: GetCrawlerCrawlRequestResponse;
+
     if (!crawlDetailsMap[previousCrawlId]) {
-      // IS THIS CORRECT? OR Will it ignore any other 'crawl' with same prevCrawlID, even if that crawl has different seedURLs?
-      // The purpose of prevCrawlId is not for unique identification, but to give us access to the completed_at data
-      const crawlDetails = previousCrawlId ? await elastic.findCrawlDetails({ id: previousCrawlId }) : null;
+      crawlDetails = previousCrawlId ? await elastic.findCrawlDetails({ id: previousCrawlId }) : null;
+      crawlDetailsMap = { ...crawlDetailsMap, [previousCrawlId] : crawlDetails };
+    }
 
-      // If no previousCrawlId then it should be crawled regardless of frequency
-      if (crawl.previousCrawlId === null) {
+    // If no previousCrawlId then it should be crawled regardless of frequency
+    if (crawlDetailsMap[previousCrawlId] === null) {
+      return seedURLs;
+    } else {
+      const { completed_at } = crawlDetailsMap[previousCrawlId];
+      const difference = calculateMinutesPassed(completed_at);
+
+      if (difference >= frequency) {
         return seedURLs;
-      } else {
-         // Not passing in empty previousCrawlId's as this would then ignore all new scheduled crawls
-        crawlDetailsMap = { ...crawlDetailsMap, [previousCrawlId] : crawlDetails };
-
-        const { completed_at } = crawlDetails;
-        const difference = calculateMinutesPassed(completed_at);
-
-        if (difference >= frequency) {
-          // TODO: How to prevent duplicate seedURLs from being returned here?
-          return seedURLs;
-          // seedURLs.forEach(url => {
-          //   // Prevent duplicates in the seed urls.
-          //   if (!seedUrlObject.seedUrls.includes(url)) {
-          //     seedUrlObject.seedUrls.push(url);
-          //     !seedUrlObject.ids.includes(id) && seedUrlObject.ids.push(id);
-          //   };
-          // });
-        };
       }
-    };
+    }
   });
 
-  const urls = activeCrawls.flatMap(activeCrawl => activeCrawl.seedURLs);
+  // Flat map and remove any seed URL duplicates
+  const urls = [ ...new Set(activeCrawls.flatMap(activeCrawl => activeCrawl.seedURLs)) ];
 
   const crawlOptions = {
     crawl: {
@@ -68,9 +57,9 @@ const triggerScheduledCrawl = async () => {
 
   const crawlResponse = await elastic.createCrawlRequest(crawlOptions);
 
-  // Update the completed crawls in DDB with previousCrawlId
-  // TODO: how to handle error if already an active crawl ongoing?
+  // Update the completed crawls in DB with previousCrawlId
   if (!crawlResponse) {
+    // TODO: how to handle error if already an active crawl ongoing?
     console.warn("Error from creating crawl request");
   } else {
     activeCrawls.forEach(activeCrawl => {
@@ -79,8 +68,10 @@ const triggerScheduledCrawl = async () => {
         previousCrawlId: crawlResponse
       });
     });
-  };
+  }
+};
 
+export const main = middyfy(triggerScheduledCrawl);
 
 
   // ORIGINAL LOGIC (JUST IN CASE...)
@@ -136,6 +127,4 @@ const triggerScheduledCrawl = async () => {
   //       });
   //   }));
   // };
-};
 
-export const main = middyfy(triggerScheduledCrawl);
