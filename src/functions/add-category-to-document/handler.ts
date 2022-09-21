@@ -27,7 +27,7 @@ interface DrupalSettingsJson {
 }
 
 /**
- * Resolves category based from URÖ
+ * Resolves category based from URL
  * 
  * @param url URL
  * @returns category
