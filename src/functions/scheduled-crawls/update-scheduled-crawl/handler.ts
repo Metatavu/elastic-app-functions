@@ -13,7 +13,7 @@ import schema from '../../../schema/scheduled-crawl';
 const updateScheduledCrawl: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async (event) => {
   const { pathParameters, body, headers } = event;
   const { id } = pathParameters;
-  const { name, previousCrawlId, seedURLs, frequency, maxCrawlDepth } = body;
+  const { name, previousCrawlId, seedURLs, frequency } = body;
   const { authorization, Authorization } = headers;
   
   const auth = parseBasicAuth(authorization || Authorization);
@@ -46,7 +46,6 @@ const updateScheduledCrawl: ValidatedEventAPIGatewayProxyEvent<typeof schema> = 
     previousCrawlId: previousCrawlId,
     seedURLs: seedURLs,
     frequency: frequency,
-    maxCrawlDepth: maxCrawlDepth
   });
 
   return {
