@@ -180,6 +180,18 @@ export class Elastic {
   }
 
   /**
+   * Check if a crawl is currently active
+   * 
+   * @param options options
+   * @returns active crawl details or 404
+   */
+  public checkIfActiveCrawl = async () => {
+    return await this.getClient().app.getCrawlerActiveCrawlRequest({
+      engine_name: this.options.engineName,
+    });
+  }
+
+  /**
    * Returns client
    * 
    * @returns client
