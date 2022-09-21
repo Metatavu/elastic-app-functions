@@ -1,4 +1,3 @@
-// import { middyfy } from "@libs/lambda";
 import fetch from "node-fetch";
 import  * as cheerio from "cheerio";
 import { getElastic } from "src/elastic";
@@ -25,7 +24,7 @@ interface DrupalSettingsJson {
   path?: {
     currentPath?: string | null;
   };
-};
+}
 
 /**
  * Resolves category based from URÖ
@@ -88,7 +87,7 @@ const resolveUrlCategory = async (url: string): Promise<ContentCategory> => {
  * @param document document
  * @returns URL or null if category could not be resolved
  */
-const resolveDocumentCategory = async (document: any): Promise<ContentCategory | null> => {
+const resolveDocumentCategory = (document: any): Promise<ContentCategory | null> => {
   const { url, id } = document;
 
   if (!id || !url) {
@@ -96,7 +95,7 @@ const resolveDocumentCategory = async (document: any): Promise<ContentCategory |
     return null;
   }
 
-  return await resolveUrlCategory(url);
+  return resolveUrlCategory(url);
 }
 
 /**

@@ -11,14 +11,14 @@ export interface Options {
   username: string;
   password: string;
   engineName: string;
-};
+}
 
 /**
  * App Search response with correct results typing
  */
 export interface AppSearchResponse extends SearchResponse {
   results: { [key: string]: any }[];
-};
+}
 
 /**
  * Update document
