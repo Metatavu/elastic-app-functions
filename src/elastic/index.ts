@@ -1,5 +1,5 @@
 import { Client } from "@elastic/enterprise-search";
-import { CreateCurationRequest } from "@elastic/enterprise-search/lib/api/app/types";
+import { CreateCurationRequest, SearchRequest, SearchResponse } from "@elastic/enterprise-search/lib/api/app/types";
 import { BasicAuth } from "@libs/auth-utils";
 import config from "../config";
 
@@ -14,6 +14,21 @@ export interface Options {
 }
 
 /**
+ * App Search response with correct results typing
+ */
+export interface AppSearchResponse extends SearchResponse {
+  results: { [key: string]: any }[];
+}
+
+/**
+ * Update document
+ */
+type UpdateDocument = {
+  id: string;
+  [k: string]: unknown;
+}
+
+/**
  * Elastic client
  */
 export class Elastic {
@@ -22,8 +37,8 @@ export class Elastic {
 
   /**
    * Constructor
-   * 
-   * @param options client options 
+   *
+   * @param options client options
    */
   constructor(options: Options) {
     this.options = options;
@@ -31,9 +46,9 @@ export class Elastic {
 
   /**
    * Creates new curation
-   * 
+   *
    * @param options options
-   * @returns craeted curation
+   * @returns created curation
    */
   public createCuration = async (options: { curation: CreateCurationRequest["body"] }): Promise<string> => {
     const { curation } = options;
@@ -47,8 +62,21 @@ export class Elastic {
   };
 
   /**
+   * Searches documents from Elastic search
+   *
+   * @param options search request options
+   * @returns list of documents matching the search criteria
+   */
+  public searchDocuments = async (options: SearchRequest["body"]): Promise<AppSearchResponse> => {
+    return this.getClient().app.search({
+      engine_name: this.options.engineName,
+      body: options
+    });
+  }
+
+  /**
    * Finds single document from Elastic search
-   * 
+   *
    * @param options options
    * @returns document or null if not found
    */
@@ -64,8 +92,21 @@ export class Elastic {
   }
 
   /**
+   * Updates documents to Elastic search
+   *
+   * @param options options
+   * @param options.document document to update
+   */
+  public updateDocuments = async ({ documents }: { documents: UpdateDocument[]; }) => {
+    return this.getClient().app.indexDocuments({
+      engine_name: this.options.engineName,
+      documents: documents
+    });
+  }
+
+  /**
    * Finds single curation
-   * 
+   *
    * @param options options
    * @returns single curation or null if not found
    */
@@ -79,7 +120,7 @@ export class Elastic {
 
   /**
    * Lists curations
-   * 
+   *
    * @returns list of curations
    */
   public listCurations = async () => {
@@ -90,7 +131,7 @@ export class Elastic {
 
   /**
    * Deletes a curation
-   * 
+   *
    * @param options options
    */
   public deleteCuration = async (options: { id: string }) => {
@@ -103,9 +144,9 @@ export class Elastic {
 
   /**
    * Returns whether user has permission to manage curations.
-   * 
+   *
    * Check is done by listing curations
-   * 
+   *
    * @returns whether user has permission to manage curations
    */
   public hasCurationsAccess = async () => {
@@ -126,26 +167,26 @@ export class Elastic {
 
   /**
    * Returns client
-   * 
+   *
    * @returns client
    */
   private getClient = () => {
     return new Client({
       url: this.options.url,
       auth: {
-        username: this.options.username, 
+        username: this.options.username,
         password: this.options.password
-      } 
+      }
     });
   }
 
 }
 
 /**
- * Returns preconfigured Elastic client
- * 
- * @param auth authentication 
- * @returns Preconfigured Elastic client
+ * Returns pre-configured Elastic client
+ *
+ * @param auth authentication
+ * @returns Pre-configured Elastic client
  */
 export const getElastic = (auth: BasicAuth) => {
   const { ELASTIC_URL, ELASTIC_APP_ENGINE } = config;
