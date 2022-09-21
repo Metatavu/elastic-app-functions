@@ -9,7 +9,6 @@ export default {
     name: { type: 'string' },
     seedURLs: { type: 'array', items: { type: 'string'} },
     frequency: { type: 'number' },
-    maxCrawlDepth: { type: 'number'}
   },
-  required: [ 'id', 'name', 'seedURLs', 'frequency', 'maxCrawlDepth' ]
+  required: [ 'id', 'name', 'seedURLs', 'frequency' ]
 } as const;

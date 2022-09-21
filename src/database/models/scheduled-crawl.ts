@@ -7,7 +7,6 @@ interface ScheduledCrawl {
   name: string;
   seedURLs: string[];
   frequency: number;
-  maxCrawlDepth: number;
 }
 
 export default ScheduledCrawl;

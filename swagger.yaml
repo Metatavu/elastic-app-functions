@@ -267,7 +267,6 @@ components:
         - name
         - seedURLs
         - frequency
-        - maxCrawlDepth
       properties:
         id:
           type: string
@@ -281,6 +280,4 @@ components:
           items:
             type: string
         frequency:
-          type: number
-        maxCrawlDepth:
           type: number

@@ -13,7 +13,7 @@ import { getElastic } from 'src/elastic';
  */
 const createScheduledCrawl: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async (event) => {
   const { body, headers } = event;
-  const { name, seedURLs, frequency, maxCrawlDepth } = body;
+  const { name, seedURLs, frequency } = body;
   const { Authorization, authorization } = headers;
 
   const auth = parseBasicAuth(authorization || Authorization);
@@ -38,7 +38,6 @@ const createScheduledCrawl: ValidatedEventAPIGatewayProxyEvent<typeof schema> = 
     name: name,
     seedURLs: seedURLs,
     frequency: frequency,
-    maxCrawlDepth: maxCrawlDepth
   });
 
   return {

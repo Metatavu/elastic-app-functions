@@ -154,7 +154,7 @@ export class Elastic {
    * @param options options
    * @returns crawl request id
    */
-  public createCrawlRequest = async (options: { crawl: { seed_urls: string[], max_crawl_depth: number }}): Promise<string> => {
+  public createCrawlRequest = async (options: { crawl: { seed_urls: string[] }}): Promise<string> => {
     const { crawl } = options;
 
     const result = await this.getClient().app.createCrawlerCrawlRequest({
