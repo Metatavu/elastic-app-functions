@@ -6,6 +6,7 @@ import createTimedCuration from '@functions/create-timed-curation';
 import updateTimedCuration from '@functions/update-timed-curation';
 import deleteTimedCuration from '@functions/delete-timed-curation';
 import scheduleTimedCuration from "@functions/schedule-timed-curations";
+import addCategoryToDocuments from "@functions/add-category-to-document";
 import { env } from 'process';
 
 const serverlessConfiguration: AWS = {
@@ -57,7 +58,8 @@ const serverlessConfiguration: AWS = {
     createTimedCuration, 
     updateTimedCuration,
     deleteTimedCuration,
-    scheduleTimedCuration
+    scheduleTimedCuration,
+    addCategoryToDocuments
   },
   package: { individually: true },
   custom: {
