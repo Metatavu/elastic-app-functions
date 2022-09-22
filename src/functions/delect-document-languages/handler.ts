@@ -84,7 +84,7 @@ const detectLanguageForUrl = async (url: string): Promise<string | null> => {
 
     if (contentType.startsWith("application/pdf")) {
       return null;
-    };
+    }
 
     console.warn(`Failed to resolve language for ${url} with content type ${contentType}`);
     return null;
