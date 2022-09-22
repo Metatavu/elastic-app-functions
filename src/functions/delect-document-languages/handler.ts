@@ -8,7 +8,7 @@ import { franc } from "franc";
 import { iso6393To1 } from "iso-639-3";
 
 const { ELASTIC_ADMIN_USERNAME, ELASTIC_ADMIN_PASSWORD } = config;
-const SUPPORTED_LANGUAGES = ["fi", "en", "sv", "et", "no", "lt", "fa", "ru", "de", "fr", "it", "ro", "sk", "so"];
+const SUPPORTED_LANGUAGES = [ "fi", "en", "sv", "et", "no", "lt", "fa", "ru", "de", "fr", "it", "ro", "sk", "so" ];
 const LANGUAGE_UNDEFINED = "C";
 const BATCH_SIZE = 100;
 
