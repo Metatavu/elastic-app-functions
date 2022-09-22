@@ -3,6 +3,7 @@ import  * as cheerio from "cheerio";
 import { getElastic } from "src/elastic";
 import config from "../../config";
 import { middyfy } from "@libs/lambda";
+import { DrupalSettingsJson } from "../../drupal/types";
 
 const { ELASTIC_ADMIN_USERNAME, ELASTIC_ADMIN_PASSWORD } = config;
 const NEWS_SLUG_IDENTIFIERS = [ "news", "uutiset" ];
@@ -15,15 +16,6 @@ enum ContentCategory {
   UNIT = "unit",
   NEWS = "news",
   UNCATEGORIZED = "uncategorized"
-}
-
-/**
- * Drupal settings JSON with property to decipher content categories for service and unit
- */
-interface DrupalSettingsJson {
-  path?: {
-    currentPath?: string | null;
-  };
 }
 
 /**
