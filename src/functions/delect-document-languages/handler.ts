@@ -1,5 +1,5 @@
 import fetch from "node-fetch";
-import  * as cheerio from "cheerio";
+import * as cheerio from "cheerio";
 import { getElastic } from "src/elastic";
 import config from "../../config";
 import { middyfy } from "@libs/lambda";
