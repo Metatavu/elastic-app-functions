@@ -8,10 +8,10 @@ import { franc } from "franc";
 import { iso6393To1 } from "iso-639-3";
 
 const { ELASTIC_ADMIN_USERNAME, ELASTIC_ADMIN_PASSWORD } = config;
-const SUPPORTED_LANGUAGES = [ "fi", "en", "sv", "et", "no", "lt", "fa", "ru", "de", "fr", "it", "ro", "sk", "so", "es" ];
+const SUPPORTED_LANGUAGES = [ "fi", "en", "sv", "et", "no", "lt", "fa", "ru", "de", "fr", "it", "ro", "sk", "so", "es", "la" ];
 const LANGUAGE_UNDEFINED = "C";
 const BATCH_SIZE = 100;
-const UNLOCALIZABLE_CONTENT_TYPES = ["application/pdf", "text/calendar; charset=UTF-8", "application/msword", "application/zip"];
+const UNLOCALIZABLE_CONTENT_TYPES = ["application/pdf", "text/calendar; charset=UTF-8", "application/msword", "application/zip", "image/jpeg"];
 
 /**
  * Returns list of supported languages in 639-1 format
@@ -99,14 +99,18 @@ const detectLanguageForUrl = async (url: string): Promise<string | null> => {
  * @returns language or null if could not be resolved
  */
 const detectLanguageForDocument = async (document: any): Promise<string | null> => {
-  const { url, id } = document;
+  const { id, url, url_path_dir1, url_path_dir2, body_content }: { 
+    id?: string,
+    url?: string,
+    url_path_dir1?: string, 
+    url_path_dir2?: string, 
+    body_content?: string 
+  } = document;
 
   if (!id || !url) {
     console.error(`Document ${id} does not contain URL`);
     return null;
   }
-
-  const { url_path_dir1, url_path_dir2, body_content } = document;
 
   if (url_path_dir1 && SUPPORTED_LANGUAGES.includes(url_path_dir1)) {
     return url_path_dir1;
@@ -117,6 +121,12 @@ const detectLanguageForDocument = async (document: any): Promise<string | null> 
   }
     
   if (body_content) {
+    const lowerBodyContent = body_content.toLowerCase();
+
+    if ("ipsum".indexOf(lowerBodyContent) || "lorem".indexOf(lowerBodyContent)) {
+      return "la";
+    }
+
     const languageFromBodyContent = detectFromContents(body_content);
     if (languageFromBodyContent) {
       return languageFromBodyContent;
@@ -125,6 +135,10 @@ const detectLanguageForDocument = async (document: any): Promise<string | null> 
 
   const result = await detectLanguageForUrl(url);
   if (!result) {
+    if (!body_content) {
+      return LANGUAGE_UNDEFINED;
+    }    
+
     console.warn(`Failed to resolve language for ${url}`);
   }
 
@@ -190,11 +204,15 @@ const detectDocumentLanguages = async () => {
     }
   }
   
-  const result = await elastic.updateDocuments({
-    documents: updateDocuments
-  });
+  if (updateDocuments.length > 0) {
+    const result = await elastic.updateDocuments({
+      documents: updateDocuments
+    });
 
-  console.log(`Updated ${result.length} document languages.`);
+    console.log(`Updated ${result.length} document languages.`);
+  } else {
+    console.log(`Updated 0 document languages.`);
+  }
 };
 
 export const main = middyfy(detectDocumentLanguages);
