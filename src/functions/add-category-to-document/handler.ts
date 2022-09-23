@@ -32,7 +32,6 @@ const resolveUrlCategory = async (url: string): Promise<ContentCategory> => {
     }
 
     const element = $("script[data-drupal-selector=drupal-settings-json]");
-
     if (!element.length) {
       console.warn(`Could not find drupal-settings-json from ${url} `);
       return ContentCategory.UNCATEGORIZED;
@@ -40,7 +39,7 @@ const resolveUrlCategory = async (url: string): Promise<ContentCategory> => {
 
     const jsonString = element.html();
     if (!jsonString.length) {
-      console.warn(`Could find drupal-settings-json string from ${url} `);
+      console.warn(`Could not find drupal-settings-json string from ${url} `);
       return ContentCategory.UNCATEGORIZED;
     }
 
@@ -52,7 +51,7 @@ const resolveUrlCategory = async (url: string): Promise<ContentCategory> => {
 
     const currentPath = config.path?.currentPath;
     if (!currentPath) {
-      console.warn(`Could find drupal-settings-json currentPath from ${url} `);
+      console.warn(`Could not find drupal-settings-json currentPath from ${url} `);
       return ContentCategory.UNCATEGORIZED;
     }
 
