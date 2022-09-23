@@ -9,6 +9,7 @@ import scheduleTimedCuration from "@functions/schedule-timed-curations";
 import addCategoryToDocuments from "@functions/add-category-to-document";
 import detectDocumentLanguages from "@functions/delect-document-languages";
 import detectNewsPublished from "@functions/detect-news-published";
+import detectBreadcrumbs from '@functions/detect-breadcrumbs';
 
 import { env } from 'process';
 
@@ -66,7 +67,8 @@ const serverlessConfiguration: AWS = {
     scheduleTimedCuration,
     addCategoryToDocuments,
     detectDocumentLanguages,
-    detectNewsPublished
+    detectNewsPublished,
+    detectBreadcrumbs
   },
   package: { individually: true },
   custom: {

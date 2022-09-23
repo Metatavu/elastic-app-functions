@@ -8,7 +8,7 @@ curl -X POST 'https://helsinki-production.ent.europe-north1.gcp.elastic-cloud.co
 -H 'Content-Type: application/json' \
 -H 'Authorization: Bearer PRIVATE_KEY' \
 -d '{
-  "publish_date": "date", "meta_content_category": "text"
+  "publish_date": "date", "meta_content_category": "text", "breadcrumbs": "text", "breadcrumbs_updated": "date"
 }
 '
 ```
