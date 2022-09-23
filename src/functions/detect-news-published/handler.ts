@@ -106,7 +106,7 @@ const detectNewsPublished = async () => {
     if (publishDate && publishDate.isValid) {
       updateDocuments.push({ ...document, publish_date: publishDate.toISO() });
     } else {
-      console.warn("Failed for to detect publish date for document", document);
+      console.warn("Failed to detect publish date for document", document);
     }
   }
   
