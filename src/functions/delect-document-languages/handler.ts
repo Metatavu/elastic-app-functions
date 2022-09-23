@@ -8,9 +8,10 @@ import { franc } from "franc";
 import { iso6393To1 } from "iso-639-3";
 
 const { ELASTIC_ADMIN_USERNAME, ELASTIC_ADMIN_PASSWORD } = config;
-const SUPPORTED_LANGUAGES = [ "fi", "en", "sv", "et", "no", "lt", "fa", "ru", "de", "fr", "it", "ro", "sk", "so" ];
+const SUPPORTED_LANGUAGES = [ "fi", "en", "sv", "et", "no", "lt", "fa", "ru", "de", "fr", "it", "ro", "sk", "so", "es" ];
 const LANGUAGE_UNDEFINED = "C";
 const BATCH_SIZE = 100;
+const UNLOCALIZABLE_CONTENT_TYPES = ["application/pdf", "text/calendar; charset=UTF-8", "application/msword", "application/zip"];
 
 /**
  * Returns list of supported languages in 639-1 format
@@ -18,7 +19,7 @@ const BATCH_SIZE = 100;
  * @returns list of supported languages in 639-1 format
  */
 const getLanguages = (): string[] => {
-  return [ ...SUPPORTED_LANGUAGES, LANGUAGE_UNDEFINED ];
+  return [ ...SUPPORTED_LANGUAGES, LANGUAGE_UNDEFINED ];
 }
 
 /**
@@ -156,7 +157,7 @@ const detectDocumentLanguages = async () => {
           none: languageFilter
         },
         {
-          none: [ { "content_type": ["application/pdf", "text/calendar; charset=UTF-8", "application/msword"] } ]
+          none: [ { "content_type": UNLOCALIZABLE_CONTENT_TYPES } ]
         }
       ]
     }
