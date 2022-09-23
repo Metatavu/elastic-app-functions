@@ -11,7 +11,7 @@ const { ELASTIC_ADMIN_USERNAME, ELASTIC_ADMIN_PASSWORD } = config;
 const SUPPORTED_LANGUAGES = [ "fi", "en", "sv", "et", "no", "lt", "fa", "ru", "de", "fr", "it", "ro", "sk", "so", "es", "la" ];
 const LANGUAGE_UNDEFINED = "C";
 const BATCH_SIZE = 100;
-const UNLOCALIZABLE_CONTENT_TYPES = ["application/pdf", "text/calendar; charset=UTF-8", "application/msword", "application/zip", "image/jpeg"];
+const UNLOCALIZABLE_CONTENT_TYPES = [ "application/pdf", "text/calendar; charset=UTF-8", "application/msword", "application/zip", "image/jpeg" ];
 
 /**
  * Returns list of supported languages in 639-1 format
