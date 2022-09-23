@@ -124,6 +124,8 @@ const detectLanguageForDocument = async (document: any): Promise<string | null> 
     const lowerBodyContent = body_content.toLowerCase();
 
     if ("ipsum".indexOf(lowerBodyContent) || "lorem".indexOf(lowerBodyContent)) {
+      // lorem ipsum is interpter as "latin", this is necessary because there actually is lorem ipsum 
+      // in target sites
       return "la";
     }
 
