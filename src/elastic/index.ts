@@ -14,6 +14,16 @@ export interface Options {
 }
 
 /**
+ * Enum for content category
+ */
+export enum ContentCategory {
+  SERVICE = "service",
+  UNIT = "unit",
+  NEWS = "news",
+  UNCATEGORIZED = "uncategorized"
+}
+
+/**
  * App Search response with correct results typing
  */
 export interface AppSearchResponse extends SearchResponse {

@@ -1,22 +1,13 @@
 import fetch from "node-fetch";
 import  * as cheerio from "cheerio";
-import { getElastic } from "src/elastic";
+import { ContentCategory, getElastic } from "../../elastic";
 import config from "../../config";
 import { middyfy } from "@libs/lambda";
 import { DrupalSettingsJson } from "../../drupal/types";
 
 const { ELASTIC_ADMIN_USERNAME, ELASTIC_ADMIN_PASSWORD } = config;
 const NEWS_SLUG_IDENTIFIERS = [ "news", "uutiset" ];
-
-/**
- * Enum for content category
- */
-enum ContentCategory {
-  SERVICE = "service",
-  UNIT = "unit",
-  NEWS = "news",
-  UNCATEGORIZED = "uncategorized"
-}
+const BATCH_SIZE = 10;
 
 /**
  * Resolves category based from URL
@@ -27,14 +18,16 @@ enum ContentCategory {
 const resolveUrlCategory = async (url: string): Promise<ContentCategory> => {
   const documentUrl = new URL(url);
   const urlSlugs = documentUrl.pathname.split('/');
-
-  if (urlSlugs.some(slug => !!slug && NEWS_SLUG_IDENTIFIERS.includes(slug))) {
-    return ContentCategory.NEWS;
-  }
-
   const pageResponse = await fetch(documentUrl.toString());
   const pageContent = await pageResponse.text();
   const $ = cheerio.load(pageContent);
+
+  if (urlSlugs.some(slug => !!slug && NEWS_SLUG_IDENTIFIERS.includes(slug))) {
+    if ($("time[itemprop='datePublished']").length) {
+      return ContentCategory.NEWS;
+    }
+  }
+
   const element = $("script[data-drupal-selector=drupal-settings-json]");
 
   if (!element.length) {
@@ -106,7 +99,7 @@ const addCategoryToDocuments = async () => {
   const { results, meta } = await elastic.searchDocuments({
     query: "",
     page: {
-      size: 10
+      size: BATCH_SIZE
     },
     filters: {
       all: [
