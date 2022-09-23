@@ -18,7 +18,7 @@ const BATCH_SIZE = 10;
 const detectBreadcrumbsFromHelOld = ($: cheerio.CheerioAPI, helBreadcrumpsOld: cheerio.Cheerio<cheerio.Element>) => {
   const result = [];
 
-  helBreadcrumpsOld.children("a").each((_index, a) => {
+  helBreadcrumpsOld.children(".breadcrump-frontpage-link,a").each((_index, a) => {
     result.push($(a).text().replaceAll("»", "").trim());
   });
 
