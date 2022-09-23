@@ -46,7 +46,7 @@ const resolveUrlCategory = async (url: string): Promise<ContentCategory> => {
 
     const config: DrupalSettingsJson = JSON.parse(jsonString);
     if (!config) {
-      console.warn(`Could parse drupal-settings-json from ${url} `);
+      console.warn(`Could not parse drupal-settings-json from ${url} `);
       return ContentCategory.UNCATEGORIZED;
     }
 
