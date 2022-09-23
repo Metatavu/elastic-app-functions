@@ -19,46 +19,50 @@ const resolveUrlCategory = async (url: string): Promise<ContentCategory> => {
   const documentUrl = new URL(url);
   const urlSlugs = documentUrl.pathname.split('/');
   const pageResponse = await fetch(documentUrl.toString());
-  const pageContent = await pageResponse.text();
-  const $ = cheerio.load(pageContent);
+  const contentType = pageResponse.headers.get("content-type");
 
-  if (urlSlugs.some(slug => !!slug && NEWS_SLUG_IDENTIFIERS.includes(slug))) {
-    if ($("time[itemprop='datePublished']").length) {
-      return ContentCategory.NEWS;
+  if (contentType.startsWith("text/html")) {
+    const pageContent = await pageResponse.text();
+    const $ = cheerio.load(pageContent);
+
+    if (urlSlugs.some(slug => !!slug && NEWS_SLUG_IDENTIFIERS.includes(slug))) {
+      if ($("time[itemprop='datePublished']").length) {
+        return ContentCategory.NEWS;
+      }
     }
-  }
 
-  const element = $("script[data-drupal-selector=drupal-settings-json]");
+    const element = $("script[data-drupal-selector=drupal-settings-json]");
 
-  if (!element.length) {
-    console.warn(`Could not find drupal-settings-json from ${url} `);
-    return ContentCategory.UNCATEGORIZED;
-  }
+    if (!element.length) {
+      console.warn(`Could not find drupal-settings-json from ${url} `);
+      return ContentCategory.UNCATEGORIZED;
+    }
 
-  const jsonString = element.html();
-  if (!jsonString.length) {
-    console.warn(`Could find drupal-settings-json string from ${url} `);
-    return ContentCategory.UNCATEGORIZED;
-  }
+    const jsonString = element.html();
+    if (!jsonString.length) {
+      console.warn(`Could find drupal-settings-json string from ${url} `);
+      return ContentCategory.UNCATEGORIZED;
+    }
 
-  const config: DrupalSettingsJson = JSON.parse(jsonString);
-  if (!config) {
-    console.warn(`Could parse drupal-settings-json from ${url} `);
-    return ContentCategory.UNCATEGORIZED;
-  }
+    const config: DrupalSettingsJson = JSON.parse(jsonString);
+    if (!config) {
+      console.warn(`Could parse drupal-settings-json from ${url} `);
+      return ContentCategory.UNCATEGORIZED;
+    }
 
-  const currentPath = config.path?.currentPath;
-  if (!currentPath) {
-    console.warn(`Could find drupal-settings-json currentPath from ${url} `);
-    return ContentCategory.UNCATEGORIZED;
-  }
+    const currentPath = config.path?.currentPath;
+    if (!currentPath) {
+      console.warn(`Could find drupal-settings-json currentPath from ${url} `);
+      return ContentCategory.UNCATEGORIZED;
+    }
 
-  if (currentPath.includes("tpr-unit")) {
-    return ContentCategory.UNIT;
-  }
+    if (currentPath.includes("tpr-unit")) {
+      return ContentCategory.UNIT;
+    }
 
-  if (currentPath.includes("tpr-service")) {
-    return ContentCategory.SERVICE;
+    if (currentPath.includes("tpr-service")) {
+      return ContentCategory.SERVICE;
+    }
   }
 
   console.warn(`Could resolve category type for ${url}`);
