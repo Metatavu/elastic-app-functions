@@ -57,7 +57,6 @@ class ScheduledCrawlService {
    * @returns list of scheduled crawls
    */
   public listScheduledCrawls = async (): Promise<ScheduledCrawl[]> => {
-    // TODO: could scan be updated to get to specify which columns are returned?
     const result = await this.docClient
       .scan({
         TableName: TABLE_NAME

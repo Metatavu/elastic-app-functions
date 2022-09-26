@@ -39,8 +39,8 @@ const deleteTimedCuration: ValidatedEventAPIGatewayProxyEvent<any> = async event
   }
   
   return {
-    statusCode: 200,
-    body: "ok"
+    statusCode: 204,
+    body: ""
   };
 };
 
