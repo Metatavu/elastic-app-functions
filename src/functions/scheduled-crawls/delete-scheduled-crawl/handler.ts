@@ -38,8 +38,9 @@ const deleteScheduledCrawl: ValidatedEventAPIGatewayProxyEvent<any> = async (eve
     };
   }
   
+  // TODO: This should be updated to return only the status code, no body. Typing issues.
   return {
-    statusCode: 200,
+    statusCode: 204,
     body: "ok"
   };
 };

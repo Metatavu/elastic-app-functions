@@ -28,6 +28,7 @@ const listScheduledCrawls: ValidatedEventAPIGatewayProxyEvent<any> = async (even
     };
   }
 
+  // TODO: This should not return previousCrawlId.
   const scheduledCrawls = await scheduledCrawlService.listScheduledCrawls();
   
   return {

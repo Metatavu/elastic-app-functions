@@ -40,6 +40,7 @@ const updateScheduledCrawl: ValidatedEventAPIGatewayProxyEvent<typeof schema> = 
     };
   }
   
+  // TODO: This should not allow updating or return of previousCrawlId
   const updatedScheduledCrawl = await scheduledCrawlService.updateScheduledCrawl({ 
     ...scheduledCrawl,
     name: name,
