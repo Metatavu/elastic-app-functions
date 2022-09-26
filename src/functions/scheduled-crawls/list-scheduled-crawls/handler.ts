@@ -30,10 +30,19 @@ const listScheduledCrawls: ValidatedEventAPIGatewayProxyEvent<any> = async (even
 
   // TODO: This should not return previousCrawlId.
   const scheduledCrawls = await scheduledCrawlService.listScheduledCrawls();
+
+  const responseScheduledCrawls = scheduledCrawls.map(row => (
+    {
+      id: row.id,
+      name: row.name,
+      seedURLs: row.seedURLs,
+      frequency: row.frequency,
+    }
+  ));
   
   return {
     statusCode: 200,
-    body: JSON.stringify(scheduledCrawls)
+    body: JSON.stringify(responseScheduledCrawls)
   };
 };
 

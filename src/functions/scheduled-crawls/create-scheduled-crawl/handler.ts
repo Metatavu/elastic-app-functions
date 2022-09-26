@@ -39,10 +39,17 @@ const createScheduledCrawl: ValidatedEventAPIGatewayProxyEvent<typeof schema> = 
     seedURLs: seedURLs,
     frequency: frequency,
   });
+  
+  const responseScheduledCrawl = {
+    id: scheduledCrawl.id,
+    name: scheduledCrawl.name,
+    seedURLs: scheduledCrawl.seedURLs,
+    frequency: scheduledCrawl.frequency,
+  };
 
   return {
     statusCode: 200,
-    body: JSON.stringify(scheduledCrawl)
+    body: JSON.stringify(responseScheduledCrawl)
   };
 };
 
