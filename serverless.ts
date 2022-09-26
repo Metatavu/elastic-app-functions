@@ -6,12 +6,17 @@ import createTimedCuration from '@functions/create-timed-curation';
 import updateTimedCuration from '@functions/update-timed-curation';
 import deleteTimedCuration from '@functions/delete-timed-curation';
 import scheduleTimedCuration from "@functions/schedule-timed-curations";
+import addCategoryToDocuments from "@functions/add-category-to-document";
+import detectDocumentLanguages from "@functions/delect-document-languages";
+import detectNewsPublished from "@functions/detect-news-published";
+import detectBreadcrumbs from '@functions/detect-breadcrumbs';
 import findScheduledCrawl from '@functions/scheduled-crawls/find-scheduled-crawl';
 import listScheduledCrawls from '@functions/scheduled-crawls/list-scheduled-crawls';
 import createScheduledCrawl from '@functions/scheduled-crawls/create-scheduled-crawl';
 import updateScheduledCrawl from '@functions/scheduled-crawls/update-scheduled-crawl';
 import deleteScheduledCrawl from '@functions/scheduled-crawls/delete-scheduled-crawl';
 import triggerScheduledCrawl from "@functions/scheduled-crawls/trigger-scheduled-crawl";
+
 import { env } from 'process';
 
 const serverlessConfiguration: AWS = {
@@ -67,6 +72,10 @@ const serverlessConfiguration: AWS = {
     updateTimedCuration,
     deleteTimedCuration,
     scheduleTimedCuration,
+    addCategoryToDocuments,
+    detectDocumentLanguages,
+    detectNewsPublished,
+    detectBreadcrumbs,
     findScheduledCrawl,
     listScheduledCrawls, 
     createScheduledCrawl, 
