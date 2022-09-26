@@ -52,8 +52,8 @@ const serverlessConfiguration: AWS = {
               "dynamodb:DeleteItem",
             ],
             Resource: [
-              // TODO: to be checked.
-              { "Fn::GetAtt": [ "TimedCurations", "Arn", "ScheduledCrawls" ] }
+              { "Fn::GetAtt": [ "TimedCurations", "Arn" ] },
+              { "Fn::GetAtt": [ "ScheduledCrawls", "Arn" ] }
             ],
           }
         ]
