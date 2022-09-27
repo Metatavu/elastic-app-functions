@@ -23,7 +23,7 @@ const triggerScheduledCrawl = async () => {
   } else {
     const scheduledCrawls = await scheduledCrawlService.listScheduledCrawls();
 
-    let crawlDetailsMap: { [key: string]: GetCrawlerCrawlRequestResponse };
+    const crawlDetailsMap: { [key: string]: GetCrawlerCrawlRequestResponse } = {};
 
     const activeCrawls = scheduledCrawls.filter(async crawl => {
       const { previousCrawlId, frequency } = crawl;
@@ -37,7 +37,7 @@ const triggerScheduledCrawl = async () => {
       if (!crawlDetails) {
         return true;
       } else {
-        const { completed_at } = crawlDetailsMap[previousCrawlId];
+        const { completed_at } = crawlDetails;
         const difference = calculateMinutesPassed(completed_at);
         return difference >= frequency;
       }
@@ -53,14 +53,14 @@ const triggerScheduledCrawl = async () => {
     };
 
     try {
-    const crawlResponse = await elastic.createCrawlRequest(crawlOptions);
+      const crawlResponse = await elastic.createCrawlRequest(crawlOptions);
 
-    activeCrawls.forEach(activeCrawl => {
-      scheduledCrawlService.updateScheduledCrawl({
-        ...activeCrawl,
-        previousCrawlId: crawlResponse
+      activeCrawls.forEach(activeCrawl => {
+        scheduledCrawlService.updateScheduledCrawl({
+          ...activeCrawl,
+          previousCrawlId: crawlResponse
+        });
       });
-    });
     } catch(e) {
       console.error("error creating crawl request", e)
     }

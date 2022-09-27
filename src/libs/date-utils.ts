@@ -40,6 +40,5 @@ export const parseDate = (date?: string): Date | undefined => {
   const now = new Date();
 
   const difference = now.getTime() - lastCrawlDate?.getTime();
-  // TODO: +180 accounting for GMT+3, will need improving
-  return Math.round(difference / 60000) + 180;
+  return Math.round(difference / 60000);
 }
