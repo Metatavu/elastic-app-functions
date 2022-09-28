@@ -36,9 +36,10 @@ export const parseDate = (date?: string): Date | undefined => {
  * @returns difference in minutes
  */
  export const calculateMinutesPassed = (lastCrawl: string ) => {
-  const lastCrawlDate = parseDate(lastCrawl);
-  const now = new Date();
+  const lastCrawlDate = DateTime.fromISO(lastCrawl);
+  const now = DateTime.now();
 
-  const difference = now.getTime() - lastCrawlDate?.getTime();
-  return Math.round(difference / 60000);
-}
+  const difference = now.diff(lastCrawlDate, "minutes");
+
+  return difference.toObject().minutes;
+};
