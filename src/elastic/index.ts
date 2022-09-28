@@ -205,12 +205,10 @@ export class Elastic {
    * @param options options
    * @returns crawl request id
    */
-  public createCrawlRequest = async (options: { crawl: { seed_urls: string[] }}): Promise<string> => {
-    const { crawl } = options;
-
+  public createCrawlRequest = async (options: { overrides: { seed_urls: string[] }}): Promise<string> => {
     const result = await this.getClient().app.createCrawlerCrawlRequest({
       engine_name: this.options.engineName,
-      body: crawl
+      body: options as any
     });
 
     return result.id;

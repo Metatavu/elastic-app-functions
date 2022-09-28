@@ -46,7 +46,7 @@ const triggerScheduledCrawl = async () => {
     const urls = [ ...new Set(activeCrawls.flatMap(activeCrawl => activeCrawl.seedURLs)) ];
 
     const crawlOptions = {
-      crawl: {
+      overrides: {
         seed_urls: urls,
         max_crawl_depth: 2
       }
@@ -54,6 +54,8 @@ const triggerScheduledCrawl = async () => {
 
     try {
       const crawlResponse = await elastic.createCrawlRequest(crawlOptions);
+
+      console.log("Crawl request created successfully", crawlResponse, urls);
 
       activeCrawls.forEach(activeCrawl => {
         scheduledCrawlService.updateScheduledCrawl({
