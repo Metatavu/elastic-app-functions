@@ -3,7 +3,7 @@ import { scheduledCrawlService } from "../../../database/services";
 import config from '../../../config';
 import { calculateMinutesPassed } from '@libs/date-utils';
 import { getElastic } from 'src/elastic';
-import { GetCrawlerCrawlRequestResponse } from '@elastic/enterprise-search/lib/api/app/types';
+import { GetCrawlerActiveCrawlRequestRequest, GetCrawlerCrawlRequestResponse } from '@elastic/enterprise-search/lib/api/app/types';
 
 const { ELASTIC_ADMIN_USERNAME, ELASTIC_ADMIN_PASSWORD } = config;
 
@@ -16,11 +16,10 @@ const triggerScheduledCrawl = async () => {
     password: ELASTIC_ADMIN_PASSWORD
   });
 
-  const activeCrawl = await elastic.checkIfActiveCrawl();
-
-  if (activeCrawl.id) {
+  try {
+    const activeCrawl = await elastic.checkIfActiveCrawl();
     console.info("Crawl already running, current scheduled crawls delayed", activeCrawl);
-  } else {
+  } catch {
     const scheduledCrawls = await scheduledCrawlService.listScheduledCrawls();
 
     const crawlDetailsMap: { [key: string]: GetCrawlerCrawlRequestResponse } = {};
