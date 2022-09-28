@@ -38,7 +38,6 @@ const triggerScheduledCrawl = async () => {
       } else {
         const { completed_at } = crawlDetails;
         const difference = calculateMinutesPassed(completed_at);
-        console.log("diff checks, completed at, difference, frequency, is diff > freq", completed_at, difference, frequency, difference >= frequency);
         return difference >= frequency;
       }
     });
