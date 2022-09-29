@@ -23,9 +23,10 @@ const triggerScheduledCrawl = async () => {
     const scheduledCrawls = await scheduledCrawlService.listScheduledCrawls();
 
     const crawlDetailsMap: { [key: string]: GetCrawlerCrawlRequestResponse } = {};
+    const activeCrawls = [];
 
-    const activeCrawls = scheduledCrawls.filter(async crawl => {
-      const { previousCrawlId, frequency } = crawl;
+    for (const scheduledCrawl of scheduledCrawls) {
+      const { previousCrawlId, frequency } = scheduledCrawl;
 
       let crawlDetails: GetCrawlerCrawlRequestResponse = crawlDetailsMap[previousCrawlId];
       if (crawlDetails === undefined) {
@@ -34,15 +35,15 @@ const triggerScheduledCrawl = async () => {
       }
 
       if (!crawlDetails) {
-        return true;
+        activeCrawls.push(scheduledCrawl);
       } else {
         const { completed_at } = crawlDetails;
         const difference = calculateMinutesPassed(completed_at);
-        return difference >= frequency;
+        if (difference >= frequency) {
+          activeCrawls.push(scheduledCrawl);
+        }
       }
-    });
-
-    console.log("active crawls", activeCrawls);
+    };
 
     const urls = [ ...new Set(activeCrawls.flatMap(activeCrawl => activeCrawl.seedURLs)) ];
 
