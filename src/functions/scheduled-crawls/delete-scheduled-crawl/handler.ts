@@ -2,14 +2,14 @@ import { ValidatedEventAPIGatewayProxyEvent } from '@libs/api-gateway';
 import { parseBasicAuth } from '@libs/auth-utils';
 import { middyfy } from '@libs/lambda';
 import { getElastic } from 'src/elastic';
-import { timedCurationsService } from "../../database/services";
+import { scheduledCrawlService } from "../../../database/services";
 
 /**
- * Lambda for deleting timed curations
+ * Lambda for deleting scheduled crawls
  * 
  * @param event event
  */
-const deleteTimedCuration: ValidatedEventAPIGatewayProxyEvent<any> = async event => {
+const deleteScheduledCrawl: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
   const { pathParameters: { id }, headers: { Authorization, authorization } } = event;
 
   const auth = parseBasicAuth(authorization || Authorization);
@@ -21,16 +21,16 @@ const deleteTimedCuration: ValidatedEventAPIGatewayProxyEvent<any> = async event
   }
 
   const elastic = getElastic(auth);
-  if (!(await elastic.hasCurationsAccess())) {
+  if (!(await elastic.hasScheduledCrawlAccess())) {
     return {
       statusCode: 403,
       body: "Forbidden"
     };
   }
 
-  const timedCuration = await timedCurationsService.findTimedCuration(id);
-  if (timedCuration) {
-    await timedCurationsService.deleteTimedCuration(id);
+  const scheduledCrawl = await scheduledCrawlService.findScheduledCrawl(id);
+  if (scheduledCrawl) {
+    await scheduledCrawlService.deleteScheduledCrawl(id);
   } else {
     return {
       statusCode: 404,
@@ -44,4 +44,4 @@ const deleteTimedCuration: ValidatedEventAPIGatewayProxyEvent<any> = async event
   };
 };
 
-export const main = middyfy(deleteTimedCuration);
+export const main = middyfy(deleteScheduledCrawl);

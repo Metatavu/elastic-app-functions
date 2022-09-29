@@ -176,6 +176,71 @@ export class Elastic {
   }
 
   /**
+   * Returns whether user has permission to manage scheduled crawls.
+   * 
+   * Check is done by listing crawl requests
+   * 
+   * @returns whether user has permission to manage scheduled crawls
+   */
+  public hasScheduledCrawlAccess = async () => {
+    try {
+      const result = await this.getClient().app.listCrawlerCrawlRequests({
+        engine_name: this.options.engineName,
+        page: {
+          current: 1,
+          size: 1
+        }
+      });
+
+      return !!result.results;
+    } catch (e) {
+    }
+
+    return false;
+  }
+
+  /**
+   * Creates new partial crawl request
+   * 
+   * @param options options
+   * @returns crawl request id
+   */
+  public createCrawlRequest = async (options: { overrides: { seed_urls: string[] }}): Promise<string> => {
+    const result = await this.getClient().app.createCrawlerCrawlRequest({
+      engine_name: this.options.engineName,
+      body: options as any
+    });
+
+    return result.id;
+  }
+
+  /**
+   * Finds details for a crawl request
+   * 
+   * @param options options
+   * @returns crawl details or null if not found
+   */
+  public findCrawlDetails = async (options: { id: string }) => {
+    const { id } = options;
+    return await this.getClient().app.getCrawlerCrawlRequest({
+      engine_name: this.options.engineName,
+      crawl_request_id: id
+    });
+  }
+
+  /**
+   * Check if a crawl is currently active
+   * 
+   * @param options options
+   * @returns active crawl details or 404
+   */
+  public checkIfActiveCrawl = async () => {
+    return await this.getClient().app.getCrawlerActiveCrawlRequest({
+      engine_name: this.options.engineName,
+    });
+  }
+
+  /**
    * Returns client
    *
    * @returns client

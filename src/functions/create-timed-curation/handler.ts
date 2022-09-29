@@ -51,13 +51,13 @@ const createTimedCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = a
   }
 
   const timedCuration = await timedCurationsService.createTimedCuration({
-    "id": uuid(),
-    "promoted": promoted,
-    "hidden": hidden,
-    "queries": queries,
-    "startTime": startTime,
-    "endTime": endTime,
-    "curationId": ""
+    id: uuid(),
+    promoted: promoted,
+    hidden: hidden,
+    queries: queries,
+    startTime: startTime,
+    endTime: endTime,
+    curationId: ""
   });
 
   return {
