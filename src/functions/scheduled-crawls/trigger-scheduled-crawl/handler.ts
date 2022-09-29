@@ -42,6 +42,8 @@ const triggerScheduledCrawl = async () => {
       }
     });
 
+    console.log("active crawls", activeCrawls);
+
     const urls = [ ...new Set(activeCrawls.flatMap(activeCrawl => activeCrawl.seedURLs)) ];
 
     const crawlOptions = {
@@ -51,19 +53,21 @@ const triggerScheduledCrawl = async () => {
       }
     };
 
-    try {
-      const crawlResponse = await elastic.createCrawlRequest(crawlOptions);
-
-      console.log("Crawl request created successfully", crawlResponse, urls);
-
-      activeCrawls.forEach(activeCrawl => {
-        scheduledCrawlService.updateScheduledCrawl({
-          ...activeCrawl,
-          previousCrawlId: crawlResponse
+    if (urls.length) {
+      try {
+        const crawlResponse = await elastic.createCrawlRequest(crawlOptions);
+  
+        console.log("Crawl request created successfully", crawlResponse, urls);
+  
+        activeCrawls.forEach(activeCrawl => {
+          scheduledCrawlService.updateScheduledCrawl({
+            ...activeCrawl,
+            previousCrawlId: crawlResponse
+          });
         });
-      });
-    } catch(e) {
-      console.error("error creating crawl request", e)
+      } catch(e) {
+        console.error("error creating crawl request", e)
+      }
     }
   }
 };
