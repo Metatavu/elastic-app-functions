@@ -27,3 +27,20 @@ export const parseDate = (date?: string): Date | undefined => {
   const zonePart = dateString.substring(offsetIndex + 1).replace("GMT", "UTC");
   return DateTime.fromFormat(datePart, format).setZone(zonePart);
 };
+
+/**
+ * 
+ * Calculates the difference between last crawl time and now
+ * 
+ * @param lastCrawl date of last crawl
+ * @returns difference in minutes
+ */
+ export const calculateMinutesPassed = (lastCrawl: string ): number => {
+  const parsedCrawlDate = parseDate(lastCrawl).toISOString();
+  const lastCrawlDate = DateTime.fromISO(parsedCrawlDate);
+  const now = DateTime.now();
+
+  const difference = now.diff(lastCrawlDate, "minutes");
+
+  return difference.toObject().minutes;
+};

@@ -31,9 +31,9 @@ export interface AppSearchResponse extends SearchResponse {
 }
 
 /**
- * Update document
+ * Document
  */
-type UpdateDocument = {
+export type Document = {
   id: string;
   [k: string]: unknown;
 }
@@ -95,7 +95,7 @@ export class Elastic {
 
     const response = await this.getClient().app.getDocuments({
       engine_name: this.options.engineName,
-      documentIds: [ documentId ]
+      documentIds: [documentId]
     });
 
     return response?.length === 1 ? response[0] : null;
@@ -107,7 +107,7 @@ export class Elastic {
    * @param options options
    * @param options.document document to update
    */
-  public updateDocuments = async ({ documents }: { documents: UpdateDocument[]; }) => {
+  public updateDocuments = async ({ documents }: { documents: Document[]; }) => {
     return this.getClient().app.indexDocuments({
       engine_name: this.options.engineName,
       documents: documents
@@ -173,6 +173,71 @@ export class Elastic {
     } catch {
       return false;
     }
+  }
+
+  /**
+   * Returns whether user has permission to manage scheduled crawls.
+   *
+   * Check is done by listing crawl requests
+   *
+   * @returns whether user has permission to manage scheduled crawls
+   */
+  public hasScheduledCrawlAccess = async () => {
+    try {
+      const result = await this.getClient().app.listCrawlerCrawlRequests({
+        engine_name: this.options.engineName,
+        page: {
+          current: 1,
+          size: 1
+        }
+      });
+
+      return !!result.results;
+    } catch (e) {
+    }
+
+    return false;
+  }
+
+  /**
+   * Creates new partial crawl request
+   *
+   * @param options options
+   * @returns crawl request id
+   */
+  public createCrawlRequest = async (options: { overrides: { seed_urls: string[] } }): Promise<string> => {
+    const result = await this.getClient().app.createCrawlerCrawlRequest({
+      engine_name: this.options.engineName,
+      body: options as any
+    });
+
+    return result.id;
+  }
+
+  /**
+   * Finds details for a crawl request
+   *
+   * @param options options
+   * @returns crawl details or null if not found
+   */
+  public findCrawlDetails = async (options: { id: string }) => {
+    const { id } = options;
+    return await this.getClient().app.getCrawlerCrawlRequest({
+      engine_name: this.options.engineName,
+      crawl_request_id: id
+    });
+  }
+
+  /**
+   * Check if a crawl is currently active
+   *
+   * @param options options
+   * @returns active crawl details or 404
+   */
+  public checkIfActiveCrawl = async () => {
+    return await this.getClient().app.getCrawlerActiveCrawlRequest({
+      engine_name: this.options.engineName,
+    });
   }
 
   /**

@@ -10,6 +10,12 @@ import addCategoryToDocuments from "@functions/add-category-to-document";
 import detectDocumentLanguages from "@functions/delect-document-languages";
 import detectNewsPublished from "@functions/detect-news-published";
 import detectBreadcrumbs from '@functions/detect-breadcrumbs';
+import findScheduledCrawl from '@functions/scheduled-crawls/find-scheduled-crawl';
+import listScheduledCrawls from '@functions/scheduled-crawls/list-scheduled-crawls';
+import createScheduledCrawl from '@functions/scheduled-crawls/create-scheduled-crawl';
+import updateScheduledCrawl from '@functions/scheduled-crawls/update-scheduled-crawl';
+import deleteScheduledCrawl from '@functions/scheduled-crawls/delete-scheduled-crawl';
+import triggerScheduledCrawl from "@functions/scheduled-crawls/trigger-scheduled-crawl";
 
 import { env } from 'process';
 
@@ -51,7 +57,8 @@ const serverlessConfiguration: AWS = {
               "dynamodb:DeleteItem",
             ],
             Resource: [
-              { "Fn::GetAtt": [ "TimedCurations", "Arn" ] }
+              { "Fn::GetAtt": [ "TimedCurations", "Arn" ] },
+              { "Fn::GetAtt": [ "ScheduledCrawls", "Arn" ] }
             ],
           }
         ]
@@ -68,7 +75,13 @@ const serverlessConfiguration: AWS = {
     addCategoryToDocuments,
     detectDocumentLanguages,
     detectNewsPublished,
-    detectBreadcrumbs
+    detectBreadcrumbs,
+    findScheduledCrawl,
+    listScheduledCrawls, 
+    createScheduledCrawl, 
+    updateScheduledCrawl,
+    deleteScheduledCrawl,
+    triggerScheduledCrawl
   },
   package: { individually: true },
   custom: {
@@ -90,6 +103,19 @@ const serverlessConfiguration: AWS = {
         DeletionPolicy: "Delete",
         Properties: {
           TableName: "timed-curations",
+          AttributeDefinitions: [{ AttributeName: "id", AttributeType: "S" }],
+          KeySchema: [{ AttributeName: "id", KeyType: "HASH" }],
+          ProvisionedThroughput: {
+            ReadCapacityUnits: 1,
+            WriteCapacityUnits: 1
+          },
+        },
+      },
+      ScheduledCrawls: {
+        Type: "AWS::DynamoDB::Table",
+        DeletionPolicy: "Delete",
+        Properties: {
+          TableName: "scheduled-crawls",
           AttributeDefinitions: [{ AttributeName: "id", AttributeType: "S" }],
           KeySchema: [{ AttributeName: "id", KeyType: "HASH" }],
           ProvisionedThroughput: {
