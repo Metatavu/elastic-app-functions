@@ -9,6 +9,20 @@ const { ELASTIC_ADMIN_USERNAME, ELASTIC_ADMIN_PASSWORD } = config;
 const BATCH_SIZE = 10;
 
 /**
+ * Returns content category type from given category string
+ *
+ * @param category category
+ */
+const getContentCategory = (category: string | undefined) => {
+  switch (category) {
+    case "news_item": return ContentCategory.NEWS;
+    case "tpr_unit": return ContentCategory.UNIT;
+    case "tpr_service": return ContentCategory.SERVICE;
+    default: return ContentCategory.UNCATEGORIZED;
+  }
+}
+
+/**
  * Resolves category for a document
  *
  * @param document document
@@ -33,14 +47,9 @@ const resolveDocumentCategory = async (document: Document): Promise<ContentCateg
 
   const pageContent = await pageResponse.text();
   const $ = cheerio.load(pageContent);
-  const contentCategory = $("meta[name=helfi_content_type]").attr("content");
+  const categoryElement = $("head").find("meta[name=helfi_content_type]");
 
-  switch (contentCategory) {
-    case "news_item": return ContentCategory.NEWS;
-    case "tpr_unit": return ContentCategory.UNIT;
-    case "tpr_service": return ContentCategory.SERVICE;
-    default: return ContentCategory.UNCATEGORIZED;
-  }
+  return getContentCategory(categoryElement.attr("content"));
 }
 
 /**
