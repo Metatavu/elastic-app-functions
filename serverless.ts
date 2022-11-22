@@ -1,31 +1,33 @@
-import type { AWS } from '@serverless/typescript';
+import type { AWS } from "@serverless/typescript";
 
-import findTimedCuration from '@functions/find-timed-curation';
-import listTimedCurations from '@functions/list-timed-curations';
-import createTimedCuration from '@functions/create-timed-curation';
-import updateTimedCuration from '@functions/update-timed-curation';
-import deleteTimedCuration from '@functions/delete-timed-curation';
+import findTimedCuration from "@functions/find-timed-curation";
+import listTimedCurations from "@functions/list-timed-curations";
+import createTimedCuration from "@functions/create-timed-curation";
+import updateTimedCuration from "@functions/update-timed-curation";
+import deleteTimedCuration from "@functions/delete-timed-curation";
 import scheduleTimedCuration from "@functions/schedule-timed-curations";
 import addCategoryToDocuments from "@functions/add-category-to-document";
 import detectDocumentLanguages from "@functions/delect-document-languages";
 import detectNewsPublished from "@functions/detect-news-published";
-import detectBreadcrumbs from '@functions/detect-breadcrumbs';
-import findScheduledCrawl from '@functions/scheduled-crawls/find-scheduled-crawl';
-import listScheduledCrawls from '@functions/scheduled-crawls/list-scheduled-crawls';
-import createScheduledCrawl from '@functions/scheduled-crawls/create-scheduled-crawl';
-import updateScheduledCrawl from '@functions/scheduled-crawls/update-scheduled-crawl';
-import deleteScheduledCrawl from '@functions/scheduled-crawls/delete-scheduled-crawl';
+import detectBreadcrumbs from "@functions/detect-breadcrumbs";
+import findScheduledCrawl from "@functions/scheduled-crawls/find-scheduled-crawl";
+import listScheduledCrawls from "@functions/scheduled-crawls/list-scheduled-crawls";
+import createScheduledCrawl from "@functions/scheduled-crawls/create-scheduled-crawl";
+import updateScheduledCrawl from "@functions/scheduled-crawls/update-scheduled-crawl";
+import deleteScheduledCrawl from "@functions/scheduled-crawls/delete-scheduled-crawl";
 import triggerScheduledCrawl from "@functions/scheduled-crawls/trigger-scheduled-crawl";
+import addContactDocumentsToSQS from "@functions/add-contact-documents-to-sqs";
+import processContactDocumentFromSQS from "@functions/process-contact-documents-from-sqs"
 
-import { env } from 'process';
+import { env } from "process";
 
 const serverlessConfiguration: AWS = {
-  service: 'elastic-app-functions',
-  frameworkVersion: '3',
-  plugins: [ 'serverless-esbuild', 'serverless-deployment-bucket' ],
+  service: "elastic-app-functions",
+  frameworkVersion: "3",
+  plugins: [ "serverless-esbuild", "serverless-deployment-bucket", "serverless-dotenv-plugin" ],
   provider: {
-    name: 'aws',
-    runtime: 'nodejs16.x',
+    name: "aws",
+    runtime: "nodejs16.x",
     region: env.AWS_DEFAULT_REGION as any,
     deploymentBucket: {
       name: "serverless-elastic-app-functions-${opt:stage}-deploy"
@@ -35,12 +37,8 @@ const serverlessConfiguration: AWS = {
       cors: true
     },
     environment: {
-      AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
-      NODE_OPTIONS: '--enable-source-maps --stack-trace-limit=1000',
-      ELASTIC_URL: env.ELASTIC_URL,
-      ELASTIC_APP_ENGINE: env.ELASTIC_APP_ENGINE,
-      ELASTIC_ADMIN_USERNAME: env.ELASTIC_ADMIN_USERNAME,
-      ELASTIC_ADMIN_PASSWORD: env.ELASTIC_ADMIN_PASSWORD
+      AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1",
+      NODE_OPTIONS: "--enable-source-maps --stack-trace-limit=1000"
     },
     iam: {
       role: {
@@ -65,10 +63,10 @@ const serverlessConfiguration: AWS = {
       }
     }
   },
-  functions: { 
+  functions: {
     findTimedCuration,
-    listTimedCurations, 
-    createTimedCuration, 
+    listTimedCurations,
+    createTimedCuration,
     updateTimedCuration,
     deleteTimedCuration,
     scheduleTimedCuration,
@@ -77,11 +75,13 @@ const serverlessConfiguration: AWS = {
     detectNewsPublished,
     detectBreadcrumbs,
     findScheduledCrawl,
-    listScheduledCrawls, 
-    createScheduledCrawl, 
+    listScheduledCrawls,
+    createScheduledCrawl,
     updateScheduledCrawl,
     deleteScheduledCrawl,
-    triggerScheduledCrawl
+    triggerScheduledCrawl,
+    addContactDocumentsToSQS,
+    processContactDocumentFromSQS
   },
   package: { individually: true },
   custom: {
@@ -89,12 +89,12 @@ const serverlessConfiguration: AWS = {
       bundle: true,
       minify: false,
       sourcemap: true,
-      exclude: [ 'aws-sdk' ],
-      target: 'node16',
-      define: { 'require.resolve': undefined },
-      platform: 'node',
+      exclude: [ "aws-sdk" ],
+      target: "node16",
+      define: { "require.resolve": undefined },
+      platform: "node",
       concurrency: 10,
-    } 
+    }
   },
   resources: {
     Resources: {

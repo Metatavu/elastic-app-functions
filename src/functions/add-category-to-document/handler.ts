@@ -39,7 +39,7 @@ const resolveDocumentCategory = async (document: Document): Promise<ContentCateg
   const pageResponse = await fetch(new URL(url as string).toString());
   const contentType = pageResponse.headers.get("content-type");
 
-  if (!contentType.startsWith("text/html")) {
+  if (!contentType?.startsWith("text/html")) {
     console.warn(`Could resolve category type for ${url}`);
 
     return ContentCategory.UNCATEGORIZED;
