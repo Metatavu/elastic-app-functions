@@ -17,9 +17,7 @@ const sendMessagesToSQS = (personsData: Person[]) => {
   const sqs = new SQS({ apiVersion: "latest" });
   const batchSize = 10;
 
-  // TODO: FOr development purposes only first 20 persons are sent to SQS
-  // Remove this limitation once the functionalities are complete
-  for (let i = 0; i < 20; i += batchSize) {
+  for (let i = 0; i < personsData.length -1; i += batchSize) {
     const currentBatch = personsData.slice(i, i + batchSize);
 
     const batch: SQS.SendMessageBatchRequestEntryList = currentBatch.map(person => ({
