@@ -1,15 +1,13 @@
 import { handlerPath } from '@libs/handler-resolver';
+import config from "../../config";
+
 
 export default {
   handler: `${handlerPath(__dirname)}/handler.main`,
   timeout: 60,
   events: [
     {
-      schedule: {
-        rate: [
-          "rate(10 seconds)"
-        ]
-      }
+      sns: { arn: config.AWS_SQS_ARN }
     }
-  ],
+  ]
 };
