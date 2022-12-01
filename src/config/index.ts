@@ -6,6 +6,9 @@ import { cleanEnv, str, url } from "envalid";
 export default cleanEnv(process.env, {
   ELASTIC_URL: url(),
   ELASTIC_APP_ENGINE: str(),
-  ELASTIC_ADMIN_USERNAME: str({ default: null }),
-  ELASTIC_ADMIN_PASSWORD: str({ default: null })
+  ELASTIC_ADMIN_USERNAME: str(),
+  ELASTIC_ADMIN_PASSWORD: str(),
+  AWS_SQS_QUEUE_URL: url(),
+  CONTACT_PERSONS_URL: url(),
+  AWS_SQS_ARN: str()
 });

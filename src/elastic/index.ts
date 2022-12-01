@@ -20,7 +20,8 @@ export enum ContentCategory {
   SERVICE = "service",
   UNIT = "unit",
   NEWS = "news",
-  UNCATEGORIZED = "uncategorized"
+  UNCATEGORIZED = "uncategorized",
+  CONTACT = "contact"
 }
 
 /**
