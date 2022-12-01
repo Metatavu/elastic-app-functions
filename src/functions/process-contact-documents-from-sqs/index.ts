@@ -7,7 +7,7 @@ export default {
   timeout: 60,
   events: [
     {
-      sns: { arn: config.AWS_SQS_ARN }
+      sqs: { arn: config.AWS_SQS_ARN }
     }
   ]
 };
