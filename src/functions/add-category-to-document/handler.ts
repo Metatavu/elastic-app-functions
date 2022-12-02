@@ -61,10 +61,6 @@ const addCategoryToDocuments = async () => {
     password: ELASTIC_ADMIN_PASSWORD
   });
 
-  const existingValueFilters = Object.values(ContentCategory).map(category => ({
-    "meta_content_category": category
-  }));
-
   const { results, meta } = await elastic.searchDocuments({
     query: "",
     page: {
@@ -73,7 +69,7 @@ const addCategoryToDocuments = async () => {
     filters: {
       all: [
         { url_host: "www.hel.fi" },
-        { none: existingValueFilters }
+        { none: { "meta_content_category": Object.values(ContentCategory) } }
       ]
     }
   });
