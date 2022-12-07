@@ -1,7 +1,7 @@
 import fetch from "node-fetch";
 import * as cheerio from "cheerio";
 import { ContentCategory, getElastic } from "src/elastic";
-import config from "../../config";
+import config from "src/config";
 import { middyfy } from "@libs/lambda";
 import { DateTime } from "luxon";
 import { parseHelFiNewsDate } from "@libs/date-utils";

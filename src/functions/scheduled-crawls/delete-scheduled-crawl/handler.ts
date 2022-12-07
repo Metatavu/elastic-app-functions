@@ -2,7 +2,7 @@ import { ValidatedEventAPIGatewayProxyEvent } from "@libs/api-gateway";
 import { parseBasicAuth } from "@libs/auth-utils";
 import { middyfy } from "@libs/lambda";
 import { getElastic } from "src/elastic";
-import { scheduledCrawlService } from "../../../database/services";
+import { scheduledCrawlService } from "src/database/services";
 
 /**
  * Lambda for deleting scheduled crawls

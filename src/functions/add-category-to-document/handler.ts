@@ -1,7 +1,7 @@
 import fetch from "node-fetch";
 import * as cheerio from "cheerio";
-import { ContentCategory, getElastic, Document } from "../../elastic";
-import config from "../../config";
+import { ContentCategory, getElastic, Document } from "src/elastic";
+import config from "src/config";
 import { middyfy } from "@libs/lambda";
 import { searchResultsToDocuments } from "@libs/document-utils";
 

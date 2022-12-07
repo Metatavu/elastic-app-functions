@@ -1,7 +1,7 @@
 import { ValidatedEventAPIGatewayProxyEvent } from "@libs/api-gateway";
 import { middyfy } from "@libs/lambda";
-import { getElastic } from "../../../elastic";
-import { scheduledCrawlService } from "../../../database/services";
+import { getElastic } from "src/elastic";
+import { scheduledCrawlService } from "src/database/services";
 import { parseBasicAuth } from "@libs/auth-utils";
 
 /**

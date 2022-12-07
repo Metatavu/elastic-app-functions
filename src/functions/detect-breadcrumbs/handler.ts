@@ -1,7 +1,7 @@
 import fetch from "node-fetch";
 import * as cheerio from "cheerio";
 import { getElastic } from "src/elastic";
-import config from "../../config";
+import config from "src/config";
 import { middyfy } from "@libs/lambda";
 
 const { ELASTIC_ADMIN_USERNAME, ELASTIC_ADMIN_PASSWORD } = config;

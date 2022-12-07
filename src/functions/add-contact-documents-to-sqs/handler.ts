@@ -1,5 +1,5 @@
 import fetch from "node-fetch";
-import config from "../../config";
+import config from "src/config";
 import { middyfy } from "@libs/lambda";
 import { Person } from "./types";
 import { XMLParser } from "fast-xml-parser";

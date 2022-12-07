@@ -1,7 +1,7 @@
 import fetch from "node-fetch";
 import * as cheerio from "cheerio";
 import { Document, getElastic } from "src/elastic";
-import config from "../../config";
+import config from "src/config";
 import { middyfy } from "@libs/lambda";
 import { franc } from "franc";
 import { iso6393To1 } from "iso-639-3";
@@ -45,7 +45,7 @@ const resolveLanguageFromDrupalSettings = ($: cheerio.CheerioAPI): string | null
  * @param bodyContent body content
  * @returns language or null if not detected
  */
-const detectFromContents = (bodyContent: string): string | null => {
+const detectFromContents = (bodyContent: string): string | null => {
   const result = franc(bodyContent);
   if (result === "und") {
     return null;

@@ -1,6 +1,6 @@
 import { middyfy } from "@libs/lambda";
-import { scheduledCrawlService } from "../../../database/services";
-import config from "../../../config";
+import { scheduledCrawlService } from "src/database/services";
+import config from "src/config";
 import { calculateMinutesPassed } from "@libs/date-utils";
 import { getElastic } from "src/elastic";
 import { GetCrawlerCrawlRequestResponse } from "@elastic/enterprise-search/lib/api/app/types";

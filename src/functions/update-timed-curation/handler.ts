@@ -2,8 +2,8 @@ import { ValidatedEventAPIGatewayProxyEvent } from "@libs/api-gateway";
 import { parseBasicAuth } from "@libs/auth-utils";
 import { middyfy } from "@libs/lambda";
 import { getElastic } from "src/elastic";
-import { timedCurationsService } from "../../database/services";
-import schema from "../../schema/timed-curation";
+import { timedCurationsService } from "src/database/services";
+import schema from "src/schema/timed-curation";
 
 /**
  * Lambda for updating timed curations

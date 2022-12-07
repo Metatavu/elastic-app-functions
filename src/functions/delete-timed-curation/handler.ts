@@ -2,7 +2,7 @@ import { ValidatedEventAPIGatewayProxyEvent } from "@libs/api-gateway";
 import { parseBasicAuth } from "@libs/auth-utils";
 import { middyfy } from "@libs/lambda";
 import { getElastic } from "src/elastic";
-import { timedCurationsService } from "../../database/services";
+import { timedCurationsService } from "src/database/services";
 
 /**
  * Lambda for deleting timed curations

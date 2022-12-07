@@ -1,6 +1,6 @@
 import { middyfy } from "@libs/lambda";
-import { timedCurationsService } from "../../database/services";
-import config from "../../config";
+import { timedCurationsService } from "src/database/services";
+import config from "src/config";
 import { parseDate } from "@libs/date-utils";
 import { getElastic } from "src/elastic";
 
