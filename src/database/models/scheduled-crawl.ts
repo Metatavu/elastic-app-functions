@@ -3,7 +3,7 @@
  */
 interface ScheduledCrawl {
   id: string;
-  previousCrawlId: string;
+  previousCrawlId?: string;
   name: string;
   seedURLs: string[];
   frequency: number;

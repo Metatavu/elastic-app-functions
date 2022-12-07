@@ -1,12 +1,12 @@
-import { ValidatedEventAPIGatewayProxyEvent } from '@libs/api-gateway';
-import { middyfy } from '@libs/lambda';
-import { getElastic } from '../../elastic';
+import { ValidatedEventAPIGatewayProxyEvent } from "@libs/api-gateway";
+import { middyfy } from "@libs/lambda";
+import { getElastic } from "../../elastic";
 import { timedCurationsService } from "../../database/services";
-import { parseBasicAuth } from '@libs/auth-utils';
+import { parseBasicAuth } from "@libs/auth-utils";
 
 /**
  * Lambda for listing timed curations
- * 
+ *
  * @param event event
  */
 const listTimedCurations: ValidatedEventAPIGatewayProxyEvent<any> = async event => {
@@ -29,7 +29,7 @@ const listTimedCurations: ValidatedEventAPIGatewayProxyEvent<any> = async event 
   }
 
   const timedCurations = await timedCurationsService.listTimedCurations();
-  
+
   return {
     statusCode: 200,
     body: JSON.stringify(timedCurations)

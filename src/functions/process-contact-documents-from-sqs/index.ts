@@ -1,13 +1,18 @@
-import { handlerPath } from '@libs/handler-resolver';
-import config from "../../config";
+import { handlerPath } from "@libs/handler-resolver";
+import { AWSFunction } from "src/types";
 
-
-export default {
+const fn: AWSFunction = {
   handler: `${handlerPath(__dirname)}/handler.main`,
   timeout: 60,
   events: [
     {
-      sqs: { arn: config.AWS_SQS_ARN }
+      sqs: {
+        arn: {
+          "Fn::GetAtt": [ "helsinki-search-contact-person-queue-${opt:stage}", "Arn" ]
+        }
+      }
     }
   ]
 };
+
+export default fn;

@@ -11,21 +11,22 @@ const BATCH_SIZE = 10;
 
 /**
  * Detects language for given URL
- * 
+ *
  * @param url URL
  * @returns language or null if not detected
  */
 const detectNewsPublishedDateFromUrl = async (url: string): Promise<DateTime | null> => {
-  const documentUrl = new URL(url); 
+  const documentUrl = new URL(url);
   const pageResponse = await fetch(documentUrl.toString());
   const contentType = pageResponse.headers.get("content-type");
 
-  if (contentType.startsWith("text/html")) {
+  if (contentType?.startsWith("text/html")) {
     const pageContent = await pageResponse.text();
     const $ = cheerio.load(pageContent);
     const publishedElement = $("time[itemprop='datePublished']");
-    if (publishedElement.length) {      
-      return parseHelFiNewsDate(publishedElement.attr("datetime"));
+    if (publishedElement.length) {
+      const dateString = publishedElement.attr("datetime");
+      if (dateString) return parseHelFiNewsDate(dateString);
     }
   }
 
@@ -34,7 +35,7 @@ const detectNewsPublishedDateFromUrl = async (url: string): Promise<DateTime | n
 
 /**
  * Resolves language for a document
- * 
+ *
  * @param document document
  * @returns language or null if could not be resolved
  */
@@ -70,8 +71,8 @@ const detectNewsPublished = async () => {
     },
     filters: {
       all: [
-        { 
-          meta_content_category: ContentCategory.NEWS 
+        {
+          meta_content_category: ContentCategory.NEWS
         },
         {
           none: [
@@ -86,7 +87,7 @@ const detectNewsPublished = async () => {
       ]
     }
   });
-  
+
   console.log(`Detecting publication date for news ${meta.page.size} / ${meta.page.total_results}.`);
 
   if (!results.length) return;
@@ -104,12 +105,16 @@ const detectNewsPublished = async () => {
   for (const document of flattenedDocuments) {
     const publishDate = await detectNewsPublishedDateFromDocument(document);
     if (publishDate && publishDate.isValid) {
-      updateDocuments.push({ ...document, publish_date: publishDate.toISO() });
+      updateDocuments.push({
+        ...document,
+        publish_date: publishDate.toISO(),
+        id: document.id!
+      });
     } else {
       console.warn("Failed to detect publish date for document", document);
     }
   }
-  
+
   if (updateDocuments.length > 0) {
     const result = await elastic.updateDocuments({
       documents: updateDocuments

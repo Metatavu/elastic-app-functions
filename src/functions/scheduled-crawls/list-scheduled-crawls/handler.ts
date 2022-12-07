@@ -1,12 +1,12 @@
-import { ValidatedEventAPIGatewayProxyEvent } from '@libs/api-gateway';
-import { middyfy } from '@libs/lambda';
-import { getElastic } from '../../../elastic';
+import { ValidatedEventAPIGatewayProxyEvent } from "@libs/api-gateway";
+import { middyfy } from "@libs/lambda";
+import { getElastic } from "../../../elastic";
 import { scheduledCrawlService } from "../../../database/services";
-import { parseBasicAuth } from '@libs/auth-utils';
+import { parseBasicAuth } from "@libs/auth-utils";
 
 /**
  * Lambda for listing scheduled crawls
- * 
+ *
  * @param event event
  */
 const listScheduledCrawls: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
@@ -38,7 +38,7 @@ const listScheduledCrawls: ValidatedEventAPIGatewayProxyEvent<any> = async (even
       frequency: row.frequency,
     }
   ));
-  
+
   return {
     statusCode: 200,
     body: JSON.stringify(responseScheduledCrawls)

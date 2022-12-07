@@ -1,5 +1,5 @@
-import type { APIGatewayProxyEvent, APIGatewayProxyResult, Handler } from "aws-lambda"
-import type { FromSchema } from "json-schema-to-ts";
+import { Static, TSchema } from "@sinclair/typebox";
+import type { APIGatewayProxyEvent, APIGatewayProxyResult, Handler } from "aws-lambda";
 
-type ValidatedAPIGatewayProxyEvent<S> = Omit<APIGatewayProxyEvent, 'body'> & { body: FromSchema<S> }
-export type ValidatedEventAPIGatewayProxyEvent<S> = Handler<ValidatedAPIGatewayProxyEvent<S>, APIGatewayProxyResult>
+type ValidatedAPIGatewayProxyEvent<S extends TSchema> = Omit<APIGatewayProxyEvent, "body"> & { body: Static<S> };
+export type ValidatedEventAPIGatewayProxyEvent<S extends TSchema> = Handler<ValidatedAPIGatewayProxyEvent<S>, APIGatewayProxyResult>;
