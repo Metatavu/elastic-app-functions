@@ -19,7 +19,7 @@ import triggerScheduledCrawl from "@functions/scheduled-crawls/trigger-scheduled
 import addContactDocumentsToSQS from "@functions/add-contact-documents-to-sqs";
 import processContactDocumentFromSQS from "@functions/process-contact-documents-from-sqs";
 
-import { env } from "process";
+import config from "src/config";
 
 const serverlessConfiguration: AWS = {
   service: "elastic-app-functions",
@@ -28,7 +28,7 @@ const serverlessConfiguration: AWS = {
   provider: {
     name: "aws",
     runtime: "nodejs16.x",
-    region: env.AWS_DEFAULT_REGION as any,
+    region: config.AWS_DEFAULT_REGION as AWS["provider"]["region"],
     deploymentBucket: {
       name: "serverless-elastic-app-functions-${opt:stage}-deploy"
     },
@@ -38,7 +38,12 @@ const serverlessConfiguration: AWS = {
     },
     environment: {
       AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1",
-      NODE_OPTIONS: "--enable-source-maps --stack-trace-limit=1000"
+      NODE_OPTIONS: "--enable-source-maps --stack-trace-limit=1000",
+      ELASTIC_URL: config.ELASTIC_URL,
+      ELASTIC_APP_ENGINE: config.ELASTIC_APP_ENGINE,
+      ELASTIC_ADMIN_USERNAME: config.ELASTIC_ADMIN_USERNAME,
+      ELASTIC_ADMIN_PASSWORD: config.ELASTIC_ADMIN_PASSWORD,
+      CONTACT_PERSONS_URL: config.CONTACT_PERSONS_URL
     },
     iam: {
       role: {
