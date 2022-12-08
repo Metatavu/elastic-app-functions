@@ -8,7 +8,7 @@ const fn: AWSFunction = {
     {
       sqs: {
         arn: {
-          "Fn::GetAtt": [ "helsinki-search-contact-person-queue-${opt:stage}", "Arn" ]
+          "Fn::GetAtt": [ "HelsinkiSearchContactPersonQueue", "Arn" ]
         }
       }
     }

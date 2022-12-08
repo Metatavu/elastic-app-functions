@@ -124,7 +124,15 @@ const serverlessConfiguration: AWS = {
           },
         },
       },
-    }
+      HelsinkiSearchContactPersonQueue: {
+        Type: "AWS::SQS::Queue",
+        Properties: {
+          QueueName: "helsinki-search-contact-person-queue-${opt:stage}",
+          VisibilityTimeout: 120,
+          MessageRetentionPeriod: 86400
+        },
+      }
+    },
   }
 };
 
