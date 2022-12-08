@@ -32,9 +32,15 @@ const sendMessagesToSQS = (personsData: Person[]) => {
     sqs.sendMessageBatch({
       Entries: batch,
       QueueUrl: queueUrl
-    }, (error: AWSError, _: SendMessageBatchResult) => {
+    }, (error: AWSError, result: SendMessageBatchResult) => {
       if (error != null) {
         console.error("Error while sending contact person message batch to SQS queue", error);
+      }
+
+      if (result.Failed.length) {
+        result.Failed.forEach(({ Code, Message }) =>
+          console.error(`Failed to add message to SQS queue with code ${Code}: ${Message}.`)
+        );
       }
     });
 
