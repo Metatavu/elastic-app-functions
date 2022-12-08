@@ -30,7 +30,8 @@ const serverlessConfiguration: AWS = {
     runtime: "nodejs16.x",
     region: env.AWS_DEFAULT_REGION as any,
     deploymentBucket: {
-      name: "serverless-elastic-app-functions-${opt:stage}-deploy"
+      name: "serverless-elastic-app-functions-${opt:stage}-deploy",
+      serverSideEncryption: "AES256"
     },
     httpApi: {
       shouldStartNameWithService: true,
