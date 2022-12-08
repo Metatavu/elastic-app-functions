@@ -1,7 +1,7 @@
 import { Client } from "@elastic/enterprise-search";
 import { CreateCurationRequest, SearchRequest, SearchResponse } from "@elastic/enterprise-search/lib/api/app/types";
 import { BasicAuth } from "@libs/auth-utils";
-import config from "../config";
+import config from "src/config";
 
 /**
  * Elastic client options

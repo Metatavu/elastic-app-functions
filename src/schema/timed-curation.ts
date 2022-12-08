@@ -1,14 +1,14 @@
+import { Type } from "@sinclair/typebox";
+
 /**
  * Schema object for timed curation REST entity
  */
-export default {
-  type: "object",
-  properties: {
-    queries: { type: 'array', items: { type: "string" } },
-    promoted: { type: 'array', items: { type: "string" } },
-    hidden: { type: 'array', items: { type: "string" } },
-    startTime: { type: 'string' },
-    endTime: { type: 'string' },
-  },
-  required: [ 'queries', 'promoted', 'hidden', 'startTime', 'endTime' ]
-} as const;
+const timedCurationSchema = Type.Object({
+  queries: Type.Array(Type.String()),
+  promoted: Type.Array(Type.String()),
+  hidden: Type.Array(Type.String()),
+  startTime: Type.String(),
+  endTime: Type.String()
+});
+
+export default timedCurationSchema;

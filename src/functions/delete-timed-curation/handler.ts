@@ -1,16 +1,22 @@
-import { ValidatedEventAPIGatewayProxyEvent } from '@libs/api-gateway';
-import { parseBasicAuth } from '@libs/auth-utils';
-import { middyfy } from '@libs/lambda';
-import { getElastic } from 'src/elastic';
-import { timedCurationsService } from "../../database/services";
+import { ValidatedEventAPIGatewayProxyEvent } from "@libs/api-gateway";
+import { parseBasicAuth } from "@libs/auth-utils";
+import { middyfy } from "@libs/lambda";
+import { getElastic } from "src/elastic";
+import { timedCurationsService } from "src/database/services";
 
 /**
  * Lambda for deleting timed curations
- * 
+ *
  * @param event event
  */
 const deleteTimedCuration: ValidatedEventAPIGatewayProxyEvent<any> = async event => {
-  const { pathParameters: { id }, headers: { Authorization, authorization } } = event;
+  const { pathParameters, headers: { Authorization, authorization } } = event;
+  const id = pathParameters?.id;
+
+  if (!id) return {
+    statusCode: 400,
+    body: "Bad request"
+  }
 
   const auth = parseBasicAuth(authorization || Authorization);
   if (!auth) {
@@ -37,7 +43,7 @@ const deleteTimedCuration: ValidatedEventAPIGatewayProxyEvent<any> = async event
       body: "Not found"
     };
   }
-  
+
   return {
     statusCode: 204,
     body: ""

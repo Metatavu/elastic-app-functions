@@ -1,12 +1,12 @@
 import fetch from "node-fetch";
-import config from "../../config";
+import config from "src/config";
 import { middyfy } from "@libs/lambda";
 import { Person } from "./types";
 import { XMLParser } from "fast-xml-parser";
 import { AWSError, SQS } from "aws-sdk";
 import { SendMessageBatchResult } from "aws-sdk/clients/sqs";
 
-const { AWS_SQS_QUEUE_URL, CONTACT_PERSONS_URL } = config;
+const { CONTACT_PERSONS_URL } = config;
 
 /**
  * Send messages to AWS SQS
@@ -14,6 +14,10 @@ const { AWS_SQS_QUEUE_URL, CONTACT_PERSONS_URL } = config;
  * @param personsData list of contact persons
  */
 const sendMessagesToSQS = (personsData: Person[]) => {
+  const queueUrl = process.env.AWS_SQS_QUEUE_URL;
+
+  if (!queueUrl) throw Error("Missing AWS_SQS_QUEUE_URL environment variable");
+
   const sqs = new SQS({ apiVersion: "latest" });
   const batchSize = 10;
 
@@ -27,7 +31,7 @@ const sendMessagesToSQS = (personsData: Person[]) => {
 
     sqs.sendMessageBatch({
       Entries: batch,
-      QueueUrl: AWS_SQS_QUEUE_URL
+      QueueUrl: queueUrl
     }, (error: AWSError, _: SendMessageBatchResult) => {
       if (error != null) {
         console.error("Error while sending contact person message batch to SQS queue", error);

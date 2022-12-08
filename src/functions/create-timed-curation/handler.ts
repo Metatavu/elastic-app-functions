@@ -1,14 +1,14 @@
-import type { ValidatedEventAPIGatewayProxyEvent } from '@libs/api-gateway';
-import { middyfy } from '@libs/lambda';
-import schema from '../../schema/timed-curation';
-import { timedCurationsService } from "../../database/services";
-import { v4 as uuid } from 'uuid';
-import { parseBasicAuth } from '@libs/auth-utils';
-import { getElastic } from 'src/elastic';
+import type { ValidatedEventAPIGatewayProxyEvent } from "@libs/api-gateway";
+import { middyfy } from "@libs/lambda";
+import schema from "src/schema/timed-curation";
+import { timedCurationsService } from "src/database/services";
+import { v4 as uuid } from "uuid";
+import { parseBasicAuth } from "@libs/auth-utils";
+import { getElastic } from "src/elastic";
 
 /**
  * Lambda for creating timed curations
- * 
+ *
  * @param event event
  */
 const createTimedCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async event => {
@@ -33,7 +33,7 @@ const createTimedCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = a
   }
 
   const documentIds = [ ...promoted, ...hidden ];
-  
+
   const documents = await Promise.all(
     documentIds.map(async documentId => ({
       id: documentId,
