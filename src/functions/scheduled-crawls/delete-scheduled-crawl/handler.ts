@@ -1,16 +1,24 @@
-import { ValidatedEventAPIGatewayProxyEvent } from '@libs/api-gateway';
-import { parseBasicAuth } from '@libs/auth-utils';
-import { middyfy } from '@libs/lambda';
-import { getElastic } from 'src/elastic';
-import { scheduledCrawlService } from "../../../database/services";
+import { ValidatedEventAPIGatewayProxyEvent } from "@libs/api-gateway";
+import { parseBasicAuth } from "@libs/auth-utils";
+import { middyfy } from "@libs/lambda";
+import { getElastic } from "src/elastic";
+import { scheduledCrawlService } from "src/database/services";
 
 /**
  * Lambda for deleting scheduled crawls
- * 
+ *
  * @param event event
  */
 const deleteScheduledCrawl: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
-  const { pathParameters: { id }, headers: { Authorization, authorization } } = event;
+  const { pathParameters, headers: { Authorization, authorization } } = event;
+  const id = pathParameters?.id;
+
+  if (!id) {
+    return {
+      statusCode: 400,
+      body: "Bad request"
+    };
+  }
 
   const auth = parseBasicAuth(authorization || Authorization);
   if (!auth) {
@@ -37,7 +45,7 @@ const deleteScheduledCrawl: ValidatedEventAPIGatewayProxyEvent<any> = async (eve
       body: "Not found"
     };
   }
-  
+
   return {
     statusCode: 204,
     body: ""

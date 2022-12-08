@@ -1,9 +1,9 @@
-import { middyfy } from '@libs/lambda';
-import { scheduledCrawlService } from "../../../database/services";
-import config from '../../../config';
-import { calculateMinutesPassed } from '@libs/date-utils';
-import { getElastic } from 'src/elastic';
-import { GetCrawlerActiveCrawlRequestRequest, GetCrawlerCrawlRequestResponse } from '@elastic/enterprise-search/lib/api/app/types';
+import { middyfy } from "@libs/lambda";
+import { scheduledCrawlService } from "src/database/services";
+import config from "src/config";
+import { calculateMinutesPassed } from "@libs/date-utils";
+import { getElastic } from "src/elastic";
+import { GetCrawlerCrawlRequestResponse } from "@elastic/enterprise-search/lib/api/app/types";
 
 const { ELASTIC_ADMIN_USERNAME, ELASTIC_ADMIN_PASSWORD } = config;
 
@@ -28,10 +28,12 @@ const triggerScheduledCrawl = async () => {
     for (const scheduledCrawl of scheduledCrawls) {
       const { previousCrawlId, frequency } = scheduledCrawl;
 
-      let crawlDetails: GetCrawlerCrawlRequestResponse = crawlDetailsMap[previousCrawlId];
+      let crawlDetails = previousCrawlId ? crawlDetailsMap[previousCrawlId] : undefined;
       if (crawlDetails === undefined) {
-        crawlDetails = previousCrawlId ? await elastic.findCrawlDetails({ id: previousCrawlId }) : null;
-        crawlDetailsMap[previousCrawlId] = crawlDetails;
+        crawlDetails = previousCrawlId ? await elastic.findCrawlDetails({ id: previousCrawlId }) : undefined;
+        if (previousCrawlId && crawlDetails) {
+          crawlDetailsMap[previousCrawlId] = crawlDetails;
+        }
       }
 
       if (!crawlDetails) {
@@ -57,9 +59,9 @@ const triggerScheduledCrawl = async () => {
     if (urls.length) {
       try {
         const crawlResponse = await elastic.createCrawlRequest(crawlOptions);
-  
+
         console.log("Crawl request created successfully", crawlResponse, urls);
-  
+
         activeCrawls.forEach(activeCrawl => {
           scheduledCrawlService.updateScheduledCrawl({
             ...activeCrawl,

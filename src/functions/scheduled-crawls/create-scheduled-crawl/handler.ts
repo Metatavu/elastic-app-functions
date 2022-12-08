@@ -1,17 +1,17 @@
-import type { ValidatedEventAPIGatewayProxyEvent } from '@libs/api-gateway';
-import { middyfy } from '@libs/lambda';
-import schema from "../../../schema/scheduled-crawl";
-import { scheduledCrawlService } from "../../../database/services";
-import { v4 as uuid } from 'uuid';
-import { parseBasicAuth } from '@libs/auth-utils';
-import { getElastic } from 'src/elastic';
+import type { ValidatedEventAPIGatewayProxyEvent } from "@libs/api-gateway";
+import { middyfy } from "@libs/lambda";
+import scheduledCrawlSchema from "src/schema/scheduled-crawl";
+import { scheduledCrawlService } from "src/database/services";
+import { v4 as uuid } from "uuid";
+import { parseBasicAuth } from "@libs/auth-utils";
+import { getElastic } from "src/elastic";
 
 /**
  * Lambda for creating scheduled crawl
- * 
+ *
  * @param event event
  */
-const createScheduledCrawl: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async (event) => {
+const createScheduledCrawl: ValidatedEventAPIGatewayProxyEvent<typeof scheduledCrawlSchema> = async (event) => {
   const { body, headers } = event;
   const { name, seedURLs, frequency } = body;
   const { Authorization, authorization } = headers;
@@ -39,7 +39,7 @@ const createScheduledCrawl: ValidatedEventAPIGatewayProxyEvent<typeof schema> = 
     seedURLs: seedURLs,
     frequency: frequency,
   });
-  
+
   const responseScheduledCrawl = {
     id: scheduledCrawl.id,
     name: scheduledCrawl.name,

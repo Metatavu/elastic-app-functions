@@ -1,21 +1,28 @@
-import { ValidatedEventAPIGatewayProxyEvent } from '@libs/api-gateway';
-import { parseBasicAuth } from '@libs/auth-utils';
-import { middyfy } from '@libs/lambda';
-import { getElastic } from 'src/elastic';
-import { timedCurationsService } from "../../database/services";
-import schema from '../../schema/timed-curation';
+import { ValidatedEventAPIGatewayProxyEvent } from "@libs/api-gateway";
+import { parseBasicAuth } from "@libs/auth-utils";
+import { middyfy } from "@libs/lambda";
+import { getElastic } from "src/elastic";
+import { timedCurationsService } from "src/database/services";
+import schema from "src/schema/timed-curation";
 
 /**
  * Lambda for updating timed curations
- * 
+ *
  * @param event event
  */
 const updateTimedCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async event => {
   const { pathParameters, body, headers } = event;
-  const { id } = pathParameters;
-  const { queries, promoted, hidden, startTime, endTime } = body;
   const { authorization, Authorization } = headers;
-  
+  const { queries, promoted, hidden, startTime, endTime } = body;
+  const id = pathParameters?.id;
+
+  if (!id) {
+    return {
+      statusCode: 400,
+      body: "Bad request"
+    }
+  }
+
   const auth = parseBasicAuth(authorization || Authorization);
   if (!auth) {
     return {
@@ -39,8 +46,8 @@ const updateTimedCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = a
       body: "Not found"
     };
   }
-  
-  const updatedCuration = await timedCurationsService.updateTimedCuration({ 
+
+  const updatedCuration = await timedCurationsService.updateTimedCuration({
     ...timedCuration,
     promoted: promoted,
     hidden: hidden,

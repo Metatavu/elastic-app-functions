@@ -1,21 +1,28 @@
-import { ValidatedEventAPIGatewayProxyEvent } from '@libs/api-gateway';
-import { parseBasicAuth } from '@libs/auth-utils';
-import { middyfy } from '@libs/lambda';
-import { getElastic } from 'src/elastic';
-import { scheduledCrawlService } from "../../../database/services";
-import schema from '../../../schema/scheduled-crawl';
+import { ValidatedEventAPIGatewayProxyEvent } from "@libs/api-gateway";
+import { parseBasicAuth } from "@libs/auth-utils";
+import { middyfy } from "@libs/lambda";
+import { getElastic } from "src/elastic";
+import { scheduledCrawlService } from "src/database/services";
+import scheduledCrawlsSchema from "src/schema/scheduled-crawl";
 
 /**
  * Lambda for updating scheduled crawls
- * 
+ *
  * @param event event
  */
-const updateScheduledCrawl: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async (event) => {
+const updateScheduledCrawl: ValidatedEventAPIGatewayProxyEvent<typeof scheduledCrawlsSchema> = async event => {
   const { pathParameters, body, headers } = event;
-  const { id } = pathParameters;
-  const { name, previousCrawlId, seedURLs, frequency } = body;
   const { authorization, Authorization } = headers;
-  
+  const { name, previousCrawlId, seedURLs, frequency } = body;
+  const id = pathParameters?.id;
+
+  if (!id) {
+    return {
+      statusCode: 400,
+      body: "Bad request"
+    };
+  }
+
   const auth = parseBasicAuth(authorization || Authorization);
   if (!auth) {
     return {
@@ -39,8 +46,8 @@ const updateScheduledCrawl: ValidatedEventAPIGatewayProxyEvent<typeof schema> = 
       body: "Not found"
     };
   }
-  
-  const updatedScheduledCrawl = await scheduledCrawlService.updateScheduledCrawl({ 
+
+  const updatedScheduledCrawl = await scheduledCrawlService.updateScheduledCrawl({
     ...scheduledCrawl,
     name: name,
     previousCrawlId: previousCrawlId,

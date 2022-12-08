@@ -7,7 +7,7 @@ import updateTimedCuration from "@functions/update-timed-curation";
 import deleteTimedCuration from "@functions/delete-timed-curation";
 import scheduleTimedCuration from "@functions/schedule-timed-curations";
 import addCategoryToDocuments from "@functions/add-category-to-document";
-import detectDocumentLanguages from "@functions/delect-document-languages";
+import detectDocumentLanguages from "@functions/detect-document-languages";
 import detectNewsPublished from "@functions/detect-news-published";
 import detectBreadcrumbs from "@functions/detect-breadcrumbs";
 import findScheduledCrawl from "@functions/scheduled-crawls/find-scheduled-crawl";
@@ -17,7 +17,7 @@ import updateScheduledCrawl from "@functions/scheduled-crawls/update-scheduled-c
 import deleteScheduledCrawl from "@functions/scheduled-crawls/delete-scheduled-crawl";
 import triggerScheduledCrawl from "@functions/scheduled-crawls/trigger-scheduled-crawl";
 import addContactDocumentsToSQS from "@functions/add-contact-documents-to-sqs";
-import processContactDocumentFromSQS from "@functions/process-contact-documents-from-sqs"
+import processContactDocumentFromSQS from "@functions/process-contact-documents-from-sqs";
 
 import { env } from "process";
 
@@ -125,7 +125,15 @@ const serverlessConfiguration: AWS = {
           },
         },
       },
-    }
+      HelsinkiSearchContactPersonQueue: {
+        Type: "AWS::SQS::Queue",
+        Properties: {
+          QueueName: "helsinki-search-contact-person-queue-${opt:stage}",
+          VisibilityTimeout: 120,
+          MessageRetentionPeriod: 86400
+        },
+      }
+    },
   }
 };
 

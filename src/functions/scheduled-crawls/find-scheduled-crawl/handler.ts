@@ -1,23 +1,23 @@
-import { ValidatedEventAPIGatewayProxyEvent } from '@libs/api-gateway';
-import { middyfy } from '@libs/lambda';
-import { getElastic } from '../../../elastic';
-import { scheduledCrawlService } from "../../../database/services";
-import { parseBasicAuth } from '@libs/auth-utils';
+import { ValidatedEventAPIGatewayProxyEvent } from "@libs/api-gateway";
+import { middyfy } from "@libs/lambda";
+import { getElastic } from "src/elastic";
+import { scheduledCrawlService } from "src/database/services";
+import { parseBasicAuth } from "@libs/auth-utils";
 
 /**
  * Lambda for find scheduled crawl
- * 
+ *
  * @param event event
  */
 const findScheduledCrawl: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
   const { pathParameters, headers } = event;
-  const { id } = pathParameters;
   const { authorization, Authorization } = headers;
+  const id = pathParameters?.id;
 
   if (!id) {
     return {
-      statusCode: 404,
-      body: "Not found"
+      statusCode: 400,
+      body: "Bad request"
     };
   }
 
@@ -51,7 +51,7 @@ const findScheduledCrawl: ValidatedEventAPIGatewayProxyEvent<any> = async (event
     seedURLs: scheduledCrawl.seedURLs,
     frequency: scheduledCrawl.frequency,
   };
-  
+
   return {
     statusCode: 200,
     body: JSON.stringify(responseScheduledCrawl)
