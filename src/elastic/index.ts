@@ -40,6 +40,14 @@ export type Document = {
 }
 
 /**
+ * Correct type for single document object in indexDocuments request of Elastic App Search
+ */
+export type UpsertDocumentResponse = {
+  id: string | null,
+  errors: string[]
+};
+
+/**
  * Elastic client
  */
 export class Elastic {
@@ -108,11 +116,11 @@ export class Elastic {
    * @param options options
    * @param options.document document to update
    */
-  public updateDocuments = async ({ documents }: { documents: Document[]; }) => {
+  public updateDocuments = async ({ documents }: { documents: Document[]; }): Promise<UpsertDocumentResponse[]> => {
     return this.getClient().app.indexDocuments({
       engine_name: this.options.engineName,
       documents: documents
-    });
+    }) as Promise<UpsertDocumentResponse[]>;
   }
 
   /**
