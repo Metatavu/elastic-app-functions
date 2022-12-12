@@ -12,7 +12,7 @@ const { CONTACT_PERSONS_URL } = config;
  *
  * @param personsData list of contact persons
  */
-const sendMessagesToSQS = (personsData: Person[]) => {
+const sendMessagesToSQS = async (personsData: Person[]) => {
   const queueUrl = process.env.AWS_SQS_QUEUE_URL;
 
   if (!queueUrl) throw Error("Missing AWS_SQS_QUEUE_URL environment variable");
@@ -28,28 +28,29 @@ const sendMessagesToSQS = (personsData: Person[]) => {
       MessageBody: JSON.stringify(person)
     }));
 
-    console.log(batch[0]);
+    try {
+      const result = await sqs.sendMessageBatch({
+        QueueUrl: queueUrl,
+        Entries: batch
+      }).promise();
 
-    sqs.sendMessageBatch({
-      QueueUrl: queueUrl,
-      Entries: batch
-    }, (error, result) => {
-      if (error != null) {
-        console.error("Error while sending contact person message batch to SQS queue", error);
-      }
+      const { Failed, Successful } = result;
 
-      console.log({ error, result });
-
-      if (result.Failed.length) {
-        result.Failed.forEach(({ Code, Message }) =>
+      if (Failed.length) {
+        Failed.forEach(({ Code, Message }) =>
           console.error(`Failed to add message to SQS queue with code ${Code}: ${Message}.`)
         );
+
+        continue;
       }
 
-      if (result.Successful.length) {
-        console.info(`Added IDs ${result.Successful.map(entry => entry.Id)} to queue`);
+      if (Successful.length) {
+        console.info(`Added IDs ${Successful.map(entry => entry.Id)} to queue`);
       }
-    });
+
+    } catch (error) {
+      console.error("Error while sending contact person message batch to SQS queue", error);
+    }
 
     const processedAmount = i + batchSize > personsData.length ?
       personsData.length :
@@ -83,7 +84,7 @@ const addContactDocumentsToSQS = async () => {
     });
 
     const personsData = xmlParser.parse(responseContent).persons.person as Person[];
-    sendMessagesToSQS(personsData);
+    await sendMessagesToSQS(personsData);
   } catch (error) {
     console.error("Error while processing contact information", error);
   }
