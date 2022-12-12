@@ -3,8 +3,7 @@ import config from "src/config";
 import { middyfy } from "@libs/lambda";
 import { Person } from "./types";
 import { XMLParser } from "fast-xml-parser";
-import { AWSError, SQS } from "aws-sdk";
-import { SendMessageBatchResult } from "aws-sdk/clients/sqs";
+import { SQS } from "aws-sdk";
 
 const { CONTACT_PERSONS_URL } = config;
 
@@ -34,10 +33,12 @@ const sendMessagesToSQS = (personsData: Person[]) => {
     sqs.sendMessageBatch({
       QueueUrl: queueUrl,
       Entries: batch
-    }, (error: AWSError, result: SendMessageBatchResult) => {
+    }, (error, result) => {
       if (error != null) {
         console.error("Error while sending contact person message batch to SQS queue", error);
       }
+
+      console.log({ error, result });
 
       if (result.Failed.length) {
         result.Failed.forEach(({ Code, Message }) =>
