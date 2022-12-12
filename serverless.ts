@@ -63,6 +63,13 @@ const serverlessConfiguration: AWS = {
               { "Fn::GetAtt": [ "TimedCurations", "Arn" ] },
               { "Fn::GetAtt": [ "ScheduledCrawls", "Arn" ] }
             ],
+          },
+          {
+            Effect: "Allow",
+            Action: [ "sqs:*" ],
+            Resource: [
+              { "Fn::GetAtt": [ "HelsinkiSearchContactPersonQueue", "Arn" ] }
+            ]
           }
         ]
       }
