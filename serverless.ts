@@ -141,7 +141,9 @@ const serverlessConfiguration: AWS = {
         Properties: {
           QueueName: "helsinki-search-contact-person-queue-${opt:stage}",
           VisibilityTimeout: 120,
-          MessageRetentionPeriod: 86400
+          MessageRetentionPeriod: 86400,
+          ReceiveMessageWaitTimeSeconds: 20,
+          DelaySeconds: 1
         },
       }
     },
