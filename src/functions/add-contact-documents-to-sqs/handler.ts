@@ -29,9 +29,11 @@ const sendMessagesToSQS = (personsData: Person[]) => {
       MessageBody: JSON.stringify(person)
     }));
 
+    console.log(batch[0]);
+
     sqs.sendMessageBatch({
-      Entries: batch,
-      QueueUrl: queueUrl
+      QueueUrl: queueUrl,
+      Entries: batch
     }, (error: AWSError, result: SendMessageBatchResult) => {
       if (error != null) {
         console.error("Error while sending contact person message batch to SQS queue", error);
@@ -42,9 +44,17 @@ const sendMessagesToSQS = (personsData: Person[]) => {
           console.error(`Failed to add message to SQS queue with code ${Code}: ${Message}.`)
         );
       }
+
+      if (result.Successful.length) {
+        console.info(`Added IDs ${result.Successful.map(entry => entry.Id)} to queue`);
+      }
     });
 
-    console.info(`Processed ${i}/${personsData.length}...`);
+    const processedAmount = i + batchSize > personsData.length ?
+      personsData.length :
+      i + batchSize;
+
+    console.info(`Processed ${processedAmount}/${personsData.length}...`);
   }
 };
 
