@@ -72,13 +72,6 @@ const serverlessConfiguration: AWS = {
             Resource: [
               { "Fn::GetAtt": [ "HelsinkiSearchContactPersonQueue", "Arn" ] }
             ]
-          },
-          {
-            Effect: "Allow",
-            Action: [
-              "lambda:UpdateEventSourceMapping"
-            ],
-            Resource: "*",
           }
         ]
       }
