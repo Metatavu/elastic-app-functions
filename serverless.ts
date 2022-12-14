@@ -76,9 +76,9 @@ const serverlessConfiguration: AWS = {
           {
             Effect: "Allow",
             Action: [
-              "lambda:*"
+              "lambda:UpdateEventSourceMapping"
             ],
-            Resource: "arn:aws:lambda:${opt:stage}:*:elastic-app-functions-*",
+            Resource: "*",
           }
         ]
       }
