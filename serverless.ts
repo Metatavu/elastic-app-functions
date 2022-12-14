@@ -67,12 +67,23 @@ const serverlessConfiguration: AWS = {
           {
             Effect: "Allow",
             Action: [
-              "sqs:*",
-              "lambda:*"
+              "sqs:*"
             ],
             Resource: [
               { "Fn::GetAtt": [ "HelsinkiSearchContactPersonQueue", "Arn" ] }
             ]
+          },
+          {
+            Effect: "Allow",
+            Action: [
+              "lambda:*"
+            ],
+            Resource: "*",
+            Condition: {
+              StringLike: {
+                "lambda:FunctionArn": "arn:aws:lambda:${opt:stage}:*:function:elastic-app-functions-*"
+              }
+            }
           }
         ]
       }
