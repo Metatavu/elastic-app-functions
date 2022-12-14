@@ -78,12 +78,9 @@ const serverlessConfiguration: AWS = {
             Action: [
               "lambda:*"
             ],
-            Resource: "*",
-            Condition: {
-              StringLike: {
-                "lambda:FunctionArn": "arn:aws:lambda:${opt:stage}:*:function:elastic-app-functions-*"
-              }
-            }
+            Resource: [
+              { "Fn::GetAtt": [ "processContactDocumentFromSQS", "Arn" ] }
+            ],
           }
         ]
       }
