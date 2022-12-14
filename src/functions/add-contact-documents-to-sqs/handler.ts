@@ -12,7 +12,7 @@ const { CONTACT_PERSONS_URL } = config;
  *
  * @param person person
  */
-const translatePerson = ({ "@_mecm_id": id, ...rest }: XMLPerson) => ({ id, ...rest });
+const translatePerson = ({ "@_mecm_id": id, ...rest }: XMLPerson) => ({ id: id.toString(), ...rest });
 
 /**
  * Send messages to AWS SQS
@@ -33,12 +33,9 @@ const sendMessagesToSQS = async (personsData: XMLPerson[]) => {
     const batch: SQS.SendMessageBatchRequestEntryList = currentBatch.map(person => {
       const translatedPerson = translatePerson(person);
 
-      const bodyStr = JSON.stringify(translatedPerson);
-      console.log(bodyStr);
-
       return {
-        Id: translatedPerson.id,
-        MessageBody: bodyStr
+        Id: translatedPerson.id.toString(),
+        MessageBody: JSON.stringify(translatedPerson)
       };
     });
 
