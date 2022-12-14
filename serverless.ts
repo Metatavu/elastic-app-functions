@@ -72,7 +72,7 @@ const serverlessConfiguration: AWS = {
             ]
           },
           {
-            Effect: "allow",
+            Effect: "Allow",
             Action: [ "lambda:*" ],
             Resource: [
               { "Fn::getAtt": [ "findTimedCuration", "Arn" ] },
