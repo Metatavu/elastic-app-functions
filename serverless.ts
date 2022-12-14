@@ -70,6 +70,30 @@ const serverlessConfiguration: AWS = {
             Resource: [
               { "Fn::GetAtt": [ "HelsinkiSearchContactPersonQueue", "Arn" ] }
             ]
+          },
+          {
+            Effects: "allow",
+            Action: [ "lambda:*" ],
+            Resource: [
+              { "Fn::getAtt": [ "findTimedCuration", "Arn" ] },
+              { "Fn::getAtt": [ "listTimedCurations", "Arn" ] },
+              { "Fn::getAtt": [ "createTimedCuration", "Arn" ] },
+              { "Fn::getAtt": [ "updateTimedCuration", "Arn" ] },
+              { "Fn::getAtt": [ "deleteTimedCuration", "Arn" ] },
+              { "Fn::getAtt": [ "scheduleTimedCuration", "Arn" ] },
+              { "Fn::getAtt": [ "addCategoryToDocuments", "Arn" ] },
+              { "Fn::getAtt": [ "detectDocumentLanguages", "Arn" ] },
+              { "Fn::getAtt": [ "detectNewsPublished", "Arn" ] },
+              { "Fn::getAtt": [ "detectBreadcrumbs", "Arn" ] },
+              { "Fn::getAtt": [ "findScheduledCrawl", "Arn" ] },
+              { "Fn::getAtt": [ "listScheduledCrawls", "Arn" ] },
+              { "Fn::getAtt": [ "createScheduledCrawl", "Arn" ] },
+              { "Fn::getAtt": [ "updateScheduledCrawl", "Arn" ] },
+              { "Fn::getAtt": [ "deleteScheduledCrawl", "Arn" ] },
+              { "Fn::getAtt": [ "triggerScheduledCrawl", "Arn" ] },
+              { "Fn::getAtt": [ "addContactDocumentsToSQS", "Arn" ] },
+              { "Fn::getAtt": [ "processContactDocumentFromSQS", "Arn" ] }
+            ]
           }
         ]
       }
