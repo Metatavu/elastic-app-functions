@@ -9,7 +9,8 @@ const fn: AWSFunction = {
       sqs: {
         arn: {
           "Fn::GetAtt": [ "HelsinkiSearchContactPersonQueue", "Arn" ]
-        }
+        },
+        batchSize: 1
       }
     }
   ]

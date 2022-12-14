@@ -1,18 +1,25 @@
 import fetch from "node-fetch";
 import config from "src/config";
 import { middyfy } from "@libs/lambda";
-import { Person } from "./types";
+import { XMLPerson } from "./types";
 import { XMLParser } from "fast-xml-parser";
 import { SQS } from "aws-sdk";
 
 const { CONTACT_PERSONS_URL } = config;
 
 /**
+ * Translates person
+ *
+ * @param person person
+ */
+const translatePerson = ({ "@_mecm_id": id, ...rest }: XMLPerson) => ({ id, ...rest });
+
+/**
  * Send messages to AWS SQS
  *
  * @param personsData list of contact persons
  */
-const sendMessagesToSQS = async (personsData: Person[]) => {
+const sendMessagesToSQS = async (personsData: XMLPerson[]) => {
   const queueUrl = process.env.AWS_SQS_QUEUE_URL;
 
   if (!queueUrl) throw Error("Missing AWS_SQS_QUEUE_URL environment variable");
@@ -20,13 +27,17 @@ const sendMessagesToSQS = async (personsData: Person[]) => {
   const sqs = new SQS({ apiVersion: "latest" });
   const batchSize = 10;
 
-  for (let i = 0; i < personsData.length -1; i += batchSize) {
+  for (let i = 0; i < personsData.length - 1; i += batchSize) {
     const currentBatch = personsData.slice(i, i + batchSize);
 
-    const batch: SQS.SendMessageBatchRequestEntryList = currentBatch.map(person => ({
-      Id: person["@_mecm_id"].toString(),
-      MessageBody: JSON.stringify(person)
-    }));
+    const batch: SQS.SendMessageBatchRequestEntryList = currentBatch.map(person => {
+      const translatedPerson = translatePerson(person);
+
+      return {
+        Id: translatedPerson.id,
+        MessageBody: JSON.stringify(translatedPerson)
+      };
+    });
 
     try {
       const result = await sqs.sendMessageBatch({
@@ -45,16 +56,16 @@ const sendMessagesToSQS = async (personsData: Person[]) => {
       }
 
       if (Successful.length) {
-        console.info(`Added IDs ${Successful.map(entry => entry.Id)} to queue`);
+        console.info(`Added IDs ${Successful.map(entry => entry.Id).join(", ")} to queue`);
       }
 
     } catch (error) {
       console.error("Error while sending contact person message batch to SQS queue", error);
     }
 
-    const processedAmount = i + batchSize > personsData.length ?
-      personsData.length :
-      i + batchSize;
+
+    const currentIndex = i + batchSize;
+    const processedAmount = currentIndex > personsData.length ? personsData.length : currentIndex;
 
     console.info(`Processed ${processedAmount}/${personsData.length}...`);
   }
@@ -83,7 +94,8 @@ const addContactDocumentsToSQS = async () => {
       }
     });
 
-    const personsData = xmlParser.parse(responseContent).persons.person as Person[];
+    const personsData: XMLPerson[] = xmlParser.parse(responseContent).persons.person;
+
     await sendMessagesToSQS(personsData);
   } catch (error) {
     console.error("Error while processing contact information", error);

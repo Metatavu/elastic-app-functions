@@ -15,12 +15,11 @@ const processContactDocumentFromSQS = async (event: SQSEvent) => {
   const record = event.Records?.at(0);
 
   if (!record) {
-    throw Error(`No item fround from event ${event}`);
+    throw Error(`No record fround from event ${event}`);
   }
 
   try {
-    const personId = record.messageId;
-    const person = JSON.parse(record.body) as Person;
+    const person: Person = JSON.parse(record.body);
 
     const elastic = getElastic({
       username: ELASTIC_ADMIN_USERNAME,
@@ -37,7 +36,7 @@ const processContactDocumentFromSQS = async (event: SQSEvent) => {
       addresses: person.addresses,
       ous: person.ous,
       search_words: person.search_words,
-      id: personId,
+      id: person.id,
       meta_content_category: ContentCategory.CONTACT
     }];
 
@@ -49,7 +48,7 @@ const processContactDocumentFromSQS = async (event: SQSEvent) => {
       throw Error("Failed to create or update document to Elastic App Search: ", { cause: documents[0].errors });
     }
 
-    console.log("Updated contact infomation", documents[0].id);
+    console.log("Updated contact information", documents[0].id);
   } catch (error) {
     console.error("Error while processing contact information", error);
   }
