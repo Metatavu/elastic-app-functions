@@ -33,9 +33,12 @@ const sendMessagesToSQS = async (personsData: XMLPerson[]) => {
     const batch: SQS.SendMessageBatchRequestEntryList = currentBatch.map(person => {
       const translatedPerson = translatePerson(person);
 
+      const bodyStr = JSON.stringify(translatedPerson);
+      console.log(bodyStr);
+
       return {
         Id: translatedPerson.id,
-        MessageBody: JSON.stringify(translatedPerson)
+        MessageBody: bodyStr
       };
     });
 
