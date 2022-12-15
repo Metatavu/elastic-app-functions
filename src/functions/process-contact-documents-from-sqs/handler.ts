@@ -1,8 +1,9 @@
-import { Person } from "@functions/add-contact-documents-to-sqs/types";
+import { Contact } from "@types";
 import { middyfy } from "@libs/lambda";
 import { SQSEvent } from "aws-lambda";
 import config from "src/config";
 import { ContentCategory, Document, getElastic } from "src/elastic";
+import { DateTime } from "luxon";
 
 const { ELASTIC_ADMIN_USERNAME, ELASTIC_ADMIN_PASSWORD } = config;
 
@@ -14,12 +15,14 @@ const { ELASTIC_ADMIN_USERNAME, ELASTIC_ADMIN_PASSWORD } = config;
 const processContactDocumentFromSQS = async (event: SQSEvent) => {
   const record = event.Records?.at(0);
 
-  if (!record) {
-    throw Error(`No record fround from event ${event}`);
-  }
+  if (!record) throw Error(`No record fround from event ${event}`);
+
+  const timestamp = Number(record.messageAttributes.timestamp.stringValue || "");
+
+  if (Number.isNaN(timestamp)) throw Error(`Invalid timestamp '${timestamp}' found from event ${event}`);
 
   try {
-    const person: Person = JSON.parse(record.body);
+    const person: Contact = JSON.parse(record.body);
 
     const elastic = getElastic({
       username: ELASTIC_ADMIN_USERNAME,
@@ -37,7 +40,8 @@ const processContactDocumentFromSQS = async (event: SQSEvent) => {
       ous: person.ous,
       search_words: person.search_words,
       id: person.id,
-      meta_content_category: ContentCategory.CONTACT
+      meta_content_category: ContentCategory.CONTACT,
+      last_crawled_at: DateTime.fromMillis(timestamp).toISO()
     }];
 
     const documents = await elastic.updateDocuments({

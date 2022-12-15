@@ -1,5 +1,11 @@
 import { handlerPath } from "@libs/handler-resolver";
+import config from "src/config";
 import { AWSFunction } from "src/types";
+
+const rate = config.CONTACT_SYNC_INTERVAL_IN_DAYS;
+const rateExpression = rate > 1
+  ? `${rate} days`
+  : "1 day";
 
 const fn: AWSFunction = {
   handler: `${handlerPath(__dirname)}/handler.main`,
@@ -13,7 +19,7 @@ const fn: AWSFunction = {
     {
       schedule: {
         rate: [
-          "rate(1 day)"
+          `rate(${rateExpression})`
         ]
       }
     }

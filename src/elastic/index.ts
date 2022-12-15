@@ -1,5 +1,5 @@
 import { Client } from "@elastic/enterprise-search";
-import { CreateCurationRequest, SearchRequest, SearchResponse } from "@elastic/enterprise-search/lib/api/app/types";
+import { CreateCurationRequest, DeleteDocumentsResponse, SearchRequest, SearchResponse } from "@elastic/enterprise-search/lib/api/app/types";
 import { BasicAuth } from "@libs/auth-utils";
 import config from "src/config";
 
@@ -121,6 +121,19 @@ export class Elastic {
       engine_name: this.options.engineName,
       documents: documents
     }) as Promise<UpsertDocumentResponse[]>;
+  }
+
+  /**
+   * Deletes documents with given IDs from Elastic Search
+   *
+   * @param options options
+   * @param options.documentIds list of IDs of documents to delete. Maximum length is 100.
+   */
+  public deleteDocuments = async ({ documentIds }: { documentIds: string[]; }): Promise<DeleteDocumentsResponse> => {
+    return this.getClient().app.deleteDocuments({
+      engine_name: this.options.engineName,
+      documentIds: documentIds
+    });
   }
 
   /**
