@@ -71,7 +71,8 @@ const serverlessConfiguration: AWS = {
               "sqs:*"
             ],
             Resource: [
-              { "Fn::GetAtt": [ "HelsinkiSearchContactPersonQueue", "Arn" ] }
+              { "Fn::GetAtt": [ "HelsinkiSearchContactPersonQueue", "Arn" ] },
+              { "Fn::GetAtt": [ "HelsinkiSearchContactPersonProcessingFailedQueue", "Arn" ] }
             ]
           }
         ]
