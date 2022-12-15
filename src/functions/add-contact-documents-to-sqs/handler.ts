@@ -154,19 +154,19 @@ const fetchContacts = async (): Promise<Contact[]> => {
  */
 const addContactDocumentsToSQS = async () => {
   try {
-    const contacts = await fetchContacts();
-    const timestamp = Date.now();
-
-    await sendContactsToSQS(contacts, timestamp);
-
     const elastic = getElastic({
       username: config.ELASTIC_ADMIN_USERNAME,
       password: config.ELASTIC_ADMIN_PASSWORD
     });
 
+    const timestamp = Date.now();
+
     const expiredContacts = await fetchExpiredContactsFromElastic(elastic, timestamp);
 
     await deleteExpiredContactsFromElastic(elastic, expiredContacts);
+    const contacts = await fetchContacts();
+
+    await sendContactsToSQS(contacts, timestamp);
   } catch (error) {
     console.error("Error while processing contact information", error);
   }

@@ -146,7 +146,26 @@ const serverlessConfiguration: AWS = {
           VisibilityTimeout: 120,
           MessageRetentionPeriod: 86400,
           ReceiveMessageWaitTimeSeconds: 20,
-          DelaySeconds: 1
+          DelaySeconds: 1,
+          RedriveAllowPolicy: {
+            redrivePermission: "denyAll"
+          },
+          RedrivePolicy: {
+            deadLetterTargetArn: { "Fn::GetAtt": [ "HelsinkiSearchContactPersonProcessingFailedQueue", "Arn" ] },
+            maxReceiveCount: 1
+          }
+        },
+      },
+      HelsinkiSearchContactPersonProcessingFailedQueue: {
+        Type: "AWS::SQS::Queue",
+        Properties: {
+          QueueName: "helsinki-search-contact-person-processing-failed-queue-${opt:stage}",
+          RedriveAllowPolicy: {
+            redrivePermission: "byQueue",
+            sourceQueueArns: [
+              { "Fn::GetAtt": [ "HelsinkiSearchContactPersonQueue", "Arn" ] }
+            ]
+          }
         },
       }
     },
