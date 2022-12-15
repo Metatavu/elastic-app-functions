@@ -10,7 +10,8 @@ const fn: AWSFunction = {
         arn: {
           "Fn::GetAtt": [ "HelsinkiSearchContactPersonQueue", "Arn" ]
         },
-        batchSize: 1
+        batchSize: 100,
+        functionResponseType: "ReportBatchItemFailures"
       }
     }
   ]
