@@ -161,10 +161,7 @@ const serverlessConfiguration: AWS = {
         Properties: {
           QueueName: "helsinki-search-contact-person-processing-failed-queue-${opt:stage}",
           RedriveAllowPolicy: {
-            redrivePermission: "byQueue",
-            sourceQueueArns: [
-              { "Fn::GetAtt": [ "HelsinkiSearchContactPersonQueue", "Arn" ] }
-            ]
+            redrivePermission: "allowAll"
           }
         },
       }
