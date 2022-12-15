@@ -77,7 +77,7 @@ const sendContactsToSQS = async (contacts: Contact[], timestamp: number) => {
       MessageBody: JSON.stringify(contact),
       MessageAttributes: {
         timestamp: {
-          DataType: "number",
+          DataType: "Number",
           StringValue: timestamp.toString()
         }
       }
