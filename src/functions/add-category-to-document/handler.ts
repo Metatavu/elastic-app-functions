@@ -1,7 +1,7 @@
 import fetch from "node-fetch";
 import * as cheerio from "cheerio";
-import { ContentCategory, getElastic, Document } from "../../elastic";
-import config from "../../config";
+import { ContentCategory, getElastic, Document } from "src/elastic";
+import config from "src/config";
 import { middyfy } from "@libs/lambda";
 import { searchResultsToDocuments } from "@libs/document-utils";
 
@@ -39,7 +39,7 @@ const resolveDocumentCategory = async (document: Document): Promise<ContentCateg
   const pageResponse = await fetch(new URL(url as string).toString());
   const contentType = pageResponse.headers.get("content-type");
 
-  if (!contentType.startsWith("text/html")) {
+  if (!contentType?.startsWith("text/html")) {
     console.warn(`Could resolve category type for ${url}`);
 
     return ContentCategory.UNCATEGORIZED;
@@ -61,10 +61,6 @@ const addCategoryToDocuments = async () => {
     password: ELASTIC_ADMIN_PASSWORD
   });
 
-  const existingValueFilters = Object.values(ContentCategory).map(category => ({
-    "meta_content_category": category
-  }));
-
   const { results, meta } = await elastic.searchDocuments({
     query: "",
     page: {
@@ -73,7 +69,7 @@ const addCategoryToDocuments = async () => {
     filters: {
       all: [
         { url_host: "www.hel.fi" },
-        { none: existingValueFilters }
+        { none: { "meta_content_category": Object.values(ContentCategory) } }
       ]
     }
   });

@@ -1,8 +1,8 @@
-import { middyfy } from '@libs/lambda';
-import { timedCurationsService } from "../../database/services";
-import config from '../../config';
-import { parseDate } from '@libs/date-utils';
-import { getElastic } from 'src/elastic';
+import { middyfy } from "@libs/lambda";
+import { timedCurationsService } from "src/database/services";
+import config from "src/config";
+import { parseDate } from "@libs/date-utils";
+import { getElastic } from "src/elastic";
 
 const { ELASTIC_ADMIN_USERNAME, ELASTIC_ADMIN_PASSWORD } = config;
 
@@ -19,7 +19,7 @@ const scheduleTimedCuration = async () => {
 
   await Promise.all(timedCurations.map(async timedCuration => {
     const { id, curationId, startTime, endTime, hidden, promoted, queries } = timedCuration;
-    
+
     const now = new Date();
     const start = parseDate(startTime);
     const end = parseDate(endTime);
@@ -27,17 +27,17 @@ const scheduleTimedCuration = async () => {
 
     if (!curationId && active) {
       const payload = {
-        hidden: hidden, 
-        promoted: promoted, 
+        hidden: hidden,
+        promoted: promoted,
         queries: queries
       };
 
       console.log(`Creating curation for scheduled curation ${id}...`);
-      
+
       const curationId = await elastic.createCuration({
         curation: payload
       });
-      
+
       timedCurationsService.updateTimedCuration({
         ...timedCuration,
         curationId: curationId

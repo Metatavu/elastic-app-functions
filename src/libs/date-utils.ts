@@ -2,26 +2,22 @@ import { DateTime } from "luxon";
 
 /**
  * Parses date
- * 
- * @param date date as string 
+ *
+ * @param date date as string
  * @returns parsed date
  */
-export const parseDate = (date?: string): Date | undefined => {
-  if (!date) {
-    return null;
-  }
-
+export const parseDate = (date: string): Date => {
   return new Date(Date.parse(date));
 }
 
 /**
  * Parses date object from hel.fi news format
- * 
+ *
  * @param dateString date string
  * @returns parsed date
  */
- export const parseHelFiNewsDate = (dateString: string) => {
-  const format = "LLL d, yyyy, h:mm:s a"; 
+export const parseHelFiNewsDate = (dateString: string) => {
+  const format = "LLL d, yyyy, h:mm:s a";
   const offsetIndex = dateString.lastIndexOf(" ");
   const datePart = dateString.substring(0, offsetIndex);
   const zonePart = dateString.substring(offsetIndex + 1).replace("GMT", "UTC");
@@ -29,18 +25,18 @@ export const parseDate = (date?: string): Date | undefined => {
 };
 
 /**
- * 
+ *
  * Calculates the difference between last crawl time and now
- * 
+ *
  * @param lastCrawl date of last crawl
  * @returns difference in minutes
  */
- export const calculateMinutesPassed = (lastCrawl: string ): number => {
+export const calculateMinutesPassed = (lastCrawl: string): number => {
   const parsedCrawlDate = parseDate(lastCrawl).toISOString();
   const lastCrawlDate = DateTime.fromISO(parsedCrawlDate);
   const now = DateTime.now();
 
   const difference = now.diff(lastCrawlDate, "minutes");
 
-  return difference.toObject().minutes;
+  return difference.get("minutes") ?? 0;
 };

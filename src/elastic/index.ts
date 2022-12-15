@@ -1,7 +1,7 @@
 import { Client } from "@elastic/enterprise-search";
-import { CreateCurationRequest, SearchRequest, SearchResponse } from "@elastic/enterprise-search/lib/api/app/types";
+import { CreateCurationRequest, DeleteDocumentsResponse, SearchRequest, SearchResponse } from "@elastic/enterprise-search/lib/api/app/types";
 import { BasicAuth } from "@libs/auth-utils";
-import config from "../config";
+import config from "src/config";
 
 /**
  * Elastic client options
@@ -20,7 +20,8 @@ export enum ContentCategory {
   SERVICE = "service",
   UNIT = "unit",
   NEWS = "news",
-  UNCATEGORIZED = "uncategorized"
+  UNCATEGORIZED = "uncategorized",
+  CONTACT = "contact"
 }
 
 /**
@@ -37,6 +38,14 @@ export type Document = {
   id: string;
   [k: string]: unknown;
 }
+
+/**
+ * Correct type for single document object in indexDocuments request of Elastic App Search
+ */
+export type UpsertDocumentResponse = {
+  id: string | null,
+  errors: string[]
+};
 
 /**
  * Elastic client
@@ -107,10 +116,23 @@ export class Elastic {
    * @param options options
    * @param options.document document to update
    */
-  public updateDocuments = async ({ documents }: { documents: Document[]; }) => {
+  public updateDocuments = async ({ documents }: { documents: Document[]; }): Promise<UpsertDocumentResponse[]> => {
     return this.getClient().app.indexDocuments({
       engine_name: this.options.engineName,
       documents: documents
+    }) as Promise<UpsertDocumentResponse[]>;
+  }
+
+  /**
+   * Deletes documents with given IDs from Elastic Search
+   *
+   * @param options options
+   * @param options.documentIds list of IDs of documents to delete. Maximum length is 100.
+   */
+  public deleteDocuments = async ({ documentIds }: { documentIds: string[]; }): Promise<DeleteDocumentsResponse> => {
+    return this.getClient().app.deleteDocuments({
+      engine_name: this.options.engineName,
+      documentIds: documentIds
     });
   }
 

@@ -6,13 +6,16 @@ const fn: AWSFunction = {
   timeout: 60,
   events: [
     {
-      schedule: {
-        rate: [
-          "rate(1 minute)"
-        ]
+      sqs: {
+        arn: {
+          "Fn::GetAtt": [ "HelsinkiSearchContactPersonQueue", "Arn" ]
+        },
+        batchSize: 100,
+        functionResponseType: "ReportBatchItemFailures",
+        maximumBatchingWindow: 20
       }
     }
-  ],
+  ]
 };
 
 export default fn;

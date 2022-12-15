@@ -10,18 +10,18 @@ class ScheduledCrawlService {
 
   /**
    * Constructor
-   * 
+   *
    * @param docClient DynamoDB client
    */
   constructor(private readonly docClient: DocumentClient) {}
 
   /**
    * Creates scheduled crawl
-   * 
+   *
    * @param scheduledCrawl scheduled crawl
    * @returns created scheduled crawl
    */
-   public createScheduledCrawl = async (scheduledCrawl: ScheduledCrawl): Promise<ScheduledCrawl> => {
+  public createScheduledCrawl = async (scheduledCrawl: ScheduledCrawl): Promise<ScheduledCrawl> => {
     await this.docClient
       .put({
         TableName: TABLE_NAME,
@@ -34,7 +34,7 @@ class ScheduledCrawlService {
 
   /**
    * Finds single scheduled crawl
-   * 
+   *
    * @param id scheduled crawl id
    * @returns scheduled crawl or null if not found
    */
@@ -42,18 +42,18 @@ class ScheduledCrawlService {
     const result = await this.docClient
       .get({
         TableName: TABLE_NAME,
-        Key: { 
-          id: id 
+        Key: {
+          id: id
         },
       })
       .promise();
 
       return result.Item as ScheduledCrawl;
-  }  
+  }
 
   /**
    * Lists scheduled crawls
-   * 
+   *
    * @returns list of scheduled crawls
    */
   public listScheduledCrawls = async (): Promise<ScheduledCrawl[]> => {
@@ -68,7 +68,7 @@ class ScheduledCrawlService {
 
   /**
    * Updates scheduled crawl
-   * 
+   *
    * @param scheduledCrawl scheduled crawl to be updated
    * @returns updated scheduled crawl
    */
@@ -85,19 +85,19 @@ class ScheduledCrawlService {
 
   /**
    * Deletes scheduled crawl
-   * 
+   *
    * @param id scheduled crawl id
    */
   public deleteScheduledCrawl = async (id: string) => {
     return this.docClient
       .delete({
         TableName: TABLE_NAME,
-        Key: { 
-          id: id 
+        Key: {
+          id: id
         },
       })
       .promise();
-  }  
+  }
 
 }
 

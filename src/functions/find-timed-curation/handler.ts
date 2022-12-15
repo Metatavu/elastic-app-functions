@@ -1,23 +1,23 @@
-import { ValidatedEventAPIGatewayProxyEvent } from '@libs/api-gateway';
-import { middyfy } from '@libs/lambda';
-import { getElastic } from '../../elastic';
-import { timedCurationsService } from "../../database/services";
-import { parseBasicAuth } from '@libs/auth-utils';
+import { ValidatedEventAPIGatewayProxyEvent } from "@libs/api-gateway";
+import { middyfy } from "@libs/lambda";
+import { getElastic } from "src/elastic";
+import { timedCurationsService } from "src/database/services";
+import { parseBasicAuth } from "@libs/auth-utils";
 
 /**
  * Lambda for find timed curation
- * 
+ *
  * @param event event
  */
 const findTimedCuration: ValidatedEventAPIGatewayProxyEvent<any> = async event => {
   const { pathParameters, headers } = event;
-  const { id } = pathParameters;
   const { authorization, Authorization } = headers;
+  const id = pathParameters?.id;
 
   if (!id) {
     return {
-      statusCode: 404,
-      body: "Not found"
+      statusCode: 400,
+      body: "Bad request"
     };
   }
 
@@ -44,7 +44,7 @@ const findTimedCuration: ValidatedEventAPIGatewayProxyEvent<any> = async event =
       body: "Not found"
     };
   }
-  
+
   return {
     statusCode: 200,
     body: JSON.stringify(timedCuration)

@@ -1,13 +1,17 @@
-import { handlerPath } from '@libs/handler-resolver';
+import { handlerPath } from "@libs/handler-resolver";
+import { AWSFunction } from "src/types";
 
-export default {
+const fn: AWSFunction = {
   handler: `${handlerPath(__dirname)}/handler.main`,
   events: [
     {
       httpApi: {
-        method: 'get',
-        path: '/scheduled-crawl'
+        method: "get",
+        path: "/scheduled-crawl"
       },
     },
   ],
 };
+
+
+export default fn;
