@@ -72,7 +72,7 @@ const sendContactsToSQS = async (contacts: Contact[], timestamp: number) => {
   for (let i = 0; i < contacts.length - 1; i += batchSize) {
     const contactBatch = contacts.slice(i, i + batchSize);
 
-    const messageBatch = contactBatch.map<SQS.SendMessageBatchRequestEntry>(contact => ({
+    const messageBatch = contactBatch.map<SQS.SendMessageBatchRequestEntry>((contact, index) => ({
       Id: contact.id.toString(),
       MessageBody: JSON.stringify(contact),
       MessageAttributes: {
@@ -80,13 +80,14 @@ const sendContactsToSQS = async (contacts: Contact[], timestamp: number) => {
           DataType: "Number",
           StringValue: timestamp.toString()
         }
-      }
+      },
+      DelaySeconds: index
     }));
 
     try {
       const result = await sqs.sendMessageBatch({
         QueueUrl: queueUrl,
-        Entries: messageBatch
+        Entries: messageBatch,
       }).promise();
 
       const { Failed, Successful } = result;
