@@ -58,3 +58,12 @@ export interface XMLPerson {
  * Contact parsed from XML person
  */
 export type Contact = Omit<XMLPerson, "@_mecm_id"> & { id: string; };
+
+/**
+ * Drupal settings JSON with property to decipher content categories for service and unit
+ */
+export type DrupalSettingsJson = {
+  path?: {
+    currentPath?: string | null;
+  };
+};
