@@ -1,11 +1,9 @@
-import fetch from "node-fetch";
-import * as cheerio from "cheerio";
 import { ContentCategory, getElastic, Document } from "src/elastic";
 import config from "src/config";
 import { middyfy } from "@libs/lambda";
 import { searchResultsToDocuments } from "@libs/document-utils";
-import { getDepartmentsFromRegistry } from "@libs/departments-registry";
-import { DrupalSettingsJson } from "@types";
+import { getDepartmentsFromRegistry } from "@libs/departments-registry-utils";
+import { getCategoryAttribute, getExternalIdFromElement, getPageResponse } from "@libs/webpage-utils";
 
 const { ELASTIC_ADMIN_USERNAME, ELASTIC_ADMIN_PASSWORD } = config;
 const BATCH_SIZE = 10;
@@ -25,22 +23,6 @@ const getContentCategory = (category: string | undefined) => {
 };
 
 /**
- * Gets page response
- * 
- * @param id document id
- * @param url document url
- * @returns Response
- */
-const getPageResponse = async ({ id, url }: Document) => {
-  if (!url) {
-    console.error(`Document ${id} does not contain URL`);
-    return;
-  }
-  
-  return await fetch(new URL(url as string).toString());
-};
-
-/**
  * Resolves TPR ID from document
  * 
  * @param document document
@@ -52,50 +34,10 @@ const resolveServiceDocumentsExternalId = async (document: Document) => {
   if (!pageResponse) {
     return null;
   }
-    
-  const contentType = pageResponse.headers.get("content-type");
-
-  if (!contentType?.startsWith("text/html")) {
-    console.warn(`Could resolve TPR service id for ${document.url}`);
-
-    return null;
-  }
   
-  const pageContent = await pageResponse.text();
-  const $ = cheerio.load(pageContent);
-  const element = $("script[data-drupal-selector=drupal-settings-json]");
+  const externalId = await getExternalIdFromElement(pageResponse);
   
-  if (!element.length) {
-    console.warn(`Couldn't find drupal-settings-json from ${document.url}`);
-    return null;
-  }
-  
-  const jsonString = element.html();
-  if (!jsonString?.length) {
-    console.warn(`Couldn't find drupal-settings-json from ${document.url}`);
-    return null;
-  }
-  
-  const config: DrupalSettingsJson = JSON.parse(jsonString);
-  if (!config) {
-    console.warn(`Couldn't parse drupal-settings-json from ${document.url}`);
-    return null;
-  }
-  
-  const currentPath = config?.path?.currentPath;
-  if (!currentPath) {
-    console.warn(`Couldn't find drupal-settings-json currentPath from ${document.url}`);
-    return null;
-  }
-  
-  if (currentPath.match(/\d+/g)) {
-    const numbers = currentPath.match(/\d+/g);
-    
-    if (!numbers) {
-      return null;
-    }
-    return parseInt(numbers.join());
-  }
+  return externalId;
 };
 
 /**
@@ -104,26 +46,22 @@ const resolveServiceDocumentsExternalId = async (document: Document) => {
  * @param document document
  * @returns category type or null if category could not be resolved
  */
-const resolveDocumentCategory = async (document: Document): Promise<ContentCategory | null> => {
+const resolveDocumentCategory = async (document: Document) => {
   const pageResponse = await getPageResponse(document);
   
   if (!pageResponse) {
-    return null;
+    return;
   }
+
+  const categoryAttribute = await getCategoryAttribute(pageResponse)
   
-  const contentType = pageResponse.headers.get("content-type");
-
-  if (!contentType?.startsWith("text/html")) {
-    console.warn(`Could resolve category type for ${document.url}`);
-
+  if (!categoryAttribute) {
+    console.warn(`Couldn't resolve category type for ${document.url}`);
+    
     return ContentCategory.UNCATEGORIZED;
   }
 
-  const pageContent = await pageResponse.text();
-  const $ = cheerio.load(pageContent);
-  const categoryElement = $("head").find("meta[name=helfi_content_type]");
-
-  return getContentCategory(categoryElement.attr("content"));
+  return getContentCategory(categoryAttribute);
 };
 
 /**
@@ -172,8 +110,11 @@ const addCategoryToDocuments = async () => {
         
         if (externalServiceId) {
           const foundRegistryDepartment = departments?.find(department => department.id === externalServiceId);
-          updatedDocument.tpr_id = foundRegistryDepartment?.id;
-          updatedDocument.meta_content_category = ContentCategory.EXTERNAL;
+          updatedDocument = {
+            ...updatedDocument,
+            external_service_id: foundRegistryDepartment?.id,
+            meta_content_category: ContentCategory.EXTERNAL
+          };
         }
       }
       
