@@ -140,6 +140,19 @@ const serverlessConfiguration: AWS = {
           },
         },
       },
+      Authentication: {
+        Type: "AWS::DynamoDB::Table",
+        DeletionPolicy: "Delete",
+        Properties: {
+          TableName: "authentication",
+          AttributeDefinitions: [{ AttributeName: "id", AttributeType: "S" }],
+          KeySchema: [{ AttributeName: "id", KeyType: "HASH" }],
+          ProvisionedThroughput: {
+            ReadCapacityUnits: 1,
+            WriteCapacityUnits: 1
+          },
+        },
+      },
       HelsinkiSearchContactPersonQueue: {
         Type: "AWS::SQS::Queue",
         Properties: {
