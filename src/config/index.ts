@@ -10,5 +10,6 @@ export default cleanEnv(process.env, {
   ELASTIC_ADMIN_PASSWORD: str(),
   AWS_DEFAULT_REGION: str(),
   CONTACT_PERSONS_URL: url(),
-  CONTACT_SYNC_INTERVAL_IN_DAYS: num()
+  CONTACT_SYNC_INTERVAL_IN_DAYS: num(),
+  SUOMIFI_HELSINKI_ORGANIZATION_ID: str()
 });

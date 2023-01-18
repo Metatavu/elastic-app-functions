@@ -18,6 +18,8 @@ import deleteScheduledCrawl from "@functions/scheduled-crawls/delete-scheduled-c
 import triggerScheduledCrawl from "@functions/scheduled-crawls/trigger-scheduled-crawl";
 import addContactDocumentsToSQS from "@functions/add-contact-documents-to-sqs";
 import processContactDocumentFromSQS from "@functions/process-contact-documents-from-sqs";
+import addExternalServiceIdToServices from "@functions/add-external-service-id-to-services"
+import createDocumentFromExternalService from "@functions/create-document-from-external-service";
 
 import config from "src/config";
 
@@ -97,7 +99,9 @@ const serverlessConfiguration: AWS = {
     deleteScheduledCrawl,
     triggerScheduledCrawl,
     addContactDocumentsToSQS,
-    processContactDocumentFromSQS
+    processContactDocumentFromSQS,
+    addExternalServiceIdToServices,
+    createDocumentFromExternalService
   },
   package: { individually: true },
   custom: {

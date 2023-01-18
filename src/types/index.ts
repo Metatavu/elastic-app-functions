@@ -67,3 +67,39 @@ export type DrupalSettingsJson = {
     currentPath?: string | null;
   };
 };
+
+/**
+ * Type for Suomi.fi Services API response
+ */
+export type SuomiFiResponseWithMeta<T> = {
+  pageNumber: number;
+  pageSize: number;
+  pageCount: number;
+  itemList: T[];
+};
+
+/**
+ * Enum for supported languages for Suomi.fi Services
+ */
+export enum SupportedLanguages {
+  FI = "fi",
+  SV = "sv",
+  EN = "en"
+}
+
+/**
+ * Type for Suomi.fi Services
+ */
+export type Service = {
+  id: string;
+  sourceId: number;
+  serviceNames: {
+    language: string;
+    value: string;
+  }[];
+  serviceDescriptions: {
+    language: string;
+    value: string;
+    type: string;
+  }[];
+};

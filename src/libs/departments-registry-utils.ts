@@ -3,7 +3,7 @@ import fetch from "node-fetch";
 /**
  * Department Registry Department type
  */
-type Department = {
+export type Department = {
   id: number;
   main_description: boolean;
   service_id: number;

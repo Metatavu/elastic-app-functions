@@ -112,8 +112,7 @@ const addCategoryToDocuments = async () => {
           const foundRegistryDepartment = departments?.find(department => department.id === externalServiceId);
           updatedDocument = {
             ...updatedDocument,
-            external_service_id: foundRegistryDepartment?.id,
-            meta_content_category: ContentCategory.EXTERNAL
+            external_service_id: foundRegistryDepartment?.id
           };
         }
       }
