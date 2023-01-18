@@ -52,6 +52,23 @@ class AuthenticationService {
   }
 
   /**
+   * Updates Authentication expiry
+   *
+   * @param Authentication session to be updated
+   * @returns updated authentication session
+   */
+    public updateSession = async (authentication: Authentication): Promise<Authentication> => {
+      await this.docClient
+        .put({
+          TableName: TABLE_NAME,
+          Item: authentication
+        })
+        .promise();
+
+        return authentication;
+    }
+
+  /**
    * Deletes authentication session
    *
    * @param token lambda authentication token

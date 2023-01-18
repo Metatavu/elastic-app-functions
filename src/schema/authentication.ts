@@ -8,6 +8,7 @@ const authenticationSchema = Type.Object({
   username: Type.String(),
   password: Type.String(),
   token: Type.String(),
+  expiry: Type.Number()
 });
 
 export default authenticationSchema;

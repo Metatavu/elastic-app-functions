@@ -40,3 +40,13 @@ export const calculateMinutesPassed = (lastCrawl: string): number => {
 
   return difference.get("minutes") ?? 0;
 };
+
+/**
+ * Create a timestamp with 15 minutes expiry
+ *
+ * @returns Timestamp
+ */
+export const generateExpiryTimestamp = () => {
+  const date = DateTime.now().plus({minutes: 15}) as any;
+  return date.ts;
+};
