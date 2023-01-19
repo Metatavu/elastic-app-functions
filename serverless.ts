@@ -144,7 +144,7 @@ const serverlessConfiguration: AWS = {
           },
         },
       },
-      Authentication: {
+      AuthenticationSessions: {
         Type: "AWS::DynamoDB::Table",
         DeletionPolicy: "Delete",
         Properties: {
