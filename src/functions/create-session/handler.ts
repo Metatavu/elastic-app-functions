@@ -22,8 +22,9 @@ const createAuthenticationSession: ValidatedEventAPIGatewayProxyEvent<typeof aut
       statusCode: 401,
       body: "Unauthorized"
     };
+  }
 
-  } else if (isBearerAuth) {
+  if (isBearerAuth) {
     const token = parseBearerAuth(authHeader);
     if (!token) {
       return {
@@ -58,8 +59,9 @@ const createAuthenticationSession: ValidatedEventAPIGatewayProxyEvent<typeof aut
       statusCode: 200,
       body: JSON.stringify(refreshedSession.expiry)
     }
+  }
 
-  } else {
+  if (isBasicAuth) {
     const auth = parseBasicAuth(authHeader);
 
     if (!auth) {
@@ -88,6 +90,11 @@ const createAuthenticationSession: ValidatedEventAPIGatewayProxyEvent<typeof aut
       statusCode: 200,
       body: JSON.stringify(responseToken)
     };
+  }
+
+  return {
+    statusCode: 400,
+    body:"Bad request"
   }
 };
 

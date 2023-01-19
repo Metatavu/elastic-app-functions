@@ -47,8 +47,8 @@ export const parseBearerAuth = (authorizationHeader: string | undefined): string
     return null;
   }
 
-  const buffer = Buffer.from(authorizationHeader.substring(7), "base64");
-  const token = buffer.toString();
+  const buffer = authorizationHeader.split(" ");
+  const token = buffer[1];
 
   if (token) return token;
 
