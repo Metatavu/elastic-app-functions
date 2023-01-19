@@ -6,8 +6,8 @@ const fn: AWSFunction = {
   events: [
     {
       httpApi: {
-        method: "delete",
-        path: "/authentication"
+        method: "post",
+        path: "/logout"
       },
     },
   ],

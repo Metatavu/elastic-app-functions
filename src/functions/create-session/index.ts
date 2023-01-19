@@ -7,7 +7,7 @@ const fn: AWSFunction = {
     {
       httpApi: {
         method: "post",
-        path: "/authentication"
+        path: "/login"
       },
     },
   ],
