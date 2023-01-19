@@ -1,7 +1,7 @@
 /**
  * DynamoDB model for authentication
  */
-interface Authentication {
+interface AuthenticationSession {
   username: string;
   password: string;
   token: string;
