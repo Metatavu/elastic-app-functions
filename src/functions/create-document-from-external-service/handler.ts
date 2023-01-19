@@ -1,13 +1,54 @@
 import { getDepartmentsFromRegistry } from "@libs/departments-registry-utils";
-import { createDocumentsFromService } from "@libs/document-utils";
+import { createDocumentsFromService, searchResultsToDocuments } from "@libs/document-utils";
 import { middyfy } from "@libs/lambda";
 import { compareServices, getSuomifiServices } from "@libs/suomifi-utils";
 import { SupportedLanguages } from "@types";
 import config from "src/config";
-import { ContentCategory, getElastic } from "src/elastic";
+import { ContentCategory, Elastic, getElastic } from "src/elastic";
 
 const { ELASTIC_ADMIN_USERNAME, ELASTIC_ADMIN_PASSWORD } = config;
 const INDEX_CHUNK_SIZE = 50;
+
+/**
+ * Gets paginated Elastic Search results filtered by given external service ids.
+ * 
+ * @param elastic Elastic
+ * @param externalServiceIds external service ids 
+ * @returns Search results
+ */
+const getPaginatedElasticResults = async (elastic: Elastic, externalServiceIds: string[]) => {
+  
+  let currentPageNumber = 1;
+  let retrievedAllDocuments = false;
+  const retrievedDocuments: { [key: string]: any }[] = [];
+  
+  do {
+    const { results, meta } = await elastic.searchDocuments({
+      query: "",
+      page: {
+        size: 1000,
+        current: currentPageNumber
+      },
+      filters: {
+        all: [
+          { meta_content_category: [ ContentCategory.SERVICE, ContentCategory.EXTERNAL ] },
+          { external_service_id: externalServiceIds }
+        ]
+      }
+    });
+    
+    if (meta.page.current === meta.page.total_pages) {
+      retrievedAllDocuments = true;
+    } else {
+      currentPageNumber++;
+    }
+    
+    retrievedDocuments.push( ...results )
+  } while (!retrievedAllDocuments)
+  
+  return retrievedDocuments;
+  
+};
 
 /**
  * Scheduled lambda for creating documents for external services
@@ -23,28 +64,12 @@ const createDocumentFromExternalService = async () => {
   if (!suomifiServices || !departments) {
     return;
   }
-  console.log(`suomifi results: ${suomifiServices.length}`)
-  console.log(`departments results: ${departments.length}`)
   
-  const { results, meta } = await elastic.searchDocuments({
-    query: "",
-    page: {
-      size: 1000
-    },
-    filters: {
-      all: [
-        { meta_content_category: [ ContentCategory.SERVICE, ContentCategory.EXTERNAL ] },
-        { external_service_id: departments.map(department => department.id.toString()) }
-      ]
-    }
-  });
-  
-  console.log(`meta size: ${meta.page.total_results}`)
-  const distinctCategories = Array.from(new Set([ ...results.map(result => result.meta_content_category.raw) ]))
-  console.log(distinctCategories)
-  console.log(`Elastic results: ${results.length}`)
-  const distinctExternalServerIds = Array.from(new Set([ ...results.map(result => parseInt(result.external_service_id.raw)) ]));
-  const filteredDepartments = departments.filter(department => !distinctExternalServerIds.find(id => id === department.id));
+  const externalServiceIds = departments.map(department => department.id.toString());
+  const searchResults = await getPaginatedElasticResults(elastic, externalServiceIds)
+  const retrievedDocuments = searchResultsToDocuments(searchResults);
+  const distinctExternalServiceIds = Array.from(new Set([ ...retrievedDocuments.map(document => parseInt(document.external_service_id as string)) ]));
+  const filteredDepartments = departments.filter(department => !distinctExternalServiceIds.find(id => id === department.id));
   
   const matches: any[] = [];
   
@@ -56,7 +81,6 @@ const createDocumentFromExternalService = async () => {
       }
   };
   
-  console.log(matches.length);
   for (let i = 0; i < matches.length; i += INDEX_CHUNK_SIZE) {
     const chunk = matches.slice(i, i + INDEX_CHUNK_SIZE);
     const result = await elastic.updateDocuments({
