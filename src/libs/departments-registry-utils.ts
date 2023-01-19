@@ -43,8 +43,6 @@ export const getDepartmentsFromRegistry = async () => {
   if (departmentsRequest.status !== 200) {
     return;
   }
-  
-  const departmentsResponse = await departmentsRequest.json() as Department[];
-  
-  return departmentsResponse;
+
+  return await departmentsRequest.json() as Department[];
 };

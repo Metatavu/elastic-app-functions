@@ -20,10 +20,8 @@ const resolveServiceDocumentsExternalId = async (document: Document) => {
   if (!pageResponse) {
     return null;
   }
-  
-  const externalId = await getExternalIdFromElement(pageResponse);
-  
-  return externalId;
+
+  return await getExternalIdFromElement(pageResponse);
 };
 
 /**

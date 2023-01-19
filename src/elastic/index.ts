@@ -36,7 +36,7 @@ export interface AppSearchResponse extends SearchResponse {
  * Document
  */
 export type Document = {
-  id: string;
+  id?: string;
   [k: string]: unknown;
 }
 

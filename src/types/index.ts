@@ -1,4 +1,5 @@
 import type { AWS } from "@serverless/typescript";
+import { ContentCategory } from "src/elastic";
 
 /**
  * AWS function type
@@ -102,4 +103,15 @@ export type Service = {
     value: string;
     type: string;
   }[];
+};
+
+/**
+ * Type for TPR Service document
+ */
+export type ServiceDocument = {
+  title: string;
+  meta_content_category: ContentCategory;
+  meta_description: string;
+  language: SupportedLanguages;
+  external_url: string;
 };

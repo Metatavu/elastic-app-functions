@@ -1,24 +1,25 @@
 import { Service, SuomiFiResponseWithMeta, SupportedLanguages } from "@types";
 import fetch from "node-fetch";
-import config from "src/config";
 import { Department } from "./departments-registry-utils";
+import { compareTwoStrings } from "string-similarity";
 
-const { SUOMIFI_HELSINKI_ORGANIZATION_ID } = config;
 const suomifiBasePath = "https://api.palvelutietovaranto.suomi.fi/api/v11/"
 const suomifiServicesPath = "Service/list/organization?organizationId=";
 
 /**
  * Gets services from Suomi.fi API
+ * 
+ * @params organizationId Organization ID
  */
-export const getSuomifiServices = async () => {
+export const getSuomifiServicesByOrganization = async (organizationId: string) => {
   let pageNumber = 1;
   let retrievedAllPages = false;
   
   const services: Service[] = [];
   
   do {
-    const serviceResponse = await doRequest<SuomiFiResponseWithMeta<Service>>(
-      suomifiServicesPath + SUOMIFI_HELSINKI_ORGANIZATION_ID,
+    const serviceResponse = await doListRequest<SuomiFiResponseWithMeta<Service>>(
+      suomifiServicesPath + organizationId,
       pageNumber
     );
     
@@ -44,20 +45,20 @@ export const getSuomifiServices = async () => {
  * @returns service name
  */
 export const getServiceName = (service: Service, language: SupportedLanguages) => (
-  service.serviceNames.find(serviceName => serviceName.language === language)?.value
+  service.serviceNames.find(serviceName => serviceName.language === language)?.value ?? ""
 );
 
 /**
  * Gets Suomi.fi services summary description for given language
  * 
- * @param service service
+ * @param service servicex
  * @param language language
  * @returns service summary description
  */
 export const getServiceSummary = (service: Service, language: SupportedLanguages) => (
   service.serviceDescriptions.find(serviceDdescription =>
     serviceDdescription.language === language && serviceDdescription.type === "Summary"
-  )?.value
+  )?.value ?? ""
 );
 
 /**
@@ -73,7 +74,10 @@ export const getServiceSummary = (service: Service, language: SupportedLanguages
 export const compareServices = (service: Service, department: Department, language: SupportedLanguages, treshold: number = 80) => {
   const suomifiSummary = getServiceSummary(service, language);
   const suomifiName = getServiceName(service, language);
-  if (suomifiName === department.title && compareSummaries(suomifiSummary, department.description_short) > treshold) {
+  const { longerSummary, shortherSummary } = getLongerAndShortherSummary(suomifiSummary, department.description_short);
+  const summarySimilarity = compareTwoStrings(shortherSummary, longerSummary.slice(0, shortherSummary.length - 1));
+  
+  if (suomifiName === department.title && (summarySimilarity * 100) > treshold) {
     return true;
   } else {
     return false;
@@ -86,44 +90,11 @@ export const compareServices = (service: Service, department: Department, langua
  * @params summary1 summary1
  * @params summary2 summary2
  */
-const getLongerAndShortherSummary = (summary1: string[], summary2: string[]) => {
-  if (summary1.length > summary2.length) {
-    return {
-      longerSummary: summary1,
-      shortherSummary: summary2
-    }
-  }
-  
+const getLongerAndShortherSummary = (summary1: string, summary2: string) => {
   return {
-    longerSummary: summary2,
-    shortherSummary: summary1
+    longerSummary: summary1.length > summary2.length ? summary1 : summary2,
+    shortherSummary: summary1.length > summary2.length ? summary2 : summary1
   }
-};
-
-/**
- * Compares summaries from Suomi.fi and TPR word by word and returns percentage of matching words.
- * 
- * @param suomifiSummary Summary from Suomi.fi service
- * @param registrySummary Summary from TPR department
- * @returns Match in percentages
- */
-const compareSummaries = (suomifiSummary?: string, registrySummary?: string) => {
-  if (!suomifiSummary || !registrySummary) {
-    return 0;
-  }
-  const suomifiSplit = suomifiSummary.split(" ").map(word => word.replace(/[^a-zA-Z0-9 ]/g, ""));
-  const registrySplit = registrySummary.split(" ").map(word => word.replace(/[^a-zA-Z0-9 ]/g, ""));
-  
-  const { longerSummary, shortherSummary } = getLongerAndShortherSummary(suomifiSplit, registrySplit);
-  
-  let amountOfMatchingWords = 0;
-  for (let i = 0; i < longerSummary.length; i++) {
-    if (longerSummary[i] === shortherSummary[i]) {
-      amountOfMatchingWords++;
-    }
-  }
-  
-  return amountOfMatchingWords / shortherSummary.length * 100;
 };
 
 /**
@@ -133,7 +104,7 @@ const compareSummaries = (suomifiSummary?: string, registrySummary?: string) => 
  * @param pageNumber page number
  * @returns Response
  */
-const doRequest = async <T>(path: string, pageNumber?: number) => {
+const doListRequest = async <T>(path: string, pageNumber?: number) => {
   let requestPath = suomifiBasePath + path;
   
   if (pageNumber) {

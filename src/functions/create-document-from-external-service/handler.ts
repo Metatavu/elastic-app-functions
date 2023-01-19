@@ -1,12 +1,12 @@
 import { getDepartmentsFromRegistry } from "@libs/departments-registry-utils";
 import { createDocumentsFromService, searchResultsToDocuments } from "@libs/document-utils";
 import { middyfy } from "@libs/lambda";
-import { compareServices, getSuomifiServices } from "@libs/suomifi-utils";
-import { SupportedLanguages } from "@types";
+import { compareServices, getSuomifiServicesByOrganization } from "@libs/suomifi-utils";
+import { ServiceDocument, SupportedLanguages } from "@types";
 import config from "src/config";
-import { ContentCategory, Elastic, getElastic } from "src/elastic";
+import { ContentCategory, Document, Elastic, getElastic } from "src/elastic";
 
-const { ELASTIC_ADMIN_USERNAME, ELASTIC_ADMIN_PASSWORD } = config;
+const { ELASTIC_ADMIN_USERNAME, ELASTIC_ADMIN_PASSWORD, SUOMIFI_ORGANIZATION_ID } = config;
 const INDEX_CHUNK_SIZE = 50;
 
 /**
@@ -42,7 +42,7 @@ const getPaginatedElasticResults = async (elastic: Elastic, externalServiceIds: 
     } else {
       currentPageNumber++;
     }
-    
+
     retrievedDocuments.push( ...results )
   } while (!retrievedAllDocuments)
   
@@ -58,8 +58,10 @@ const createDocumentFromExternalService = async () => {
     username: ELASTIC_ADMIN_USERNAME,
     password: ELASTIC_ADMIN_PASSWORD
   });
-  const suomifiServices = await getSuomifiServices();
+  const suomifiServices = await getSuomifiServicesByOrganization(SUOMIFI_ORGANIZATION_ID);
+  console.log(`Found ${suomifiServices?.length} Suomi.fi services`);
   const departments = await getDepartmentsFromRegistry();
+  console.log(`Found ${departments?.length} TPR services`);
   
   if (!suomifiServices || !departments) {
     return;
@@ -70,21 +72,26 @@ const createDocumentFromExternalService = async () => {
   const retrievedDocuments = searchResultsToDocuments(searchResults);
   const distinctExternalServiceIds = Array.from(new Set([ ...retrievedDocuments.map(document => parseInt(document.external_service_id as string)) ]));
   const filteredDepartments = departments.filter(department => !distinctExternalServiceIds.find(id => id === department.id));
+  console.log(`Found ${distinctExternalServiceIds.length} Elastic documents with TPR service ID`)
   
-  const matches: any[] = [];
+  const matches: ServiceDocument[] = [];
   
-  for (const department of filteredDepartments) {
-      const matchingSuomifiService = suomifiServices.find(service => compareServices(service, department, SupportedLanguages.FI));
+  console.log(`[${new Date()}] Starting to process non indexed services...`)
+  await Promise.all(filteredDepartments.map(async department => {   
+    const matchingSuomifiService = suomifiServices.find(service => compareServices(service, department, SupportedLanguages.FI));
+
+    if (matchingSuomifiService) {
+      const createdDocuments = await createDocumentsFromService(matchingSuomifiService, department);
+      matches.push(...createdDocuments);
+      console.log(`Created document (${matches.length}) for ${department.title}`);
+    }
+  }));
   
-      if (matchingSuomifiService) {
-        matches.push(...createDocumentsFromService(matchingSuomifiService, department));
-      }
-  };
-  
+  console.log(`[${new Date()}] Starting to index new documents....`);
   for (let i = 0; i < matches.length; i += INDEX_CHUNK_SIZE) {
     const chunk = matches.slice(i, i + INDEX_CHUNK_SIZE);
     const result = await elastic.updateDocuments({
-      documents: chunk
+      documents: chunk as Document[]
     });
     console.log(`Indexed ${result.length} documents!`);
   }

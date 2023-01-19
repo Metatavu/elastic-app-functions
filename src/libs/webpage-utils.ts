@@ -7,10 +7,10 @@ import { DrupalSettingsJson } from "@types";
  * Gets element from pages head
  * 
  * @param pageResponse Response
- * @param elementName head element name
+ * @param selector selector name
  * @returns Element, if found
  */
-const getHeadElement = async (pageResponse: Response, elementName: string) => {
+const getHeadElement = async (pageResponse: Response, selector: string) => {
   const contentType = pageResponse.headers.get("content-type");
   
   if (!contentType?.startsWith("text/html")) {
@@ -20,7 +20,7 @@ const getHeadElement = async (pageResponse: Response, elementName: string) => {
   const pageContent = await pageResponse.text();
   const $ = cheerio.load(pageContent);
   
-  return $("head").find(elementName);
+  return $("head").find(selector);
 };
 
 /**
