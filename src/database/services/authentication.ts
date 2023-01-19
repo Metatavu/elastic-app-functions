@@ -1,7 +1,7 @@
 import { DocumentClient } from "aws-sdk/clients/dynamodb";
 import Authentication from "../models/authentication";
 
-const TABLE_NAME = "authentication";
+const TABLE_NAME = "authenticationSessions";
 
 /**
  * Database service for authentication
