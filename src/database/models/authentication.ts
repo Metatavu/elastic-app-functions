@@ -5,7 +5,7 @@ interface Authentication {
   username: string;
   password: string;
   token: string;
-  expiry: number;
+  expiresAt: number;
 };
 
 export default Authentication;
