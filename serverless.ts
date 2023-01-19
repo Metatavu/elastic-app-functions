@@ -10,6 +10,8 @@ import addCategoryToDocuments from "@functions/add-category-to-document";
 import detectDocumentLanguages from "@functions/detect-document-languages";
 import detectNewsPublished from "@functions/detect-news-published";
 import detectBreadcrumbs from "@functions/detect-breadcrumbs";
+import createSession from "@functions/create-session";
+import deleteSession from "@functions/delete-session";
 import findScheduledCrawl from "@functions/scheduled-crawls/find-scheduled-crawl";
 import listScheduledCrawls from "@functions/scheduled-crawls/list-scheduled-crawls";
 import createScheduledCrawl from "@functions/scheduled-crawls/create-scheduled-crawl";
@@ -97,7 +99,9 @@ const serverlessConfiguration: AWS = {
     deleteScheduledCrawl,
     triggerScheduledCrawl,
     addContactDocumentsToSQS,
-    processContactDocumentFromSQS
+    processContactDocumentFromSQS,
+    createSession,
+    deleteSession
   },
   package: { individually: true },
   custom: {

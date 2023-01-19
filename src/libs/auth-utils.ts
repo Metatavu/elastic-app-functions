@@ -1,5 +1,7 @@
 import { v4 as uuid } from "uuid";
 import { SHA256 } from 'crypto-js';
+import { authenticationService } from "src/database/services";
+import { validateTimestamp } from "./date-utils";
 
 /**
  * Interface for basic auth username and password pair
@@ -40,7 +42,7 @@ export const parseBasicAuth = (authorizationHeader?: string): BasicAuth | null =
  * @param authorizationHeader authentication header
  * @returns bearer auth token
  */
-export const parseBearerAuth = (authorizationHeader?: string): string | null => {
+export const parseBearerAuth = (authorizationHeader: string | undefined): string | null => {
   if (!authorizationHeader?.toLocaleLowerCase().startsWith("bearer ")) {
     return null;
   }
@@ -60,4 +62,36 @@ export const parseBearerAuth = (authorizationHeader?: string): string | null => 
  */
 export const generateToken = () => {
   return SHA256(uuid()).toString();
+}
+
+/**
+ * Get elastic credentials for session
+ *
+ * @param authHeader authorization token
+ * @returns BasicAuth for elastic
+ */
+export const getElasticCredentialsForSession = async (authHeader: string | undefined) => {
+  const token = parseBearerAuth(authHeader);
+  if (!token) {
+    return undefined;
+  };
+
+  const authenticationSession = await authenticationService.findSession(token);
+  if (!authenticationSession) {
+    return undefined;
+  }
+
+  const isValid = validateTimestamp(authenticationSession.expiry);
+  if (!isValid) {
+    await authenticationService.deleteSession(authenticationSession.token);
+
+    return undefined;
+  }
+
+  const auth: BasicAuth = {
+    username: authenticationSession.username,
+    password: authenticationSession.password
+  };
+
+  return auth;
 }

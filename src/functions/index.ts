@@ -8,6 +8,8 @@ export { default as addCategoryToDocuments } from "./add-category-to-document";
 export { default as detectDocumentLanguages } from "./detect-document-languages";
 export { default as detectNewsPublished } from "./detect-news-published";
 export { default as detectBreadcrumbs } from "./detect-breadcrumbs";
+export { default as createSession } from "./create-session";
+export { default as deleteSessson } from "./delete-session";
 export { default as createScheduledCrawl } from "./scheduled-crawls/create-scheduled-crawl";
 export { default as findScheduledCrawl } from "./scheduled-crawls/find-scheduled-crawl";
 export { default as listScheduledCrawls } from "./scheduled-crawls/list-scheduled-crawls";

@@ -50,3 +50,14 @@ export const generateExpiryTimestamp = () => {
   const date = DateTime.now().plus({minutes: 15}) as any;
   return date.ts;
 };
+
+/**
+ * Compare timestamp with current time
+ *
+ * @param expiry timestamp
+ * @returns boolean value
+ */
+export const validateTimestamp = (expiry: number) => {
+  const now = DateTime.now() as any;
+  return expiry > now;
+}
