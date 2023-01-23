@@ -64,7 +64,8 @@ const serverlessConfiguration: AWS = {
             ],
             Resource: [
               { "Fn::GetAtt": [ "TimedCurations", "Arn" ] },
-              { "Fn::GetAtt": [ "ScheduledCrawls", "Arn" ] }
+              { "Fn::GetAtt": [ "ScheduledCrawls", "An" ] },
+              { "Fn::GetAtt": [ "AuthenticationSessions", "Arn" ] }
             ],
           },
           {
