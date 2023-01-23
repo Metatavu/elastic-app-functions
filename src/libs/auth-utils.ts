@@ -67,6 +67,7 @@ export const generateToken = () => {
  * @returns BasicAuth for elastic
  */
 export const getElasticCredentialsForSession = async (authHeader: string | undefined) => {
+  console.log("in credentials check")
   if (!authHeader) {
     return undefined;
   }
@@ -76,10 +77,15 @@ export const getElasticCredentialsForSession = async (authHeader: string | undef
     return undefined;
   };
 
+  console.log("is token", token);
+
   const authenticationSession = await authenticationService.findSession(token);
   if (!authenticationSession) {
     return undefined;
   }
+
+  console.log("found auth session", authenticationSession.token);
+  console.log("found auth expiry", authenticationSession.expiry);
 
   const isValid = validateTimestamp(authenticationSession.expiry);
   if (!isValid) {
@@ -88,10 +94,14 @@ export const getElasticCredentialsForSession = async (authHeader: string | undef
     return undefined;
   }
 
+  console.log("is valid timestamp", isValid);
+
   const auth: BasicAuth = {
     username: authenticationSession.username,
     password: authenticationSession.password
   };
+
+  console.log("returning auth", auth.username);
 
   return auth;
 }
