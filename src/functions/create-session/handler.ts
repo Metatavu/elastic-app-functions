@@ -3,7 +3,7 @@ import { middyfy } from "@libs/lambda";
 import { authenticationService } from "src/database/services";
 import { generateToken, parseBasicAuth, parseBearerAuth } from "@libs/auth-utils";
 import authenticationSchema from "src/schema/authentication";
-import { generateExpiryTimestamp } from "@libs/date-utils";
+import { generateExpiryTimestamp, validateTimestamp } from "@libs/date-utils";
 
 /**
  * Lambda for creating Authentication session
@@ -25,7 +25,7 @@ const createAuthenticationSession: ValidatedEventAPIGatewayProxyEvent<typeof aut
   }
 
   if (isBearerAuth) {
-    const token = parseBearerAuth(authHeader);
+    const token = parseBearerAuth(authHeader!);
     if (!token) {
       return {
         statusCode: 401,
@@ -36,9 +36,18 @@ const createAuthenticationSession: ValidatedEventAPIGatewayProxyEvent<typeof aut
     const foundSession = await authenticationService.findSession(token);
     if (!foundSession) {
       return {
-        statusCode: 404,
-        body: "Not found"
+        statusCode: 401,
+        body: "Unauthorized"
       };
+    }
+
+    if (!validateTimestamp(foundSession.expiry)) {
+      await authenticationService.deleteSession(foundSession.token);
+
+      return {
+        statusCode: 401,
+        body: "Unauthorized"
+      }
     }
 
     const tokenExpiry: number = generateExpiryTimestamp();
@@ -46,14 +55,7 @@ const createAuthenticationSession: ValidatedEventAPIGatewayProxyEvent<typeof aut
     const refreshedSession = await authenticationService.updateSession({
       ...foundSession,
       expiry: tokenExpiry
-    })
-
-    if (!refreshedSession) {
-      return {
-        statusCode: 404,
-        body: "Token not refreshed"
-      };
-    }
+    });
 
     return {
       statusCode: 200,
@@ -83,11 +85,11 @@ const createAuthenticationSession: ValidatedEventAPIGatewayProxyEvent<typeof aut
 
     const responseToken = {
       token: authenticationToken.token,
-      expiry: authenticationToken.expiry,
+      expiry: authenticationToken.expiry
     }
 
     return {
-      statusCode: 200,
+      statusCode: 201,
       body: JSON.stringify(responseToken)
     };
   }

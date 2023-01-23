@@ -42,11 +42,7 @@ export const parseBasicAuth = (authorizationHeader?: string): BasicAuth | null =
  * @param authorizationHeader authentication header
  * @returns bearer auth token
  */
-export const parseBearerAuth = (authorizationHeader: string | undefined): string | null => {
-  if (!authorizationHeader?.toLocaleLowerCase().startsWith("bearer ")) {
-    return null;
-  }
-
+export const parseBearerAuth = (authorizationHeader: string): string | null => {
   const buffer = authorizationHeader.split(" ");
   const token = buffer[1];
 
@@ -71,6 +67,10 @@ export const generateToken = () => {
  * @returns BasicAuth for elastic
  */
 export const getElasticCredentialsForSession = async (authHeader: string | undefined) => {
+  if (!authHeader) {
+    return undefined;
+  }
+
   const token = parseBearerAuth(authHeader);
   if (!token) {
     return undefined;
