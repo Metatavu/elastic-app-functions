@@ -2,7 +2,6 @@ import type { ValidatedEventAPIGatewayProxyEvent } from "@libs/api-gateway";
 import { middyfy } from "@libs/lambda";
 import { authenticationService } from "src/database/services";
 import { generateToken, parseBasicAuth, parseBearerAuth } from "@libs/auth-utils";
-import authenticationSchema from "src/schema/authentication";
 import { generateExpiryTimestamp, validateTimestamp } from "@libs/date-utils";
 
 /**
@@ -10,7 +9,7 @@ import { generateExpiryTimestamp, validateTimestamp } from "@libs/date-utils";
  *
  * @param event event
  */
-const createAuthenticationSession: ValidatedEventAPIGatewayProxyEvent<typeof authenticationSchema> = async (event) => {
+const createAuthenticationSession: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
   const { headers } = event;
   const { Authorization, authorization } = headers;
   const authHeader = Authorization || authorization;
