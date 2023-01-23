@@ -4,7 +4,7 @@ info:
   description: Elastic App search lambda functions
   version: 1.0.0
 security:
-  - Basic: []
+  - BearerAuth: []
 paths:
   "/timed-curations":
     get:
@@ -105,7 +105,7 @@ paths:
       responses:
         "204":
           description: Empty content indicating a successful removal
-  
+
   "/scheduled-crawl":
     get:
       operationId: listScheduledCrawls
@@ -206,6 +206,37 @@ paths:
         "204":
           description: Empty content indicating a successful removal
 
+  "/login":
+    post:
+      operationId: createSession
+      summary: Create session authentication
+      description: |
+        Create session authentication
+      security:
+        - Basic: []
+        - BearerAuth: []
+      tags:
+        - Authentication
+      responses:
+        "200":
+          description: Logged in
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: "#/components/schemas/Authentication"
+
+  "/logout":
+    post:
+      operationId: deleteSession
+      summary: Deletes session authentication
+      description: |
+        Deletes session authentication
+      tags:
+        - Authentication
+      responses:
+        "204":
+          description: Empty content indicating a successful removal
+
 components:
   requestBodies:
     TimedCuration:
@@ -226,6 +257,9 @@ components:
     Basic:
       type: http
       scheme: Basic
+    BearerAuth:
+      type: http
+      scheme: bearer
   schemas:
     TimedCuration:
       type: object
@@ -280,4 +314,16 @@ components:
           items:
             type: string
         frequency:
+          type: number
+    Authentication:
+      type: object
+      required:
+        - token
+        - expiry
+      properties:
+        token:
+          type: string
+          readOnly: true
+          description: Identifier
+        expiry:
           type: number
