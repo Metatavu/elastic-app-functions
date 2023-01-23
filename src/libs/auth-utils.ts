@@ -67,10 +67,12 @@ export const generateToken = () => {
  * @returns BasicAuth for elastic
  */
 export const getElasticCredentialsForSession = async (authHeader: string | undefined) => {
-  console.log("in credentials check")
+  console.log("in credentials check", authHeader);
   if (!authHeader) {
     return undefined;
   }
+
+  console.log("auth header is valid");
 
   const token = parseBearerAuth(authHeader);
   if (!token) {
