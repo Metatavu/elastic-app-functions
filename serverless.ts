@@ -150,7 +150,7 @@ const serverlessConfiguration: AWS = {
         DeletionPolicy: "Delete",
         Properties: {
           TableName: "authentication-sessions",
-          AttributeDefinitions: [{ AttributeName: "id", AttributeType: "S" }],
+          AttributeDefinitions: [{ AttributeName: "token", AttributeType: "S" }],
           KeySchema: [{ AttributeName: "token", KeyType: "HASH" }],
           ProvisionedThroughput: {
             ReadCapacityUnits: 1,
