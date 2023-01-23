@@ -148,7 +148,7 @@ const serverlessConfiguration: AWS = {
         Type: "AWS::DynamoDB::Table",
         DeletionPolicy: "Delete",
         Properties: {
-          TableName: "authenticationSessions",
+          TableName: "authentication-sessions",
           AttributeDefinitions: [{ AttributeName: "id", AttributeType: "S" }],
           KeySchema: [{ AttributeName: "id", KeyType: "HASH" }],
           ProvisionedThroughput: {
