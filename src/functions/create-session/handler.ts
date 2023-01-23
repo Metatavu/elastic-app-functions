@@ -3,6 +3,7 @@ import { middyfy } from "@libs/lambda";
 import { authenticationService } from "src/database/services";
 import { generateToken, parseBasicAuth, parseBearerAuth } from "@libs/auth-utils";
 import { generateExpiryTimestamp, validateTimestamp } from "@libs/date-utils";
+import { v4 as uuid } from "uuid";
 
 /**
  * Lambda for creating Authentication session
@@ -24,6 +25,7 @@ const createAuthenticationSession: ValidatedEventAPIGatewayProxyEvent<any> = asy
   }
 
   if (isBearerAuth) {
+    console.log("in bearer");
     const token = parseBearerAuth(authHeader!);
     if (!token) {
       return {
@@ -63,6 +65,7 @@ const createAuthenticationSession: ValidatedEventAPIGatewayProxyEvent<any> = asy
   }
 
   if (isBasicAuth) {
+    console.log("in basic");
     const auth = parseBasicAuth(authHeader);
 
     if (!auth) {
@@ -76,6 +79,7 @@ const createAuthenticationSession: ValidatedEventAPIGatewayProxyEvent<any> = asy
     const tokenExpiry: number = generateExpiryTimestamp();
 
     const authenticationToken = await authenticationService.createSession({
+      id: uuid(),
       username: auth.username,
       password: auth.password,
       token: token,
