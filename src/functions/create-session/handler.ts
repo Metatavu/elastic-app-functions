@@ -25,7 +25,6 @@ const createAuthenticationSession: ValidatedEventAPIGatewayProxyEvent<any> = asy
   }
 
   if (isBearerAuth) {
-    console.log("in bearer");
     const token = parseBearerAuth(authHeader!);
     if (!token) {
       return {
@@ -59,13 +58,12 @@ const createAuthenticationSession: ValidatedEventAPIGatewayProxyEvent<any> = asy
     });
 
     return {
-      statusCode: 200,
+      statusCode: 201,
       body: JSON.stringify(refreshedSession.expiry)
     }
   }
 
   if (isBasicAuth) {
-    console.log("in basic");
     const auth = parseBasicAuth(authHeader);
 
     if (!auth) {

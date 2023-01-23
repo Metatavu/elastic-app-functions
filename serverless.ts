@@ -151,7 +151,7 @@ const serverlessConfiguration: AWS = {
         Properties: {
           TableName: "authentication-sessions",
           AttributeDefinitions: [{ AttributeName: "id", AttributeType: "S" }],
-          KeySchema: [{ AttributeName: "id", KeyType: "HASH" }],
+          KeySchema: [{ AttributeName: "token", KeyType: "HASH" }],
           ProvisionedThroughput: {
             ReadCapacityUnits: 1,
             WriteCapacityUnits: 1
