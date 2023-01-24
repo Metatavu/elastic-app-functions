@@ -1,5 +1,5 @@
 import { ValidatedEventAPIGatewayProxyEvent } from "@libs/api-gateway";
-import { parseBasicAuth } from "@libs/auth-utils";
+import { getElasticCredentialsForSession } from "@libs/auth-utils";
 import { middyfy } from "@libs/lambda";
 import { getElastic } from "src/elastic";
 import { timedCurationsService } from "src/database/services";
@@ -15,6 +15,7 @@ const updateTimedCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = a
   const { authorization, Authorization } = headers;
   const { queries, promoted, hidden, startTime, endTime } = body;
   const id = pathParameters?.id;
+  const authHeader = Authorization || authorization;
 
   if (!id) {
     return {
@@ -23,7 +24,7 @@ const updateTimedCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = a
     }
   }
 
-  const auth = parseBasicAuth(authorization || Authorization);
+  const auth = await getElasticCredentialsForSession(authHeader);
   if (!auth) {
     return {
       statusCode: 401,

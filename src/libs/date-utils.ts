@@ -1,4 +1,5 @@
 import { DateTime } from "luxon";
+import config from "src/config";
 
 /**
  * Parses date
@@ -40,3 +41,26 @@ export const calculateMinutesPassed = (lastCrawl: string): number => {
 
   return difference.get("minutes") ?? 0;
 };
+
+/**
+ * Create a timestamp with expiry
+ *
+ * @returns Timestamp
+ */
+export const generateExpiryTimestamp = () => {
+  const date = DateTime.now().plus({minutes: config.AUTHENTICATION_EXPIRY_IN_MINS}) as any;
+  const timestampInMillis = Math.floor(date.ts / 1000);
+
+  return timestampInMillis;
+};
+
+/**
+ * Compare timestamp with current time
+ *
+ * @param expiry timestamp
+ * @returns boolean value
+ */
+export const validateTimestamp = (expiry: number) => {
+  const now = DateTime.now() as any;
+  return expiry > now;
+}

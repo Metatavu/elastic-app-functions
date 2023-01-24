@@ -13,5 +13,6 @@ export default cleanEnv(process.env, {
   AWS_DEFAULT_REGION: str(),
   CONTACT_PERSONS_URL: url(),
   CONTACT_SYNC_INTERVAL_IN_DAYS: num(),
+  AUTHENTICATION_EXPIRY_IN_MINS: num(),
   SUOMIFI_ORGANIZATION_ID: str()
 });
