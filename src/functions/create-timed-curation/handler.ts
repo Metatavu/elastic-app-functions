@@ -3,7 +3,7 @@ import { middyfy } from "@libs/lambda";
 import schema from "src/schema/timed-curation";
 import { timedCurationsService } from "src/database/services";
 import { v4 as uuid } from "uuid";
-import { parseBasicAuth } from "@libs/auth-utils";
+import { getElasticCredentialsForSession } from "@libs/auth-utils";
 import { getElastic } from "src/elastic";
 
 /**
@@ -15,8 +15,9 @@ const createTimedCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = a
   const { body, headers } = event;
   const { queries, promoted, hidden, startTime, endTime } = body;
   const { Authorization, authorization } = headers;
+  const authHeader = Authorization || authorization;
 
-  const auth = parseBasicAuth(authorization || Authorization);
+  const auth = await getElasticCredentialsForSession(authHeader);
   if (!auth) {
     return {
       statusCode: 401,

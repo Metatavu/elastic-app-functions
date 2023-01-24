@@ -10,6 +10,8 @@ import addCategoryToDocuments from "@functions/add-category-to-document";
 import detectDocumentLanguages from "@functions/detect-document-languages";
 import detectNewsPublished from "@functions/detect-news-published";
 import detectBreadcrumbs from "@functions/detect-breadcrumbs";
+import createSession from "@functions/create-session";
+import deleteSession from "@functions/delete-session";
 import findScheduledCrawl from "@functions/scheduled-crawls/find-scheduled-crawl";
 import listScheduledCrawls from "@functions/scheduled-crawls/list-scheduled-crawls";
 import createScheduledCrawl from "@functions/scheduled-crawls/create-scheduled-crawl";
@@ -46,7 +48,8 @@ const serverlessConfiguration: AWS = {
       ELASTIC_ADMIN_USERNAME: config.ELASTIC_ADMIN_USERNAME,
       ELASTIC_ADMIN_PASSWORD: config.ELASTIC_ADMIN_PASSWORD,
       CONTACT_PERSONS_URL: config.CONTACT_PERSONS_URL,
-      CONTACT_SYNC_INTERVAL_IN_DAYS: config.CONTACT_SYNC_INTERVAL_IN_DAYS.toString()
+      CONTACT_SYNC_INTERVAL_IN_DAYS: config.CONTACT_SYNC_INTERVAL_IN_DAYS.toString(),
+      AUTHENTICATION_EXPIRY_IN_MINS: config.AUTHENTICATION_EXPIRY_IN_MINS.toString()
     },
     iam: {
       role: {
@@ -61,10 +64,12 @@ const serverlessConfiguration: AWS = {
               "dynamodb:PutItem",
               "dynamodb:UpdateItem",
               "dynamodb:DeleteItem",
+              "dynamodb:UpdateTimeToLive"
             ],
             Resource: [
               { "Fn::GetAtt": [ "TimedCurations", "Arn" ] },
-              { "Fn::GetAtt": [ "ScheduledCrawls", "Arn" ] }
+              { "Fn::GetAtt": [ "ScheduledCrawls", "Arn" ] },
+              { "Fn::GetAtt": [ "AuthenticationSessions", "Arn" ] }
             ],
           },
           {
@@ -100,6 +105,8 @@ const serverlessConfiguration: AWS = {
     triggerScheduledCrawl,
     addContactDocumentsToSQS,
     processContactDocumentFromSQS,
+    createSession,
+    deleteSession,
     addExternalServiceIdToServices,
     createDocumentFromExternalService
   },
@@ -142,6 +149,23 @@ const serverlessConfiguration: AWS = {
             ReadCapacityUnits: 1,
             WriteCapacityUnits: 1
           },
+        },
+      },
+      AuthenticationSessions: {
+        Type: "AWS::DynamoDB::Table",
+        DeletionPolicy: "Delete",
+        Properties: {
+          TableName: "authentication-sessions",
+          AttributeDefinitions: [{ AttributeName: "token", AttributeType: "S" }],
+          KeySchema: [{ AttributeName: "token", KeyType: "HASH" }],
+          ProvisionedThroughput: {
+            ReadCapacityUnits: 1,
+            WriteCapacityUnits: 1
+          },
+          TimeToLiveSpecification: {
+            AttributeName: "expiresAt",
+            Enabled: true
+          }
         },
       },
       HelsinkiSearchContactPersonQueue: {

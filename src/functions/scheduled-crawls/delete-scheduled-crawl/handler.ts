@@ -1,5 +1,5 @@
 import { ValidatedEventAPIGatewayProxyEvent } from "@libs/api-gateway";
-import { parseBasicAuth } from "@libs/auth-utils";
+import { getElasticCredentialsForSession } from "@libs/auth-utils";
 import { middyfy } from "@libs/lambda";
 import { getElastic } from "src/elastic";
 import { scheduledCrawlService } from "src/database/services";
@@ -12,6 +12,7 @@ import { scheduledCrawlService } from "src/database/services";
 const deleteScheduledCrawl: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
   const { pathParameters, headers: { Authorization, authorization } } = event;
   const id = pathParameters?.id;
+  const authHeader = Authorization || authorization;
 
   if (!id) {
     return {
@@ -20,7 +21,7 @@ const deleteScheduledCrawl: ValidatedEventAPIGatewayProxyEvent<any> = async (eve
     };
   }
 
-  const auth = parseBasicAuth(authorization || Authorization);
+  const auth = await getElasticCredentialsForSession(authHeader);
   if (!auth) {
     return {
       statusCode: 401,
