@@ -1,7 +1,5 @@
 import { cleanEnv, num, str, url } from "envalid";
-import * as dotenv from "dotenv";
 
-dotenv.config();
 /**
  * Validates that environment variables are in place and have correct form
  */
