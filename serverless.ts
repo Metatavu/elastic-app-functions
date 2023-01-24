@@ -20,6 +20,8 @@ import deleteScheduledCrawl from "@functions/scheduled-crawls/delete-scheduled-c
 import triggerScheduledCrawl from "@functions/scheduled-crawls/trigger-scheduled-crawl";
 import addContactDocumentsToSQS from "@functions/add-contact-documents-to-sqs";
 import processContactDocumentFromSQS from "@functions/process-contact-documents-from-sqs";
+import addExternalServiceIdToServices from "@functions/add-external-service-id-to-services"
+import createDocumentFromExternalService from "@functions/create-document-from-external-service";
 
 import config from "src/config";
 
@@ -47,7 +49,8 @@ const serverlessConfiguration: AWS = {
       ELASTIC_ADMIN_PASSWORD: config.ELASTIC_ADMIN_PASSWORD,
       CONTACT_PERSONS_URL: config.CONTACT_PERSONS_URL,
       CONTACT_SYNC_INTERVAL_IN_DAYS: config.CONTACT_SYNC_INTERVAL_IN_DAYS.toString(),
-      AUTHENTICATION_EXPIRY_IN_MINS: config.AUTHENTICATION_EXPIRY_IN_MINS.toString()
+      AUTHENTICATION_EXPIRY_IN_MINS: config.AUTHENTICATION_EXPIRY_IN_MINS.toString(),
+      SUOMIFI_ORGANIZATION_ID: config.SUOMIFI_ORGANIZATION_ID
     },
     iam: {
       role: {
@@ -104,7 +107,9 @@ const serverlessConfiguration: AWS = {
     addContactDocumentsToSQS,
     processContactDocumentFromSQS,
     createSession,
-    deleteSession
+    deleteSession,
+    addExternalServiceIdToServices,
+    createDocumentFromExternalService
   },
   package: { individually: true },
   custom: {
