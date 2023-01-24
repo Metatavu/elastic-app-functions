@@ -70,7 +70,7 @@ export const createDocumentsFromService = async (service: Service, department: D
     return {
       title: getServiceName(service, language),
       meta_content_category: ContentCategory.EXTERNAL,
-      meta_description: language === SupportedLanguages.FI ? department.title : localizedDescription,
+      meta_description: language === SupportedLanguages.FI ? department.description_short : localizedDescription,
       external_service_id: department.id,
       language: language,
       external_url: await getLocalizedServiceUrl(language, service)
