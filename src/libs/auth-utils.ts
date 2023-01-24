@@ -81,7 +81,7 @@ export const getElasticCredentialsForSession = async (authHeader: string | undef
     return undefined;
   }
 
-  const isValid = validateTimestamp(authenticationSession.expiry);
+  const isValid = validateTimestamp(authenticationSession.expiresAt);
   if (!isValid) {
     await authenticationService.deleteSession(authenticationSession.token);
 

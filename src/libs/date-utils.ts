@@ -1,5 +1,5 @@
 import { DateTime } from "luxon";
-// import config from "src/config";
+import config from "src/config";
 
 /**
  * Parses date
@@ -48,8 +48,10 @@ export const calculateMinutesPassed = (lastCrawl: string): number => {
  * @returns Timestamp
  */
 export const generateExpiryTimestamp = () => {
-  const date = DateTime.now().plus({minutes: 60}) as any;
-  return date.ts;
+  const date = DateTime.now().plus({minutes: config.AUTHENTICATION_EXPIRY_IN_MINS}) as any;
+  const timestampInMillis = Math.floor(date.ts / 1000);
+
+  return timestampInMillis;
 };
 
 /**

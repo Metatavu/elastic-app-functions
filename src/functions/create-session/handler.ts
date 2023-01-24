@@ -37,30 +37,35 @@ const createAuthenticationSession: ValidatedEventAPIGatewayProxyEvent<any> = asy
     if (!foundSession) {
       return {
         statusCode: 401,
-        body: "Unauthorized"
+        body: "Unauthorized- not found"
       };
     }
 
-    if (!validateTimestamp(foundSession.expiry)) {
-      await authenticationService.deleteSession(foundSession.token);
+    // No token refresh for testing time to live configuration
+    // if (!validateTimestamp(foundSession.expiresAt)) {
+    //   await authenticationService.deleteSession(foundSession.token);
 
-      return {
-        statusCode: 401,
-        body: "Unauthorized"
-      }
-    }
+    //   return {
+    //     statusCode: 401,
+    //     body: "Unauthorized"
+    //   }
+    // }
 
-    const tokenExpiry: number = generateExpiryTimestamp();
+    // const tokenExpiry: number = generateExpiryTimestamp();
 
-    const refreshedSession = await authenticationService.updateSession({
-      ...foundSession,
-      expiry: tokenExpiry
-    });
+    // const refreshedSession = await authenticationService.updateSession({
+    //   ...foundSession,
+    //   expiresAt: tokenExpiry
+    // });
 
+    // const responseToken = {
+    //   token: refreshedSession.token,
+    //   expiry: refreshedSession.expiresAt
+    // };
     const responseToken = {
-      token: refreshedSession.token,
-      expiry: refreshedSession.expiry
-    }
+      token: foundSession.token,
+      expiry: foundSession.expiresAt
+    };
 
     return {
       statusCode: 201,
@@ -86,12 +91,12 @@ const createAuthenticationSession: ValidatedEventAPIGatewayProxyEvent<any> = asy
       username: auth.username,
       password: auth.password,
       token: token,
-      expiry: tokenExpiry
+      expiresAt: tokenExpiry
     });
 
     const responseToken = {
       token: authenticationToken.token,
-      expiry: authenticationToken.expiry
+      expiry: authenticationToken.expiresAt
     }
 
     return {
