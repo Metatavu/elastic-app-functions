@@ -62,6 +62,7 @@ const serverlessConfiguration: AWS = {
               "dynamodb:PutItem",
               "dynamodb:UpdateItem",
               "dynamodb:DeleteItem",
+              "dynamodb:UpdateTimeToLive"
             ],
             Resource: [
               { "Fn::GetAtt": [ "TimedCurations", "Arn" ] },
