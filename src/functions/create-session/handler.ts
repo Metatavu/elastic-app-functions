@@ -57,9 +57,14 @@ const createAuthenticationSession: ValidatedEventAPIGatewayProxyEvent<any> = asy
       expiry: tokenExpiry
     });
 
+    const responseToken = {
+      token: refreshedSession.token,
+      expiry: refreshedSession.expiry
+    }
+
     return {
       statusCode: 201,
-      body: JSON.stringify(refreshedSession.expiry)
+      body: JSON.stringify(responseToken)
     }
   }
 
