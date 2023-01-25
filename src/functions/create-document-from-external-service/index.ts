@@ -7,7 +7,7 @@ const fn: AWSFunction = {
     {
       schedule: {
         rate: [
-          "cron(0 3 * * SUN *)"
+          "cron(0 3 ? * SUN *)"
         ]
       }
     }
