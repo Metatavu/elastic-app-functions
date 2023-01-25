@@ -208,7 +208,7 @@ paths:
 
   "/login":
     post:
-      operationId: createSession
+      operationId: login
       summary: Create session authentication
       description: |
         Create session authentication
@@ -227,7 +227,7 @@ paths:
 
   "/logout":
     post:
-      operationId: deleteSession
+      operationId: logout
       summary: Deletes session authentication
       description: |
         Deletes session authentication
