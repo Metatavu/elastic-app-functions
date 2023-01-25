@@ -9,6 +9,7 @@ interface TimedCuration {
   hidden: string[];
   startTime: string;
   endTime: string;
+  isManuallyCreated?: boolean;
 }
 
 export default TimedCuration;

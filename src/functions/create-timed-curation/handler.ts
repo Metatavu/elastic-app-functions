@@ -4,7 +4,7 @@ import schema from "src/schema/timed-curation";
 import { timedCurationsService } from "src/database/services";
 import { v4 as uuid } from "uuid";
 import { getElasticCredentialsForSession } from "@libs/auth-utils";
-import { getElastic } from "src/elastic";
+import { ContentCategory, getElastic } from "src/elastic";
 
 /**
  * Lambda for creating timed curations
@@ -33,7 +33,7 @@ const createTimedCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = a
     };
   }
 
-  const documentIds = [ ...promoted, ...hidden ];
+  const documentIds = [ ...promoted, ...hidden || [] ];
 
   const documents = await Promise.all(
     documentIds.map(async documentId => ({
@@ -49,6 +49,25 @@ const createTimedCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = a
         body: `Document ${document.id} not found`
       };
     }
+  }
+
+  // TODO this will handle manual document curation as is currently set up in UI, curating only one at a time. If the manual document was part of a batch of promoted documents, it would not be stored as isManuallyCreated in the db.
+  if (promoted.length === 1 && documents[0].data?.meta_content_category === ContentCategory.MANUAL) {
+    const manualDocumentCuration = await timedCurationsService.createTimedCuration({
+      id: uuid(),
+      promoted: promoted,
+      hidden: hidden,
+      queries: queries,
+      startTime: startTime,
+      endTime: endTime,
+      curationId: "",
+      isManuallyCreated: true
+    });
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify(manualDocumentCuration)
+    };
   }
 
   const timedCuration = await timedCurationsService.createTimedCuration({

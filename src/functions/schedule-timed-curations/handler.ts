@@ -18,14 +18,15 @@ const scheduleTimedCuration = async () => {
   const timedCurations = await timedCurationsService.listTimedCurations();
 
   await Promise.all(timedCurations.map(async timedCuration => {
-    const { id, curationId, startTime, endTime, hidden, promoted, queries } = timedCuration;
+    const { id, curationId, startTime, endTime, hidden, promoted, queries, isManuallyCreated } = timedCuration;
 
     const now = new Date();
     const start = parseDate(startTime);
     const end = parseDate(endTime);
     const active = start.getTime() <= now.getTime() && end.getTime() >= now.getTime();
+    const alwaysActive = isManuallyCreated && !startTime && !endTime;
 
-    if (!curationId && active) {
+    if (!curationId && active || !curationId && alwaysActive) {
       const payload = {
         hidden: hidden,
         promoted: promoted,
@@ -44,7 +45,7 @@ const scheduleTimedCuration = async () => {
       });
 
       console.log(`Created curation ${curationId} for scheduled curation ${id}.`);
-    } else if (curationId && !active) {
+    } else if (curationId && !active && !alwaysActive) {
       console.log(`Curation ${curationId} scheduled to be deactivated. Removing curation from app search...`);
 
       const curation = await elastic.findCuration({ id: curationId });
