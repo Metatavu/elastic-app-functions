@@ -49,9 +49,9 @@ export const calculateMinutesPassed = (lastCrawl: string): number => {
  */
 export const generateExpiryTimestamp = () => {
   const date = DateTime.now().plus({minutes: config.AUTHENTICATION_EXPIRY_IN_MINS}) as any;
-  const timestampInMillis = Math.floor(date.ts / 1000);
+  const timestampInSeconds = Math.floor(date.ts / 1000);
 
-  return timestampInMillis;
+  return timestampInSeconds;
 };
 
 /**
@@ -61,6 +61,8 @@ export const generateExpiryTimestamp = () => {
  * @returns boolean value
  */
 export const validateTimestamp = (expiry: number) => {
-  const now = DateTime.now() as any;
-  return expiry > now;
+  const nowInMillis = DateTime.now() as any;
+  const nowInSeconds = Math.floor(nowInMillis / 1000);
+
+  return expiry > nowInSeconds;
 }
