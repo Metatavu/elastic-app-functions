@@ -158,8 +158,6 @@ const detectDocumentLanguages = async () => {
   console.log(`Detecting language for ${meta.page.size} / ${meta.page.total_results} documents.`);
 
   if (!results.length) return;
-
-  // Search result values are stored in { raw: "value" } format, this flattens them
   
   const documents = searchResultsToDocuments(results);
   const updateDocuments: Document[] = [];
