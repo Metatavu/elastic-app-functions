@@ -5,6 +5,7 @@ import config from "src/config";
 import { middyfy } from "@libs/lambda";
 import { franc } from "franc";
 import { iso6393To1 } from "iso-639-3";
+import { searchResultsToDocuments } from "@libs/document-utils";
 
 const { ELASTIC_ADMIN_USERNAME, ELASTIC_ADMIN_PASSWORD } = config;
 const SUPPORTED_LANGUAGES = [ "fi", "en", "sv", "et", "no", "lt", "fa", "ru", "de", "fr", "it", "ro", "sk", "so", "es", "la" ];
@@ -20,38 +21,19 @@ const UNLOCALIZABLE_CONTENT_TYPES = [ "application/pdf", "text/calendar; charset
 const getLanguages = (): string[] => {
   return [ ...SUPPORTED_LANGUAGES, LANGUAGE_UNDEFINED ];
 }
-
-/**
- * Resolves language from Drupal settings JSON
- *
- * @param $ cheerio document
- * @returns language or null if not resolved
- */
-const resolveLanguageFromDrupalSettings = ($: cheerio.CheerioAPI): string | null => {
-  const element = $("script[data-drupal-selector=drupal-settings-json]");
-
-  if (!element.length) return null;
-
-  const jsonString = element.html();
-
-  if (!jsonString?.length) return null;
-
-  return JSON.parse(jsonString)?.path?.currentLanguage || null;
-}
-
 /**
  * Detects language from body content
  *
  * @param bodyContent body content
  * @returns language or null if not detected
  */
-const detectFromContents = (bodyContent: string): string | null => {
+const detectFromContents = (bodyContent: string) => {
   const result = franc(bodyContent);
   if (result === "und") {
-    return null;
+    return;
   }
 
-  return iso6393To1[result] || null;
+  return iso6393To1[result];
 }
 
 /**
@@ -60,27 +42,33 @@ const detectFromContents = (bodyContent: string): string | null => {
  * @param url URL
  * @returns language or null if not detected
  */
-const detectLanguageForUrl = async (url: string): Promise<string | null> => {
+const detectLanguageFromMetaTags = async (url: string) => {
   const documentUrl = new URL(url);
   const pageResponse = await fetch(documentUrl.toString());
   const contentType = pageResponse.headers.get("content-type");
   if (contentType?.startsWith("text/html")) {
     const pageContent = await pageResponse.text();
     const $ = cheerio.load(pageContent);
+    
+    const htmlLangValue = $("html").attr("lang");
+    
+    if (htmlLangValue) {
+      return htmlLangValue;
+    }
+    
+    const element = $("script[data-drupal-selector=drupal-settings-json]");
 
-    const languageFromDrupalJson = resolveLanguageFromDrupalSettings($);
-    return languageFromDrupalJson ?? null;
+    if (!element.length) return;
+  
+    const jsonString = element.html();
+  
+    if (!jsonString?.length) return;
+  
+    return JSON.parse(jsonString)?.path?.currentLanguage;
   } else {
-    if (contentType?.startsWith("image/")) {
-      return LANGUAGE_UNDEFINED;
-    }
-
-    if (contentType?.startsWith("application/pdf")) {
-      return null;
-    }
 
     console.warn(`Failed to resolve language for ${url} with content type ${contentType}`);
-    return null;
+    return;
   }
 }
 
@@ -112,7 +100,16 @@ const detectLanguageForDocument = async (document: any): Promise<string | null> 
     return url_path_dir2;
   }
 
+  const result = await detectLanguageFromMetaTags(url);
+  if (result) {
+    return result;
+  }
+  
   if (body_content) {
+    const languageFromBodyContent = detectFromContents(body_content);
+    if (languageFromBodyContent) {
+      return languageFromBodyContent;
+    }
     const lowerBodyContent = body_content.toLowerCase();
 
     if ("ipsum".indexOf(lowerBodyContent) || "lorem".indexOf(lowerBodyContent)) {
@@ -121,22 +118,9 @@ const detectLanguageForDocument = async (document: any): Promise<string | null> 
       return "la";
     }
 
-    const languageFromBodyContent = detectFromContents(body_content);
-    if (languageFromBodyContent) {
-      return languageFromBodyContent;
-    }
   }
 
-  const result = await detectLanguageForUrl(url);
-  if (!result) {
-    if (!body_content) {
-      return LANGUAGE_UNDEFINED;
-    }
-
-    console.warn(`Failed to resolve language for ${url}`);
-  }
-
-  return result;
+  return null;
 }
 
 /**
@@ -174,18 +158,11 @@ const detectDocumentLanguages = async () => {
   console.log(`Detecting language for ${meta.page.size} / ${meta.page.total_results} documents.`);
 
   if (!results.length) return;
-
-  // Search result values are stored in { raw: "value" } format, this flattens them
-  const flattenedDocuments = results.map(result =>
-    Object.keys(result).reduce<{ [key: string]: any }>((document, key) => {
-      const value = result[key]?.raw;
-      return value ? { ...document, [key]: value } : document;
-    }, {})
-  );
-
+  
+  const documents = searchResultsToDocuments(results);
   const updateDocuments: Document[] = [];
 
-  for (const document of flattenedDocuments) {
+  for (const document of documents) {
     const language = await detectLanguageForDocument(document);
     if (language) {
       if (!languages.includes(language)) {
