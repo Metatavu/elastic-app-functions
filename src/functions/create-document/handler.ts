@@ -2,7 +2,7 @@ import type { ValidatedEventAPIGatewayProxyEvent } from "@libs/api-gateway";
 import { middyfy } from "@libs/lambda";
 import schema from "src/schema/create-document";
 import { getElasticCredentialsForSession } from "@libs/auth-utils";
-import { getElastic } from "src/elastic";
+import { ContentCategory, getElastic } from "src/elastic";
 
 /**
  * Lambda for creating documents
@@ -34,7 +34,8 @@ const createDocument: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
   const documentProperties = [{
     title: title,
     description: description,
-    links: links
+    links: links,
+    meta_content_category: ContentCategory.MANUAL
   }];
 
   const document = await elastic.updateDocuments({
