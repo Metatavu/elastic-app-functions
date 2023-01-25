@@ -2,7 +2,7 @@ import { ValidatedEventAPIGatewayProxyEvent } from "@libs/api-gateway";
 import { middyfy } from "@libs/lambda";
 import { getElastic } from "src/elastic";
 import { timedCurationsService } from "src/database/services";
-import { getElasticCredentialsForSession } from "@libs/auth-utils";
+import { getElasticCredentialsForSession, returnForbidden, returnUnauthorized } from "@libs/auth-utils";
 
 /**
  * Lambda for find timed curation
@@ -24,18 +24,12 @@ const findTimedCuration: ValidatedEventAPIGatewayProxyEvent<any> = async event =
 
   const auth = await getElasticCredentialsForSession(authHeader);
   if (!auth) {
-    return {
-      statusCode: 401,
-      body: "Unauthorized"
-    };
+    return returnUnauthorized();
   }
 
   const elastic = getElastic(auth);
   if (!(await elastic.hasCurationsAccess())) {
-    return {
-      statusCode: 403,
-      body: "Forbidden"
-    };
+    return returnForbidden();
   }
 
   const timedCuration = await timedCurationsService.findTimedCuration(id);

@@ -95,3 +95,19 @@ export const getElasticCredentialsForSession = async (authHeader: string | undef
 
   return auth;
 }
+
+/**
+ * Returns Unauthorized response
+ */
+export const returnUnauthorized = () => ({
+  statusCode: 401,
+  body: "Unauthorized"
+});
+
+/**
+ * Returns Forbidden response
+ */
+export const returnForbidden = () => ({
+  statusCode: 403,
+  body: "Forbidden"
+});

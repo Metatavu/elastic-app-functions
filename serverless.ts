@@ -1,29 +1,31 @@
 import type { AWS } from "@serverless/typescript";
-
-import findTimedCuration from "@functions/find-timed-curation";
-import listTimedCurations from "@functions/list-timed-curations";
-import createTimedCuration from "@functions/create-timed-curation";
-import updateTimedCuration from "@functions/update-timed-curation";
-import deleteTimedCuration from "@functions/delete-timed-curation";
-import scheduleTimedCuration from "@functions/schedule-timed-curations";
-import addCategoryToDocuments from "@functions/add-category-to-document";
-import detectDocumentLanguages from "@functions/detect-document-languages";
-import detectNewsPublished from "@functions/detect-news-published";
-import detectBreadcrumbs from "@functions/detect-breadcrumbs";
-import createSession from "@functions/create-session";
-import deleteSession from "@functions/delete-session";
-import findScheduledCrawl from "@functions/scheduled-crawls/find-scheduled-crawl";
-import listScheduledCrawls from "@functions/scheduled-crawls/list-scheduled-crawls";
-import createScheduledCrawl from "@functions/scheduled-crawls/create-scheduled-crawl";
-import updateScheduledCrawl from "@functions/scheduled-crawls/update-scheduled-crawl";
-import deleteScheduledCrawl from "@functions/scheduled-crawls/delete-scheduled-crawl";
-import triggerScheduledCrawl from "@functions/scheduled-crawls/trigger-scheduled-crawl";
-import addContactDocumentsToSQS from "@functions/add-contact-documents-to-sqs";
-import processContactDocumentFromSQS from "@functions/process-contact-documents-from-sqs";
-import addExternalServiceIdToServices from "@functions/add-external-service-id-to-services"
-import createDocumentFromExternalService from "@functions/create-document-from-external-service";
-
 import config from "src/config";
+import {
+  findTimedCuration,
+  listTimedCurations,
+  createTimedCuration,
+  updateTimedCuration,
+  deleteTimedCuration,
+  scheduleTimedCuration,
+  addCategoryToDocuments,
+  detectDocumentLanguages,
+  detectNewsPublished,
+  detectBreadcrumbs,
+  createSession,
+  deleteSession,
+  findScheduledCrawl,
+  listScheduledCrawls,
+  createScheduledCrawl,
+  updateScheduledCrawl,
+  deleteScheduledCrawl,
+  triggerScheduledCrawl,
+  addContactDocumentsToSQS,
+  processContactDocumentFromSQS,
+  addExternalServiceIdToServices,
+  createDocumentFromExternalService,
+  listDocumentsByIds
+} from "@functions";
+
 
 const serverlessConfiguration: AWS = {
   service: "elastic-app-functions",
@@ -109,7 +111,8 @@ const serverlessConfiguration: AWS = {
     createSession,
     deleteSession,
     addExternalServiceIdToServices,
-    createDocumentFromExternalService
+    createDocumentFromExternalService,
+    listDocumentsByIds
   },
   package: { individually: true },
   custom: {

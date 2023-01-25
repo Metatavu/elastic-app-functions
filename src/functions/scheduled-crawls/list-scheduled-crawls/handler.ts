@@ -2,7 +2,7 @@ import { ValidatedEventAPIGatewayProxyEvent } from "@libs/api-gateway";
 import { middyfy } from "@libs/lambda";
 import { getElastic } from "src/elastic";
 import { scheduledCrawlService } from "src/database/services";
-import { getElasticCredentialsForSession } from "@libs/auth-utils";
+import { getElasticCredentialsForSession, returnForbidden, returnUnauthorized } from "@libs/auth-utils";
 
 /**
  * Lambda for listing scheduled crawls
@@ -15,18 +15,12 @@ const listScheduledCrawls: ValidatedEventAPIGatewayProxyEvent<any> = async (even
 
   const auth = await getElasticCredentialsForSession(authHeader);
   if (!auth) {
-    return {
-      statusCode: 401,
-      body: "Unauthorized"
-    };
+    return returnUnauthorized();
   }
 
   const elastic = getElastic(auth);
   if (!(await elastic.hasScheduledCrawlAccess())) {
-    return {
-      statusCode: 403,
-      body: "Forbidden"
-    };
+    return returnForbidden();
   }
 
   const scheduledCrawls = await scheduledCrawlService.listScheduledCrawls();

@@ -1,7 +1,7 @@
 import type { ValidatedEventAPIGatewayProxyEvent } from "@libs/api-gateway";
 import { middyfy } from "@libs/lambda";
 import { authenticationService } from "src/database/services";
-import { generateToken, parseBasicAuth, parseBearerAuth } from "@libs/auth-utils";
+import { generateToken, parseBasicAuth, parseBearerAuth, returnUnauthorized } from "@libs/auth-utils";
 import { generateExpiryTimestamp, validateTimestamp } from "@libs/date-utils";
 import { v4 as uuid } from "uuid";
 
@@ -18,27 +18,18 @@ const createAuthenticationSession: ValidatedEventAPIGatewayProxyEvent<any> = asy
   const isBearerAuth = authHeader?.toLowerCase()?.startsWith("bearer");
 
   if (!isBearerAuth && !isBasicAuth) {
-    return {
-      statusCode: 401,
-      body: "Unauthorized"
-    };
+    return returnUnauthorized();
   }
 
   if (isBearerAuth) {
     const token = parseBearerAuth(authHeader!);
     if (!token) {
-      return {
-        statusCode: 401,
-        body: "Unauthorized"
-      };
+      return returnUnauthorized();
     }
 
     const foundSession = await authenticationService.findSession(token);
     if (!foundSession) {
-      return {
-        statusCode: 401,
-        body: "Unauthorized- not found"
-      };
+      return returnUnauthorized()
     }
 
     // No token refresh for testing time to live configuration
@@ -77,10 +68,7 @@ const createAuthenticationSession: ValidatedEventAPIGatewayProxyEvent<any> = asy
     const auth = parseBasicAuth(authHeader);
 
     if (!auth) {
-      return {
-        statusCode: 401,
-        body: "Unauthorized"
-      };
+      return returnUnauthorized();
     }
 
     const token: string = generateToken();

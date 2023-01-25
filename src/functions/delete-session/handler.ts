@@ -1,7 +1,7 @@
 import type { ValidatedEventAPIGatewayProxyEvent } from "@libs/api-gateway";
 import { middyfy } from "@libs/lambda";
 import { authenticationService } from "src/database/services";
-import { parseBearerAuth } from "@libs/auth-utils";
+import { parseBearerAuth, returnUnauthorized } from "@libs/auth-utils";
 import authenticationSchema from "src/schema/authentication";
 
 /**
@@ -12,13 +12,14 @@ import authenticationSchema from "src/schema/authentication";
 const deleteAuthenticationSession: ValidatedEventAPIGatewayProxyEvent<typeof authenticationSchema> = async (event) => {
   const { headers } = event;
   const { Authorization, authorization } = headers;
+  
+  if (!authorization || !Authorization) {
+    return returnUnauthorized();
+  }
 
   const token = parseBearerAuth(authorization || Authorization);
   if (!token) {
-    return {
-      statusCode: 401,
-      body: "Unauthorized"
-    };
+    return returnUnauthorized();
   };
 
   const authenticationSession = await authenticationService.findSession(token);
