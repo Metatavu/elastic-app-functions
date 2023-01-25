@@ -16,3 +16,4 @@ export { default as listScheduledCrawls } from "./scheduled-crawls/list-schedule
 export { default as updateScheduledCrawl } from "./scheduled-crawls/update-scheduled-crawl";
 export { default as deleteScheduledCrawl } from "./scheduled-crawls/delete-scheduled-crawl";
 export { default as triggerScheduledCrawl } from "./scheduled-crawls/trigger-scheduled-crawl";
+export { default as createDocument } from "./create-document";

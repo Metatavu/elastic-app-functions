@@ -22,6 +22,7 @@ import addContactDocumentsToSQS from "@functions/add-contact-documents-to-sqs";
 import processContactDocumentFromSQS from "@functions/process-contact-documents-from-sqs";
 import addExternalServiceIdToServices from "@functions/add-external-service-id-to-services"
 import createDocumentFromExternalService from "@functions/create-document-from-external-service";
+import createDocument from "@functions/create-document";
 
 import config from "src/config";
 
@@ -109,7 +110,8 @@ const serverlessConfiguration: AWS = {
     createSession,
     deleteSession,
     addExternalServiceIdToServices,
-    createDocumentFromExternalService
+    createDocumentFromExternalService,
+    createDocument
   },
   package: { individually: true },
   custom: {

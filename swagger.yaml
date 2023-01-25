@@ -218,7 +218,7 @@ paths:
       tags:
         - Authentication
       responses:
-        "200":
+        "201":
           description: Logged in
           content:
             application/json;charset=utf-8:
@@ -236,6 +236,22 @@ paths:
       responses:
         "204":
           description: Empty content indicating a successful removal
+
+  "/document":
+    post:
+      operationId: createDocument
+      summary: Creates a document
+      description: |
+        Creates document
+      tags:
+        - Documents
+      responses:
+        "201":
+          description: Create new document
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: "#/components/schemas/DocumentCreation"
 
 components:
   requestBodies:
@@ -327,3 +343,16 @@ components:
           description: Identifier
         expiry:
           type: number
+    DocumentCreation:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+          description: Identifier
+        title:
+          type: string
+        description:
+          type: string
+        links:
+          type: string
