@@ -11,9 +11,7 @@ import schema from "src/schema/list-documents";
  * @param event event
  */
 const listDocumentsByIds: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async event => {
-  const { body: { documentIds }, 
-  headers: { authorization, Authorization } 
-} = event;
+  const { body: { documentIds }, headers: { authorization, Authorization } } = event;
   const authHeader = Authorization || authorization;
   const auth = await getElasticCredentialsForSession(authHeader);
   
