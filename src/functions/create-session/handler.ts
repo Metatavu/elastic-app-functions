@@ -37,34 +37,29 @@ const createAuthenticationSession: ValidatedEventAPIGatewayProxyEvent<any> = asy
     if (!foundSession) {
       return {
         statusCode: 401,
-        body: "Unauthorized- not found"
+        body: "Unauthorized"
       };
     }
 
-    // No token refresh for testing time to live configuration
-    // if (!validateTimestamp(foundSession.expiresAt)) {
-    //   await authenticationService.deleteSession(foundSession.token);
+    if (!validateTimestamp(foundSession.expiresAt)) {
+      await authenticationService.deleteSession(foundSession.token);
 
-    //   return {
-    //     statusCode: 401,
-    //     body: "Unauthorized"
-    //   }
-    // }
+      return {
+        statusCode: 401,
+        body: "Unauthorized"
+      }
+    }
 
-    // const tokenExpiry: number = generateExpiryTimestamp();
+    const tokenExpiry: number = generateExpiryTimestamp();
 
-    // const refreshedSession = await authenticationService.updateSession({
-    //   ...foundSession,
-    //   expiresAt: tokenExpiry
-    // });
+    const refreshedSession = await authenticationService.updateSession({
+      ...foundSession,
+      expiresAt: tokenExpiry
+    });
 
-    // const responseToken = {
-    //   token: refreshedSession.token,
-    //   expiry: refreshedSession.expiresAt
-    // };
     const responseToken = {
-      token: foundSession.token,
-      expiry: foundSession.expiresAt
+      token: refreshedSession.token,
+      expiry: refreshedSession.expiresAt
     };
 
     return {
