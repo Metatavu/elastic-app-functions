@@ -17,3 +17,4 @@ export { default as updateScheduledCrawl } from "./scheduled-crawls/update-sched
 export { default as deleteScheduledCrawl } from "./scheduled-crawls/delete-scheduled-crawl";
 export { default as triggerScheduledCrawl } from "./scheduled-crawls/trigger-scheduled-crawl";
 export { default as createDocument } from "./create-document";
+export { default as listManuallyCreatedDocuments } from "./list-manually-created-documents";

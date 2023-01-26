@@ -10,14 +10,14 @@ class TimedCurationService {
 
   /**
    * Constructor
-   * 
+   *
    * @param docClient DynamoDB client
    */
   constructor(private readonly docClient: DocumentClient) {}
 
   /**
    * Creates timed curation
-   * 
+   *
    * @param timedCuration timed curation
    * @returns created timed curation
    */
@@ -34,7 +34,7 @@ class TimedCurationService {
 
   /**
    * Finds single timed curation
-   * 
+   *
    * @param id timed curation id
    * @returns timed curation or null if not found
    */
@@ -42,18 +42,18 @@ class TimedCurationService {
     const result = await this.docClient
       .get({
         TableName: TABLE_NAME,
-        Key: { 
-          id: id 
+        Key: {
+          id: id
         },
       })
       .promise();
 
       return result.Item as TimedCuration;
-  }  
+  }
 
   /**
    * Lists timed curations
-   * 
+   *
    * @returns list of timed curations
    */
   public listTimedCurations = async (): Promise<TimedCuration[]> => {
@@ -67,8 +67,27 @@ class TimedCurationService {
   }
 
   /**
+   * Lists manually created document curations
+   *
+   * @returns list of timed curations
+   */
+  public listManuallyCreatedDocumentCurations = async (): Promise<TimedCuration[]> => {
+    const result = await this.docClient
+    // Could this be done with a query?
+      .scan({
+        TableName: TABLE_NAME,
+        FilterExpression: "#isManuallyCreated = :isManuallyCreated",
+        ExpressionAttributeNames: { "#isManuallyCreated": "isManuallyCreated" },
+        ExpressionAttributeValues: { ":isManuallyCreated":true }
+      })
+      .promise();
+
+    return result.Items as TimedCuration[];
+  }
+
+  /**
    * Updates timed curation
-   * 
+   *
    * @param timedCuration timed curation to be updated
    * @returns updated timed curation
    */
@@ -85,19 +104,19 @@ class TimedCurationService {
 
   /**
    * Deletes timed curation
-   * 
+   *
    * @param id timed curation id
    */
   public deleteTimedCuration = async (id: string) => {
     return this.docClient
       .delete({
         TableName: TABLE_NAME,
-        Key: { 
-          id: id 
+        Key: {
+          id: id
         },
       })
       .promise();
-  }  
+  }
 
 }
 

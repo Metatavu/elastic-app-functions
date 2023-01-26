@@ -23,6 +23,7 @@ import processContactDocumentFromSQS from "@functions/process-contact-documents-
 import addExternalServiceIdToServices from "@functions/add-external-service-id-to-services"
 import createDocumentFromExternalService from "@functions/create-document-from-external-service";
 import createDocument from "@functions/create-document";
+import listManuallyCreatedDocuments from "@functions/list-manually-created-documents";
 
 import config from "src/config";
 
@@ -111,7 +112,8 @@ const serverlessConfiguration: AWS = {
     deleteSession,
     addExternalServiceIdToServices,
     createDocumentFromExternalService,
-    createDocument
+    createDocument,
+    listManuallyCreatedDocuments
   },
   package: { individually: true },
   custom: {

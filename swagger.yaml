@@ -251,7 +251,25 @@ paths:
           content:
             application/json;charset=utf-8:
               schema:
-                $ref: "#/components/schemas/DocumentCreation"
+                $ref: "#/components/schemas/Document"
+
+  "/documents":
+    get:
+      operationId: listsManuallyCreatedDocuments
+      summary: Lists manually created documents
+      description: |
+        Lists manually created documents
+      tags:
+        - Documents
+      responses:
+        "200":
+          description: A list of manually created documents
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Document"
 
 components:
   requestBodies:
@@ -343,7 +361,7 @@ components:
           description: Identifier
         expiry:
           type: number
-    DocumentCreation:
+    Document:
       type: object
       properties:
         id:
