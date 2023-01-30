@@ -26,7 +26,7 @@ const scheduleTimedCuration = async () => {
     const active = start.getTime() <= now.getTime() && end.getTime() >= now.getTime();
     const alwaysActive = isManuallyCreated && !startTime && !endTime;
 
-    if (!curationId && active || !curationId && alwaysActive) {
+    if (!curationId && (active || alwaysActive)) {
       const payload = {
         hidden: hidden,
         promoted: promoted,
