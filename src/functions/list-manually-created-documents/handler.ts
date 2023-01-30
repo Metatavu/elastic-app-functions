@@ -30,16 +30,21 @@ const listManuallyCreatedDocuments: ValidatedEventAPIGatewayProxyEvent<any> = as
   }
 
   const manuallyCreatedCurations = await timedCurationsService.listManuallyCreatedDocumentCurations();
+  const manuallyCreatedCurationsIds = manuallyCreatedCurations.map(curation => curation.curationId);
 
-  const documents = await Promise.all(
-    manuallyCreatedCurations.map(async curation => {
-      return await elastic.findDocument({ documentId: curation.id });
-    })
-  );
+  const { results } = await elastic.searchDocuments({
+    query: "",
+    page: {
+      size: 1000
+    },
+    filters: {
+      id: manuallyCreatedCurationsIds
+    }
+  });
 
   return {
     statusCode: 200,
-    body: JSON.stringify(documents)
+    body: JSON.stringify(results)
   };
 };
 

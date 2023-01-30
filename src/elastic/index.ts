@@ -22,8 +22,7 @@ export enum ContentCategory {
   NEWS = "news",
   UNCATEGORIZED = "uncategorized",
   CONTACT = "contact",
-  EXTERNAL = "service_external_link",
-  MANUAL = "manually_created_document"
+  EXTERNAL = "service_external_link"
 }
 
 /**

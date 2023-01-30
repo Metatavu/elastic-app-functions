@@ -2,7 +2,7 @@ import type { ValidatedEventAPIGatewayProxyEvent } from "@libs/api-gateway";
 import { middyfy } from "@libs/lambda";
 import schema from "src/schema/create-document";
 import { getElasticCredentialsForSession } from "@libs/auth-utils";
-import { ContentCategory, getElastic } from "src/elastic";
+import { getElastic } from "src/elastic";
 
 /**
  * Lambda for creating documents
@@ -36,7 +36,7 @@ const createDocument: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
       title: title,
       description: description,
       links: links,
-      meta_content_category: ContentCategory.MANUAL
+      is_manually_created: true
     }]
   });
 

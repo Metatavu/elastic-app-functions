@@ -4,7 +4,7 @@ import schema from "src/schema/timed-curation";
 import { timedCurationsService } from "src/database/services";
 import { v4 as uuid } from "uuid";
 import { getElasticCredentialsForSession } from "@libs/auth-utils";
-import { ContentCategory, getElastic } from "src/elastic";
+import { getElastic } from "src/elastic";
 
 /**
  * Lambda for creating timed curations
@@ -51,7 +51,7 @@ const createTimedCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = a
     }
   }
 
-  if (promoted.length === 1 && documents[0].data?.meta_content_category === ContentCategory.MANUAL) {
+  if (promoted.length === 1 && documents[0].data?.is_manually_created) {
     const manualDocumentCuration = await timedCurationsService.createTimedCuration({
       id: documents[0].id,
       promoted: promoted,
