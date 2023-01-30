@@ -31,15 +31,13 @@ const createDocument: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
     };
   }
 
-  const documentProperties = [{
-    title: title,
-    description: description,
-    links: links,
-    meta_content_category: ContentCategory.MANUAL
-  }];
-
   const document = await elastic.updateDocuments({
-    documents: documentProperties
+    documents: [{
+      title: title,
+      description: description,
+      links: links,
+      meta_content_category: ContentCategory.MANUAL
+    }]
   });
 
   return {
