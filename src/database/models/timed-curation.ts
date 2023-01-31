@@ -7,8 +7,8 @@ interface TimedCuration {
   queries: string[];
   promoted: string[];
   hidden: string[];
-  startTime: string;
-  endTime: string;
+  startTime?: string;
+  endTime?: string;
   isManuallyCreated?: boolean;
 }
 

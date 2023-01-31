@@ -301,8 +301,6 @@ components:
         - queries
         - promoted
         - hidden
-        - startTime
-        - endTime
       properties:
         id:
           type: string
