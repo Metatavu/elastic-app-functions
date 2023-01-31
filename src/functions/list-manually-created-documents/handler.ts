@@ -32,6 +32,8 @@ const listManuallyCreatedDocuments: ValidatedEventAPIGatewayProxyEvent<any> = as
   const manuallyCreatedCurations = await timedCurationsService.listManuallyCreatedDocumentCurations();
   const manuallyCreatedCurationsIds = manuallyCreatedCurations.map(curation => curation.curationId);
 
+  console.log("manually created curation id", manuallyCreatedCurations, manuallyCreatedCurationsIds);
+
   const { results } = await elastic.searchDocuments({
     query: "",
     page: {
@@ -41,6 +43,8 @@ const listManuallyCreatedDocuments: ValidatedEventAPIGatewayProxyEvent<any> = as
       id: manuallyCreatedCurationsIds
     }
   });
+
+  console.log("results", results);
 
   return {
     statusCode: 200,
