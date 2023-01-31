@@ -245,6 +245,8 @@ paths:
         Creates document
       tags:
         - Documents
+      requestBody:
+        $ref: "#/components/requestBodies/Document"
       responses:
         "201":
           description: Create new document
@@ -285,6 +287,13 @@ components:
         application/json;charset=utf-8:
           schema:
             $ref: "#/components/schemas/ScheduledCrawl"
+      description: Payload
+      required: true
+    Document:
+      content:
+        application/json;charset=utf-8:
+          schema:
+            $ref: "#/components/schemas/Document"
       description: Payload
       required: true
   securitySchemes:
