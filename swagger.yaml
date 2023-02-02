@@ -6,99 +6,99 @@ info:
 security:
   - BearerAuth: []
 paths:
-  "/timed-curations":
+  "/curations":
     get:
-      operationId: listTimedCurations
-      summary: Lists timed curations
+      operationId: listCurations
+      summary: Lists curations
       description: |
-        Lists timed curations
+        Lists curations
       tags:
-        - TimedCurations
+        - Curations
       responses:
         "200":
-          description: A list of timed curations
+          description: A list of curations
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/TimedCuration"
+                  $ref: "#/components/schemas/Curation"
     post:
-      operationId: createTimedCuration
-      summary: create new timed curation
+      operationId: createCuration
+      summary: create new curation
       description: |
-        Creates new timed curation
+        Creates new curation
       tags:
-        - TimedCurations
+        - Curations
       requestBody:
-        $ref: "#/components/requestBodies/TimedCuration"
+        $ref: "#/components/requestBodies/Curation"
       responses:
         "200":
-          description: Created timed curation
+          description: Created curation
           content:
             application/json;charset=utf-8:
               schema:
-                $ref: "#/components/schemas/TimedCuration"
+                $ref: "#/components/schemas/Curation"
 
-  "/timed-curations/{id}":
+  "/curations/{id}":
     get:
-      operationId: findTimedCuration
-      summary: Find timed curation
+      operationId: findCuration
+      summary: Find curation
       description: |
-        Find timed curation
+        Find curation
       tags:
-        - TimedCurations
+        - Curations
       parameters:
         - name: id
           required: true
           in: path
-          description: timed curation id
+          description: curation id
           schema:
             type: string
             format: uuid
       responses:
         "200":
-          description: Found timed curation
+          description: Found curation
           content:
             application/json;charset=utf-8:
               schema:
-                $ref: "#/components/schemas/TimedCuration"
+                $ref: "#/components/schemas/Curation"
     put:
-      operationId: updateTimedCuration
-      summary: Updates timed curation
+      operationId: updateCuration
+      summary: Updates curation
       description: |
-        Updates timed curations
+        Updates curations
       tags:
-        - TimedCurations
+        - Curations
       parameters:
         - name: id
           required: true
           in: path
-          description: timed curation id
+          description: timed id
           schema:
             type: string
             format: uuid
       requestBody:
-        $ref: "#/components/requestBodies/TimedCuration"
+        $ref: "#/components/requestBodies/Curation"
       responses:
         "200":
-          description: Updated timed curation
+          description: Updated curation
           content:
             application/json;charset=utf-8:
               schema:
-                $ref: "#/components/schemas/TimedCuration"
+                $ref: "#/components/schemas/Curation"
     delete:
-      operationId: deleteTimedCuration
-      summary: Deletes timed curation
+      operationId: deleteCuration
+      summary: Deletes curation
       description: |
-        Deletes timed curation
+        Deletes curation
       tags:
-        - TimedCurations
+        - Curations
       parameters:
         - name: id
           required: true
           in: path
-          description: timed curation id
+          description: curation id
           schema:
             type: string
             format: uuid
@@ -237,24 +237,6 @@ paths:
         "204":
           description: Empty content indicating a successful removal
 
-  "/document":
-    post:
-      operationId: createDocument
-      summary: Creates a document
-      description: |
-        Creates document
-      tags:
-        - Documents
-      requestBody:
-        $ref: "#/components/requestBodies/Document"
-      responses:
-        "201":
-          description: Create new document
-          content:
-            application/json;charset=utf-8:
-              schema:
-                $ref: "#/components/schemas/Document"
-
   "/documents":
     get:
       operationId: listsManuallyCreatedDocuments
@@ -275,11 +257,11 @@ paths:
 
 components:
   requestBodies:
-    TimedCuration:
+    Curation:
       content:
         application/json;charset=utf-8:
           schema:
-            $ref: "#/components/schemas/TimedCuration"
+            $ref: "#/components/schemas/CurationBody"
       description: Payload
       required: true
     ScheduledCrawl:
@@ -304,7 +286,7 @@ components:
       type: http
       scheme: bearer
   schemas:
-    TimedCuration:
+    Curation:
       type: object
       required:
         - queries
@@ -316,6 +298,10 @@ components:
           format: uuid
           readOnly: true
           description: Identifier
+        elasticCurationId:
+          type: string
+        documentId:
+          type: string
         queries:
           type: array
           items:
@@ -336,6 +322,52 @@ components:
           type: string
           format: date-time
           description: Start time of curation
+    CurationBody:
+      type: object
+      required:
+        - queries
+        - promoted
+        - hidden
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          description: Identifier
+        elasticCurationId:
+          type: string
+        documentId:
+          type: string
+        queries:
+          type: array
+          items:
+            type: string
+        promoted:
+          type: array
+          items:
+            type: string
+        hidden:
+          type: array
+          items:
+            type: string
+        startTime:
+          type: string
+          format: date-time
+          description: Start time of curation
+        endTime:
+          type: string
+          format: date-time
+          description: Start time of curation
+        title:
+          type: string
+        description:
+          type: string
+        links:
+          type: string
+        language:
+          type: string
+        curationType:
+          type: string
     ScheduledCrawl:
       type: object
       required:
@@ -380,4 +412,6 @@ components:
         description:
           type: string
         links:
+          type: string
+        language:
           type: string

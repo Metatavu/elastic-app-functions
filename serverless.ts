@@ -1,10 +1,10 @@
 import type { AWS } from "@serverless/typescript";
 
-import findTimedCuration from "@functions/find-timed-curation";
-import listTimedCurations from "@functions/list-timed-curations";
-import createTimedCuration from "@functions/create-timed-curation";
-import updateTimedCuration from "@functions/update-timed-curation";
-import deleteTimedCuration from "@functions/delete-timed-curation";
+import findCuration from "@functions/find-curation";
+import listCurations from "@functions/list-curations";
+import createCuration from "@functions/create-curation";
+import updateCuration from "@functions/update-curation";
+import deleteCuration from "@functions/delete-curation";
 import scheduleTimedCuration from "@functions/schedule-timed-curations";
 import addCategoryToDocuments from "@functions/add-category-to-document";
 import detectDocumentLanguages from "@functions/detect-document-languages";
@@ -22,8 +22,7 @@ import addContactDocumentsToSQS from "@functions/add-contact-documents-to-sqs";
 import processContactDocumentFromSQS from "@functions/process-contact-documents-from-sqs";
 import addExternalServiceIdToServices from "@functions/add-external-service-id-to-services"
 import createDocumentFromExternalService from "@functions/create-document-from-external-service";
-import createDocument from "@functions/create-document";
-import listManuallyCreatedDocuments from "@functions/list-manually-created-documents";
+import listManuallyCreatedDocuments from "@functions/list-custom-documents";
 
 import config from "src/config";
 
@@ -70,9 +69,10 @@ const serverlessConfiguration: AWS = {
               "dynamodb:UpdateTimeToLive"
             ],
             Resource: [
-              { "Fn::GetAtt": [ "TimedCurations", "Arn" ] },
+              { "Fn::GetAtt": [ "Curations", "Arn" ] },
               { "Fn::GetAtt": [ "ScheduledCrawls", "Arn" ] },
-              { "Fn::GetAtt": [ "AuthenticationSessions", "Arn" ] }
+              { "Fn::GetAtt": [ "AuthenticationSessions", "Arn" ] },
+              { "Fn::GetAtt": [ "Documents", "Arn" ] }
             ],
           },
           {
@@ -90,11 +90,11 @@ const serverlessConfiguration: AWS = {
     }
   },
   functions: {
-    findTimedCuration,
-    listTimedCurations,
-    createTimedCuration,
-    updateTimedCuration,
-    deleteTimedCuration,
+    findCuration,
+    listCurations,
+    createCuration,
+    updateCuration,
+    deleteCuration,
     scheduleTimedCuration,
     addCategoryToDocuments,
     detectDocumentLanguages,
@@ -112,7 +112,6 @@ const serverlessConfiguration: AWS = {
     deleteSession,
     addExternalServiceIdToServices,
     createDocumentFromExternalService,
-    createDocument,
     listManuallyCreatedDocuments
   },
   package: { individually: true },
@@ -130,11 +129,11 @@ const serverlessConfiguration: AWS = {
   },
   resources: {
     Resources: {
-      TimedCurations: {
+      Curations: {
         Type: "AWS::DynamoDB::Table",
         DeletionPolicy: "Delete",
         Properties: {
-          TableName: "timed-curations",
+          TableName: "curations",
           AttributeDefinitions: [{ AttributeName: "id", AttributeType: "S" }],
           KeySchema: [{ AttributeName: "id", KeyType: "HASH" }],
           ProvisionedThroughput: {
@@ -148,6 +147,19 @@ const serverlessConfiguration: AWS = {
         DeletionPolicy: "Delete",
         Properties: {
           TableName: "scheduled-crawls",
+          AttributeDefinitions: [{ AttributeName: "id", AttributeType: "S" }],
+          KeySchema: [{ AttributeName: "id", KeyType: "HASH" }],
+          ProvisionedThroughput: {
+            ReadCapacityUnits: 1,
+            WriteCapacityUnits: 1
+          },
+        },
+      },
+      Documents: {
+        Type: "AWS::DynamoDB::Table",
+        DeletionPolicy: "Delete",
+        Properties: {
+          TableName: "documents",
           AttributeDefinitions: [{ AttributeName: "id", AttributeType: "S" }],
           KeySchema: [{ AttributeName: "id", KeyType: "HASH" }],
           ProvisionedThroughput: {

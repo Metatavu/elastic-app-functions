@@ -6,8 +6,8 @@ const fn: AWSFunction = {
   events: [
     {
       httpApi: {
-        method: "get",
-        path: "/timed-curations/{id}"
+        method: "post",
+        path: "/curations"
       },
     },
   ],

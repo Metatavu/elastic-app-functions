@@ -1,17 +1,26 @@
 import { ValidatedEventAPIGatewayProxyEvent } from "@libs/api-gateway";
 import { middyfy } from "@libs/lambda";
 import { getElastic } from "src/elastic";
-import { timedCurationsService } from "src/database/services";
+import { curationsService } from "src/database/services";
 import { getElasticCredentialsForSession } from "@libs/auth-utils";
 
 /**
- * Lambda for listing timed curations
+ * Lambda for find curation
  *
  * @param event event
  */
-const listTimedCurations: ValidatedEventAPIGatewayProxyEvent<any> = async event => {
-  const { headers: { authorization, Authorization } } = event;
+const findCuration: ValidatedEventAPIGatewayProxyEvent<any> = async event => {
+  const { pathParameters, headers } = event;
+  const { authorization, Authorization } = headers;
+  const id = pathParameters?.id;
   const authHeader = Authorization || authorization;
+
+  if (!id) {
+    return {
+      statusCode: 400,
+      body: "Bad request"
+    };
+  }
 
   const auth = await getElasticCredentialsForSession(authHeader);
   if (!auth) {
@@ -29,12 +38,18 @@ const listTimedCurations: ValidatedEventAPIGatewayProxyEvent<any> = async event 
     };
   }
 
-  const timedCurations = await timedCurationsService.listTimedCurations();
+  const curation = await curationsService.findCuration(id);
+  if (!curation) {
+    return {
+      statusCode: 404,
+      body: "Not found"
+    };
+  }
 
   return {
     statusCode: 200,
-    body: JSON.stringify(timedCurations)
+    body: JSON.stringify(curation)
   };
 };
 
-export const main = middyfy(listTimedCurations);
+export const main = middyfy(findCuration);

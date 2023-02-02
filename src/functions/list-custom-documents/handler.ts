@@ -1,15 +1,15 @@
 import { ValidatedEventAPIGatewayProxyEvent } from "@libs/api-gateway";
 import { middyfy } from "@libs/lambda";
 import { getElastic } from "src/elastic";
-import { timedCurationsService } from "src/database/services";
+import { curationsService } from "src/database/services";
 import { getElasticCredentialsForSession } from "@libs/auth-utils";
 
 /**
- * Lambda for listing manually created documents
+ * Lambda for listing custom documents
  *
  * @param event event
  */
-const listManuallyCreatedDocuments: ValidatedEventAPIGatewayProxyEvent<any> = async event => {
+const listCustomDocuments: ValidatedEventAPIGatewayProxyEvent<any> = async event => {
   const { headers: { authorization, Authorization } } = event;
   const authHeader = Authorization || authorization;
 
@@ -29,7 +29,7 @@ const listManuallyCreatedDocuments: ValidatedEventAPIGatewayProxyEvent<any> = as
     };
   }
 
-  const manuallyCreatedCurations = await timedCurationsService.listManuallyCreatedDocumentCurations();
+  const manuallyCreatedCurations = await curationsService.listCustomDocumentCurations();
   const manuallyCreatedCurationsIds = manuallyCreatedCurations.map(curation => curation.id);
 
   const { results } = await elastic.searchDocuments({
@@ -48,4 +48,4 @@ const listManuallyCreatedDocuments: ValidatedEventAPIGatewayProxyEvent<any> = as
   };
 };
 
-export const main = middyfy(listManuallyCreatedDocuments);
+export const main = middyfy(listCustomDocuments);

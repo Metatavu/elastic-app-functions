@@ -115,3 +115,12 @@ export type ServiceDocument = {
   language: SupportedLanguages;
   external_url: string;
 };
+
+/**
+ * Enum for curation type
+ */
+export enum CurationType {
+  CUSTOM_PERMANENT = "custom permanent",
+  CUSTOM_TIMED = "custom timed",
+  STANDARD_TIMED = "standard timed"
+};

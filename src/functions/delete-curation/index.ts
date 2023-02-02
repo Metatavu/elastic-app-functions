@@ -7,7 +7,7 @@ const fn: AWSFunction = {
     {
       httpApi: {
         method: "delete",
-        path: "/timed-curations/{id}"
+        path: "/curations/{id}"
       },
     },
   ],

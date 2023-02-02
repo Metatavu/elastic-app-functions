@@ -1,8 +1,8 @@
-export { default as createTimedCuration } from "./create-timed-curation";
-export { default as listTimedCurations } from "./list-timed-curations";
-export { default as updateTimedCuration } from "./update-timed-curation";
-export { default as deleteTimedCuration } from "./delete-timed-curation";
-export { default as findTimedCuration } from "./find-timed-curation";
+export { default as createCuration } from "./create-curation";
+export { default as listCurations } from "./list-curations";
+export { default as updateCuration } from "./update-curation";
+export { default as deleteCuration } from "./delete-curation";
+export { default as findCuration } from "./find-curation";
 export { default as scheduleTimedCuration } from "./schedule-timed-curations";
 export { default as addCategoryToDocuments } from "./add-category-to-document";
 export { default as detectDocumentLanguages } from "./detect-document-languages";
@@ -16,5 +16,4 @@ export { default as listScheduledCrawls } from "./scheduled-crawls/list-schedule
 export { default as updateScheduledCrawl } from "./scheduled-crawls/update-scheduled-crawl";
 export { default as deleteScheduledCrawl } from "./scheduled-crawls/delete-scheduled-crawl";
 export { default as triggerScheduledCrawl } from "./scheduled-crawls/trigger-scheduled-crawl";
-export { default as createDocument } from "./create-document";
-export { default as listManuallyCreatedDocuments } from "./list-manually-created-documents";
+export { default as listCustomDocuments } from "./list-custom-documents";
