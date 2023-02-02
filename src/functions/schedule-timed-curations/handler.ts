@@ -28,26 +28,23 @@ const scheduleTimedCuration = async () => {
     const start = startTime ? parseDate(startTime) : now;
     const end = endTime ? parseDate(endTime) : farFuture;
     const active = start.getTime() <= now.getTime() && end.getTime() >= now.getTime();
-    const customTimedCuration = !!(!elasticCurationId && active && curationType === CurationType.CUSTOM_TIMED && documentId);
+    const activeCustomTimedCuration = !!(!elasticCurationId && active && curationType === CurationType.CUSTOM_TIMED && documentId);
 
-    if (customTimedCuration) {
+    if (activeCustomTimedCuration) {
       const foundDocument = await documentService.findDocument(documentId);
       if (!foundDocument) {
-        return {
-          statusCode: 404,
-          body: `Document ${documentId} not found`
-        };
+        console.warn(`Could not find custom document ${documentId}.`);
+      } else {
+        await elastic.updateDocuments({
+          documents: [{
+            id: foundDocument.id,
+            title: foundDocument.title,
+            description: foundDocument.description,
+            links: foundDocument.links,
+            language: foundDocument.language,
+          }]
+        });
       }
-
-      await elastic.updateDocuments({
-        documents: [{
-          id: foundDocument.id,
-          title: foundDocument.title,
-          description: foundDocument.description,
-          links: foundDocument.links,
-          language: foundDocument.language,
-        }]
-      });
     }
 
     if (!elasticCurationId && active) {
@@ -72,6 +69,7 @@ const scheduleTimedCuration = async () => {
     } else if (elasticCurationId && !active) {
       console.log(`Curation ${elasticCurationId} scheduled to be deactivated. Removing curation from app search...`);
       const curation = await elastic.findCuration({ id: elasticCurationId });
+
       if (curation) {
         await elastic.deleteCuration({ id: elasticCurationId });
         console.info(`Curation ${elasticCurationId} removed.`);
@@ -82,25 +80,21 @@ const scheduleTimedCuration = async () => {
       if (curationType === CurationType.CUSTOM_TIMED && documentId) {
         const foundDocument = await documentService.findDocument(documentId);
         if (!foundDocument) {
-          return {
-            statusCode: 404,
-            body: `Document ${documentId} not found`
-          };
-        }
-        const foundElasticDocument = await elastic.findDocument({ documentId: documentId });
-        if (!foundElasticDocument) {
-          return {
-            statusCode: 404,
-            body: `Elastic document ${documentId} not found`
-          };
-        }
+          console.warn(`Could not find document ${documentId}.`);
+        } else {
+          const foundElasticDocument = await elastic.findDocument({ documentId: documentId });
 
-        await elastic.deleteDocuments({documentIds: [documentId]});
+          if (!foundElasticDocument) {
+            console.warn(`Could not find expired elastic custom document ${documentId}, so cannot remove it.`);
+          } else {
+            await elastic.deleteDocuments({documentIds: [documentId]});
 
-        await documentService.updateDocument({
-          ...foundDocument,
-          curationId: ""
-        });
+            await documentService.updateDocument({
+              ...foundDocument,
+              curationId: ""
+            });
+          }
+        }
       }
 
       await curationsService.deleteCuration(id);

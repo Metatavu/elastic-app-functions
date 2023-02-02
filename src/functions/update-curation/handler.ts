@@ -18,8 +18,8 @@ const updateCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
   const id = pathParameters?.id;
   const authHeader = Authorization || authorization;
 
-  const isCustomCuration = curationType === CurationType.CUSTOM_PERMANENT || curationType === CurationType.CUSTOM_TIMED;
   const hasDocumentAttributes = !!(title && description && links && language);
+  const isCustomCuration = (curationType === CurationType.CUSTOM_PERMANENT || curationType === CurationType.CUSTOM_TIMED) && hasDocumentAttributes;
 
   if (!id) {
     return {
@@ -53,13 +53,6 @@ const updateCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
   }
 
   if (isCustomCuration && curation.documentId) {
-    if (!hasDocumentAttributes) {
-      return {
-        statusCode: 400,
-        body: "Missing document properties"
-      };
-    }
-
     // Fixed custom curation
     if (!startTime) {
       await elastic.updateDocuments({

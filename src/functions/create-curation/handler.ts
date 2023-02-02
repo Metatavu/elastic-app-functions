@@ -29,8 +29,8 @@ const createCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
   const { Authorization, authorization } = headers;
   const authHeader = Authorization || authorization;
 
-  const isCustomCuration = curationType === CurationType.CUSTOM_PERMANENT || curationType === CurationType.CUSTOM_TIMED;
   const hasDocumentAttributes = !!(title && description && links && language);
+  const isCustomCuration = (curationType === CurationType.CUSTOM_PERMANENT || curationType === CurationType.CUSTOM_TIMED) && hasDocumentAttributes;
 
   const auth = await getElasticCredentialsForSession(authHeader);
   if (!auth) {
@@ -48,14 +48,7 @@ const createCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
     };
   }
 
-  if (promoted.length === 0 && isCustomCuration) {
-    if (!hasDocumentAttributes) {
-      return {
-        statusCode: 400,
-        body: "Missing document properties"
-      };
-    }
-
+  if (isCustomCuration) {
     const newDocumentId = uuid();
     promoted.push(newDocumentId);
 
@@ -101,7 +94,6 @@ const createCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
       });
 
       const foundDocument = await documentService.findDocument(newDocumentId);
-
       if (!foundDocument) {
         return {
           statusCode: 404,
