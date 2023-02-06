@@ -107,7 +107,7 @@ const createCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
 
   if (curationType === CurationType.STANDARD) {
     try {
-      validateDocumentIds(promoted, hidden, elastic);
+      await validateDocumentIds(promoted, hidden, elastic);
     } catch (error) {
       return {
         statusCode: 404,
