@@ -374,51 +374,62 @@ components:
           type: string
     CurationUpdate:
       type: object
-      required:
-        - queries
-        - promoted
-        - hidden
-        - curationType
       properties:
-        id:
-          type: string
-          format: uuid
-          readOnly: true
-          description: Identifier
-        elasticCurationId:
-          type: string
-        documentId:
-          type: string
-        queries:
-          type: array
-          items:
-            type: string
-        promoted:
-          type: array
-          items:
-            type: string
-        hidden:
-          type: array
-          items:
-            type: string
-        startTime:
-          type: string
-          format: date-time
-          description: Start time of curation
-        endTime:
-          type: string
-          format: date-time
-          description: Start time of curation
-        title:
-          type: string
-        description:
-          type: string
-        links:
-          type: string
-        language:
-          type: string
-        curationType:
-          type: string
+        curation:
+          type: object
+          required:
+            - queries
+            - promoted
+            - hidden
+            - curationType
+          properties:
+            id:
+              type: string
+              format: uuid
+              readOnly: true
+              description: Identifier
+            elasticCurationId:
+              type: string
+            documentId:
+              type: string
+            queries:
+              type: array
+              items:
+                type: string
+            promoted:
+              type: array
+              items:
+                type: string
+            hidden:
+              type: array
+              items:
+                type: string
+            startTime:
+              type: string
+              format: date-time
+              description: Start time of curation
+            endTime:
+              type: string
+              format: date-time
+              description: Start time of curation
+            curationType:
+              type: string
+        document:
+          type: object
+          required:
+            - title
+            - description
+            - links
+            - language
+          properties:
+            title:
+              type: string
+            description:
+              type: string
+            links:
+              type: string
+            language:
+              type: string
     ScheduledCrawl:
       type: object
       required:
