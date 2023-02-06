@@ -44,8 +44,6 @@ const deleteCuration: ValidatedEventAPIGatewayProxyEvent<any> = async event => {
     };
   }
 
-  const isCustomCuration = curation.curationType === CurationType.CUSTOM_PERMANENT || curation.curationType === CurationType.CUSTOM_TIMED;
-
   if (curation.elasticCurationId) {
     const elasticCuration = await elastic.findCuration({ id: curation.elasticCurationId });
     if (elasticCuration) {
@@ -55,7 +53,7 @@ const deleteCuration: ValidatedEventAPIGatewayProxyEvent<any> = async event => {
     }
   }
 
-  if (isCustomCuration && curation.documentId) {
+  if (curation.curationType === CurationType.CUSTOM && curation.documentId) {
     const foundDocument = await elastic.findDocument({ documentId: curation.documentId });
     if (foundDocument) {
       await elastic.deleteDocuments({documentIds: [curation.documentId]});

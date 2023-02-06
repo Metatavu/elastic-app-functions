@@ -1,5 +1,5 @@
 import { Client } from "@elastic/enterprise-search";
-import { CreateCurationRequest, DeleteDocumentsResponse, SearchRequest, SearchResponse } from "@elastic/enterprise-search/lib/api/app/types";
+import { CreateCurationRequest, DeleteDocumentsResponse, PutCurationRequest, SearchRequest, SearchResponse } from "@elastic/enterprise-search/lib/api/app/types";
 import { BasicAuth } from "@libs/auth-utils";
 import config from "src/config";
 
@@ -75,6 +75,24 @@ export class Elastic {
 
     const result = await this.getClient().app.createCuration({
       engine_name: this.options.engineName,
+      body: curation
+    });
+
+    return result.id;
+  };
+
+  /**
+   * Updates curation
+   *
+   * @param options options
+   * @returns updated curation id
+   */
+  public updateCuration = async (options: { curation: PutCurationRequest["body"] }): Promise<string> => {
+    const { curation } = options;
+
+    const result = await this.getClient().app.putCuration({
+      engine_name: this.options.engineName,
+      curation_id: curation?.id!,
       body: curation
     });
 

@@ -4,7 +4,9 @@ import { middyfy } from "@libs/lambda";
 import { getElastic } from "src/elastic";
 import { curationsService, documentService } from "src/database/services";
 import schema from "src/schema/curation";
-import { CurationType } from "@types";
+import { CurationType, UpdateCurationResponse } from "@types";
+import { updateExistingElasticCuration } from "@libs/curation-utils";
+import Document from "src/database/models/document";
 
 /**
  * Lambda for updating custom and standard curations
@@ -14,18 +16,34 @@ import { CurationType } from "@types";
 const updateCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async event => {
   const { pathParameters, body, headers } = event;
   const { authorization, Authorization } = headers;
-  const { queries, promoted, hidden, startTime, endTime, title, description, links, language, curationType } = body;
+  const {
+    queries,
+    promoted,
+    hidden,
+    startTime,
+    endTime,
+    title,
+    description,
+    links,
+    language,
+    curationType
+  } = body;
   const id = pathParameters?.id;
   const authHeader = Authorization || authorization;
-
-  const hasDocumentAttributes = !!(title && description && links && language);
-  const isCustomCuration = (curationType === CurationType.CUSTOM_PERMANENT || curationType === CurationType.CUSTOM_TIMED) && hasDocumentAttributes;
 
   if (!id) {
     return {
       statusCode: 400,
       body: "Bad request"
     }
+  }
+
+  const hasDocumentAttributes = !!(title && description && links && language);
+  if (curationType === CurationType.CUSTOM && !hasDocumentAttributes) {
+    return {
+      statusCode: 400,
+      body: "Bad request, missing document values"
+    };
   }
 
   const auth = await getElasticCredentialsForSession(authHeader);
@@ -52,37 +70,11 @@ const updateCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
     };
   }
 
-  if (isCustomCuration && curation.documentId) {
-    // Fixed custom curation
+  let elasticCurationId = curation.elasticCurationId;
+  let response: UpdateCurationResponse = {};
+
+  if (curationType === CurationType.CUSTOM && curation.documentId && hasDocumentAttributes) {
     if (!startTime) {
-      await elastic.updateDocuments({
-        documents: [{
-          id: curation.documentId,
-          title: title,
-          description: description,
-          links: links,
-          language: language
-        }]
-      });
-
-      const elasticCurationId = await elastic.createCuration({
-        curation: {
-          hidden: hidden,
-          promoted: promoted,
-          queries: queries
-        }
-      });
-
-      const updatedCuration = await curationsService.updateCuration({
-        ...curation,
-        promoted: promoted,
-        hidden: hidden,
-        queries: queries,
-        endTime: endTime,
-        curationType: curationType,
-        elasticCurationId: elasticCurationId
-      });
-
       const foundDocument = await documentService.findDocument(curation.documentId);
       if (!foundDocument) {
         return {
@@ -91,71 +83,61 @@ const updateCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
         };
       }
 
-      const updatedDocument = await documentService.updateDocument({
-        ...foundDocument,
-        curationId: updatedCuration.id
-      });
-
-      const updatedCurationAndDocument = {
-        curation: updatedCuration,
-        document: updatedDocument
-      };
-
-      return {
-        statusCode: 200,
-        body: JSON.stringify(updatedCurationAndDocument)
-      };
-      // Timed custom curation, not starting yet
-    } else {
-      const updatedCuration = await curationsService.updateCuration({
-        ...curation,
-        promoted: promoted,
-        hidden: hidden,
-        queries: queries,
-        startTime: startTime,
-        endTime: endTime,
-        curationType: curationType,
-        elasticCurationId: ""
-      });
-
-      const foundDocument = await documentService.findDocument(curation.documentId);
-      if (!foundDocument) {
-        return {
-          statusCode: 404,
-          body: `Document ${curation.documentId} not found`
-        };
+      const updatesToDocument: Document = {
+        id: curation.documentId,
+        description: description,
+        language: language,
+        links: links,
+        title: title,
+        curationId: id
       }
 
-      const updatedDocument = await documentService.updateDocument({
-        ...foundDocument,
-        curationId: updatedCuration.id
-      });
+      if (foundDocument !== updatesToDocument) {
+        const updatedDocument = await documentService.updateDocument(updatesToDocument)
+        await elastic.updateDocuments({
+          documents: [{
+            id: curation.documentId,
+            title: title,
+            description: description,
+            links: links,
+            language: language
+          }]
+        });
+        response.document = updatedDocument;
+      }
 
-      const updatedCurationAndDocument = {
-        curation: updatedCuration,
-        document: updatedDocument
-      };
-
-      return {
-        statusCode: 200,
-        body: JSON.stringify(updatedCurationAndDocument)
-      };
+      if (curation.elasticCurationId) {
+        updateExistingElasticCuration(curation.elasticCurationId, elastic);
+      } else {
+        elasticCurationId = await elastic.createCuration({
+          curation: {
+            hidden: hidden,
+            promoted: promoted,
+            queries: queries
+          }
+        });
+      }
     }
   }
 
-  // Standard timed curation
   const updatedCuration = await curationsService.updateCuration({
     ...curation,
     promoted: promoted,
     hidden: hidden,
     queries: queries,
     startTime: startTime,
-    endTime: endTime
+    endTime: endTime,
+    elasticCurationId: elasticCurationId
   });
+  response.curation = updatedCuration;
+
+  if (updatedCuration.elasticCurationId) {
+    updateExistingElasticCuration(updatedCuration.elasticCurationId, elastic);
+  }
 
   return {
     statusCode: 200,
-    body: JSON.stringify(updatedCuration)
+    body: JSON.stringify(response)
   };
 };
 

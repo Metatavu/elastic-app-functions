@@ -1,4 +1,6 @@
 import type { AWS } from "@serverless/typescript";
+import Curation from "src/database/models/curation";
+import Document from "src/database/models/document";
 import { ContentCategory } from "src/elastic";
 
 /**
@@ -120,7 +122,14 @@ export type ServiceDocument = {
  * Enum for curation type
  */
 export enum CurationType {
-  CUSTOM_PERMANENT = "custom permanent",
-  CUSTOM_TIMED = "custom timed",
-  STANDARD_TIMED = "standard timed"
+  CUSTOM = "custom",
+  STANDARD = "standard"
+};
+
+/**
+ * Interface for update curation lambda response
+ */
+export interface UpdateCurationResponse {
+  document?: Document,
+  curation?: Curation
 };

@@ -78,25 +78,7 @@ class CurationService {
         TableName: TABLE_NAME,
         FilterExpression: "#curationType = :curationType",
         ExpressionAttributeNames: { "#curationType": "curationType" },
-        ExpressionAttributeValues: { ":curationType":CurationType.CUSTOM_PERMANENT || CurationType.CUSTOM_TIMED }
-      })
-      .promise();
-
-    return result.Items as Curation[];
-  }
-
-  /**
-   * Lists timed document curations
-   *
-   * @returns list of curations
-   */
-  public listTimedCurations = async (): Promise<Curation[]> => {
-    const result = await this.docClient
-      .scan({
-        TableName: TABLE_NAME,
-        FilterExpression: "#curationType = :curationType",
-        ExpressionAttributeNames: { "#curationType": "curationType" },
-        ExpressionAttributeValues: { ":curationType":CurationType.STANDARD_TIMED || CurationType.CUSTOM_TIMED }
+        ExpressionAttributeValues: { ":curationType":CurationType.CUSTOM }
       })
       .promise();
 

@@ -6,9 +6,10 @@ import { v4 as uuid } from "uuid";
 import { getElasticCredentialsForSession } from "@libs/auth-utils";
 import { getElastic } from "src/elastic";
 import { CurationType } from "@types";
+import { validateDocumentIds } from "@libs/curation-utils";
 
 /**
- * Lambda for creating custom fixed, custom timed, and standard curations
+ * Lambda for creating custom and standard curations
  *
  * @param event event
  */
@@ -30,7 +31,12 @@ const createCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
   const authHeader = Authorization || authorization;
 
   const hasDocumentAttributes = !!(title && description && links && language);
-  const isCustomCuration = (curationType === CurationType.CUSTOM_PERMANENT || curationType === CurationType.CUSTOM_TIMED) && hasDocumentAttributes;
+  if (curationType === CurationType.CUSTOM && !hasDocumentAttributes) {
+    return {
+      statusCode: 400,
+      body: "Bad request, missing document values"
+    };
+  }
 
   const auth = await getElasticCredentialsForSession(authHeader);
   if (!auth) {
@@ -48,127 +54,83 @@ const createCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
     };
   }
 
-  if (isCustomCuration) {
-    const newDocumentId = uuid();
+  const curationId = uuid();
+  let newDocumentId = undefined;
+  let elasticCurationId = "";
+
+  if (curationType === CurationType.CUSTOM && hasDocumentAttributes) {
+    newDocumentId = uuid();
     promoted.push(newDocumentId);
 
-    const createdDocument = await documentService.createDocument({
+    const document = await documentService.createDocument({
       id: newDocumentId,
       title: title,
       description: description,
       links: links,
-      language: language
+      language: language,
+      curationId: curationId
     });
-
-    // Permanent curations, create in elastic
-    if (!startTime) {
-      await elastic.updateDocuments({
-        documents: [{
-          id: newDocumentId,
-          title: title,
-          description: description,
-          links: links,
-          language: language,
-        }]
-      });
-
-      const payload = {
-        hidden: hidden,
-        promoted: promoted,
-        queries: queries
-      };
-
-      const elasticCurationId = await elastic.createCuration({
-        curation: payload
-      });
-
-      const customFixedCuration = await curationsService.createCuration({
-        id: uuid(),
-        documentId: newDocumentId,
-        promoted: promoted,
-        hidden: hidden,
-        queries: queries,
-        endTime: endTime,
-        elasticCurationId: elasticCurationId,
-        curationType: CurationType.CUSTOM_PERMANENT
-      });
-
-      const foundDocument = await documentService.findDocument(newDocumentId);
-      if (!foundDocument) {
-        return {
-          statusCode: 404,
-          body: `Document ${newDocumentId} not found`
-        };
+    if (!document) {
+      return {
+        statusCode: 400,
+        body: "Failed to create document record"
       }
+    }
 
-      documentService.updateDocument({
-        ...foundDocument,
-        curationId: customFixedCuration.id
-      })
+    if (!startTime) {
+      try {
+        await elastic.updateDocuments({
+          documents: [{
+            id: newDocumentId,
+            title: title,
+            description: description,
+            links: links,
+            language: language,
+          }]
+        });
 
-      return {
-        statusCode: 200,
-        body: JSON.stringify(customFixedCuration)
-      };
-      // Timed curations, not yet in elastic
-    } else {
-      const customTimedCuration = await curationsService.createCuration({
-        id: uuid(),
-        documentId: newDocumentId,
-        promoted: promoted,
-        hidden: hidden,
-        queries: queries,
-        startTime: startTime,
-        endTime: endTime,
-        elasticCurationId: "",
-        curationType: CurationType.CUSTOM_TIMED
-      });
-
-      documentService.updateDocument({
-        ...createdDocument,
-        curationId: customTimedCuration.id
-      })
-
-      return {
-        statusCode: 200,
-        body: JSON.stringify(customTimedCuration)
-      };
+        elasticCurationId = await elastic.createCuration({
+          curation: {
+            queries: queries,
+            promoted: [newDocumentId],
+            hidden: hidden
+          }
+        });
+      } catch (error) {
+        return {
+          statusCode: 400,
+          body: `Elastic error ${error}`
+        }
+      }
     }
   }
 
-  // Standard curations
-  const documentIds = [ ...promoted, ...hidden ];
-
-  const documents = await Promise.all(
-    documentIds.map(async documentId => ({
-      id: documentId,
-      data: await elastic.findDocument({ documentId: documentId })
-    }))
-  );
-
-  for (const document of documents) {
-    if (!document.data) {
+  if (curationType === CurationType.STANDARD) {
+    try {
+      validateDocumentIds(promoted, hidden, elastic);
+    } catch (error) {
       return {
         statusCode: 404,
-        body: `Document ${document.id} not found`
-      };
+        body: JSON.stringify(error)
+      }
     }
   }
 
-  const timedCuration = await curationsService.createCuration({
-    id: uuid(),
+  const curation = await curationsService.createCuration({
+    id: curationId,
     promoted: promoted,
     hidden: hidden,
     queries: queries,
     startTime: startTime,
     endTime: endTime,
-    elasticCurationId: "",
-    curationType: CurationType.STANDARD_TIMED
+    documentId: newDocumentId,
+    elasticCurationId: elasticCurationId,
+    curationType: curationType
   });
 
   return {
     statusCode: 200,
-    body: JSON.stringify(timedCuration)
+    body: JSON.stringify(curation)
   };
 };
 
