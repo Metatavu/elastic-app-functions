@@ -7,6 +7,7 @@ import schema from "src/schema/curation";
 import { CurationType, CustomCurationResponse } from "@types";
 import { updateExistingElasticCuration } from "@libs/curation-utils";
 import Document from "src/database/models/document";
+import Curation from "src/database/models/curation";
 
 /**
  * Lambda for updating custom and standard curations
@@ -107,7 +108,7 @@ const updateCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
       }
 
       if (curation.elasticCurationId) {
-        updateExistingElasticCuration(curation.elasticCurationId, elastic);
+        await updateExistingElasticCuration(curation.elasticCurationId, elastic);
       } else {
         elasticCurationId = await elastic.createCuration({
           curation: {
@@ -120,19 +121,33 @@ const updateCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
     }
   }
 
-  const updatedCuration = await curationsService.updateCuration({
-    ...curation,
+  const curationUpdates: Curation = {
+    id: curation.id,
+    elasticCurationId: curation.id,
+    documentId: curation.documentId,
+    queries: queries,
     promoted: promoted,
     hidden: hidden,
-    queries: queries,
     startTime: startTime,
     endTime: endTime,
-    elasticCurationId: elasticCurationId
-  });
-  response.curation = updatedCuration;
+    curationType: curationType
+  };
 
-  if (updatedCuration.elasticCurationId) {
-    updateExistingElasticCuration(updatedCuration.elasticCurationId, elastic);
+  if (curation !== curationUpdates) {
+    const updatedCuration = await curationsService.updateCuration({
+      ...curation,
+      promoted: promoted,
+      hidden: hidden,
+      queries: queries,
+      startTime: startTime,
+      endTime: endTime,
+      elasticCurationId: elasticCurationId
+    });
+    response.curation = updatedCuration;
+
+    if (updatedCuration.elasticCurationId) {
+      await updateExistingElasticCuration(updatedCuration.elasticCurationId, elastic);
+    }
   }
 
   return {
