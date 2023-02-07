@@ -4,7 +4,7 @@ import { middyfy } from "@libs/lambda";
 import { getElastic } from "src/elastic";
 import { curationsService, documentService } from "src/database/services";
 import schema from "src/schema/curation";
-import { CurationType, UpdateCurationResponse } from "@types";
+import { CurationType, CustomCurationResponse } from "@types";
 import { updateExistingElasticCuration } from "@libs/curation-utils";
 import Document from "src/database/models/document";
 
@@ -71,7 +71,7 @@ const updateCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
   }
 
   let elasticCurationId = curation.elasticCurationId;
-  let response: UpdateCurationResponse = {};
+  let response: CustomCurationResponse = {};
 
   if (curationType === CurationType.CUSTOM && curation.documentId && hasDocumentAttributes) {
     if (!startTime) {

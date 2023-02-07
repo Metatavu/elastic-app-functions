@@ -127,9 +127,9 @@ export enum CurationType {
 };
 
 /**
- * Interface for update curation lambda response
+ * Interface for custom curation lambda response
  */
-export interface UpdateCurationResponse {
+export interface CustomCurationResponse {
   document?: Document,
   curation?: Curation
 };

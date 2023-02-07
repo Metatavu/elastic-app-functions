@@ -38,7 +38,7 @@ paths:
           content:
             application/json;charset=utf-8:
               schema:
-                $ref: "#/components/schemas/Curation"
+                $ref: "#/components/schemas/CustomCuration"
 
   "/curations/{id}":
     get:
@@ -86,7 +86,7 @@ paths:
           content:
             application/json;charset=utf-8:
               schema:
-                $ref: "#/components/schemas/CurationUpdate"
+                $ref: "#/components/schemas/CustomCuration"
     delete:
       operationId: deleteCuration
       summary: Deletes curation
@@ -372,7 +372,7 @@ components:
           type: string
         curationType:
           type: string
-    CurationUpdate:
+    CustomCuration:
       type: object
       properties:
         curation:
@@ -422,6 +422,13 @@ components:
             - links
             - language
           properties:
+            id:
+              type: string
+              format: uuid
+              readOnly: true
+              description: Identifier
+            curationId:
+              type: string
             title:
               type: string
             description:

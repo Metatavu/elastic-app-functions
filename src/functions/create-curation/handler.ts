@@ -5,7 +5,7 @@ import { documentService, curationsService } from "src/database/services";
 import { v4 as uuid } from "uuid";
 import { getElasticCredentialsForSession } from "@libs/auth-utils";
 import { getElastic } from "src/elastic";
-import { CurationType } from "@types";
+import { CurationType, CustomCurationResponse } from "@types";
 import { validateDocumentIds } from "@libs/curation-utils";
 
 /**
@@ -57,6 +57,7 @@ const createCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
   const curationId = uuid();
   let newDocumentId = undefined;
   let elasticCurationId = "";
+  let response: CustomCurationResponse = {};
 
   if (curationType === CurationType.CUSTOM && hasDocumentAttributes) {
     newDocumentId = uuid();
@@ -76,6 +77,7 @@ const createCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
         body: "Failed to create document record"
       }
     }
+    response.document = document;
 
     if (!startTime) {
       try {
@@ -127,10 +129,11 @@ const createCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
     elasticCurationId: elasticCurationId,
     curationType: curationType
   });
+  response.curation = curation;
 
   return {
     statusCode: 200,
-    body: JSON.stringify(curation)
+    body: JSON.stringify(response)
   };
 };
 
