@@ -62,6 +62,8 @@ const deleteCuration: ValidatedEventAPIGatewayProxyEvent<any> = async event => {
     }
   }
 
+  await curationsService.deleteCuration(id);
+
   return {
     statusCode: 204,
     body: ""

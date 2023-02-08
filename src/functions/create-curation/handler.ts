@@ -7,6 +7,7 @@ import { getElasticCredentialsForSession } from "@libs/auth-utils";
 import { getElastic } from "src/elastic";
 import { CurationType, CustomCurationResponse } from "@types";
 import { validateDocumentIds } from "@libs/curation-utils";
+import { parseDate } from "@libs/date-utils";
 
 /**
  * Lambda for creating custom and standard curations
@@ -55,9 +56,10 @@ const createCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
   }
 
   const curationId = uuid();
-  let newDocumentId = undefined;
+  let newDocumentId: string | undefined = undefined;
   let elasticCurationId = "";
   let response: CustomCurationResponse = {};
+  const now = new Date();
 
   if (curationType === CurationType.CUSTOM && hasDocumentAttributes) {
     newDocumentId = uuid();
@@ -73,13 +75,14 @@ const createCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
     });
     if (!document) {
       return {
-        statusCode: 400,
+        statusCode: 500,
         body: "Failed to create document record"
       }
     }
     response.document = document;
 
-    if (!startTime) {
+
+    if (!startTime && (!endTime || parseDate(endTime) > now)) {
       try {
         await elastic.updateDocuments({
           documents: [{
@@ -100,7 +103,7 @@ const createCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
         });
       } catch (error) {
         return {
-          statusCode: 400,
+          statusCode: 500,
           body: `Elastic error ${error}`
         }
       }

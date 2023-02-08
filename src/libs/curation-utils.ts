@@ -1,19 +1,23 @@
+import Curation from "src/database/models/curation";
 import { Elastic } from "src/elastic";
 
 
 /**
- * Checks if elastic curation exists and updates if it does
+ * Checks if elastic curation exists and update
  *
  * @param elasticCurationId
+ * @param curationUpdates curation values to update
  * @param elastic elastic client
  */
-export const updateExistingElasticCuration = async (elasticCurationId: string, elastic: Elastic) => {
+export const updateExistingElasticCuration = async (elasticCurationId: string, curationUpdates: Curation, elastic: Elastic) => {
   const foundCuration = await elastic.findCuration({ id: elasticCurationId });
   if (foundCuration) {
-    await elastic.updateCuration({
+    return await elastic.updateCuration({
       curation: {
         id: foundCuration.id,
-        queries: foundCuration.queries,
+        queries: curationUpdates.queries,
+        hidden: curationUpdates.hidden,
+        promoted: curationUpdates.promoted
       }
     });
   }

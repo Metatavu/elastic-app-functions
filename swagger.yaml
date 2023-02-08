@@ -38,7 +38,7 @@ paths:
           content:
             application/json;charset=utf-8:
               schema:
-                $ref: "#/components/schemas/CustomCuration"
+                $ref: "#/components/schemas/CustomCurationResponse"
 
   "/curations/{id}":
     get:
@@ -86,7 +86,7 @@ paths:
           content:
             application/json;charset=utf-8:
               schema:
-                $ref: "#/components/schemas/CustomCuration"
+                $ref: "#/components/schemas/CustomCurationResponse"
     delete:
       operationId: deleteCuration
       summary: Deletes curation
@@ -372,71 +372,13 @@ components:
           type: string
         curationType:
           type: string
-    CustomCuration:
+    CustomCurationResponse:
       type: object
       properties:
         curation:
-          type: object
-          required:
-            - queries
-            - promoted
-            - hidden
-            - curationType
-          properties:
-            id:
-              type: string
-              format: uuid
-              readOnly: true
-              description: Identifier
-            elasticCurationId:
-              type: string
-            documentId:
-              type: string
-            queries:
-              type: array
-              items:
-                type: string
-            promoted:
-              type: array
-              items:
-                type: string
-            hidden:
-              type: array
-              items:
-                type: string
-            startTime:
-              type: string
-              format: date-time
-              description: Start time of curation
-            endTime:
-              type: string
-              format: date-time
-              description: Start time of curation
-            curationType:
-              type: string
+          $ref: "#/components/schemas/Curation"
         document:
-          type: object
-          required:
-            - title
-            - description
-            - links
-            - language
-          properties:
-            id:
-              type: string
-              format: uuid
-              readOnly: true
-              description: Identifier
-            curationId:
-              type: string
-            title:
-              type: string
-            description:
-              type: string
-            links:
-              type: string
-            language:
-              type: string
+          $ref: "#/components/schemas/Document"
     ScheduledCrawl:
       type: object
       required:

@@ -8,6 +8,7 @@ import { CurationType, CustomCurationResponse } from "@types";
 import { updateExistingElasticCuration } from "@libs/curation-utils";
 import Document from "src/database/models/document";
 import Curation from "src/database/models/curation";
+import isEqual from "lodash/isEqual";
 
 /**
  * Lambda for updating custom and standard curations
@@ -75,26 +76,26 @@ const updateCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
   let response: CustomCurationResponse = {};
 
   if (curationType === CurationType.CUSTOM && curation.documentId && hasDocumentAttributes) {
-    if (!startTime) {
-      const foundDocument = await documentService.findDocument(curation.documentId);
-      if (!foundDocument) {
-        return {
-          statusCode: 404,
-          body: `Document ${curation.documentId} not found`
-        };
-      }
+    const foundDocument = await documentService.findDocument(curation.documentId);
+    if (!foundDocument) {
+      return {
+        statusCode: 404,
+        body: `Document ${curation.documentId} not found`
+      };
+    }
 
-      const updatesToDocument: Document = {
-        id: curation.documentId,
-        description: description,
-        language: language,
-        links: links,
-        title: title,
-        curationId: id
-      }
+    const updatesToDocument: Document = {
+      id: curation.documentId,
+      description: description,
+      language: language,
+      links: links,
+      title: title,
+      curationId: id
+    };
 
-      if (foundDocument !== updatesToDocument) {
-        const updatedDocument = await documentService.updateDocument(updatesToDocument)
+    if (!isEqual(foundDocument, updatesToDocument)) {
+      const updatedDocument = await documentService.updateDocument(updatesToDocument)
+      if (!startTime) {
         await elastic.updateDocuments({
           documents: [{
             id: curation.documentId,
@@ -104,20 +105,9 @@ const updateCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
             language: language
           }]
         });
-        response.document = updatedDocument;
       }
 
-      if (curation.elasticCurationId) {
-        await updateExistingElasticCuration(curation.elasticCurationId, elastic);
-      } else {
-        elasticCurationId = await elastic.createCuration({
-          curation: {
-            hidden: hidden,
-            promoted: promoted,
-            queries: queries
-          }
-        });
-      }
+      response.document = updatedDocument;
     }
   }
 
@@ -133,7 +123,19 @@ const updateCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
     curationType: curationType
   };
 
-  if (curation !== curationUpdates) {
+  if (!isEqual(curation, curationUpdates)) {
+    if (!startTime && elasticCurationId) {
+      elasticCurationId = await updateExistingElasticCuration(elasticCurationId, curationUpdates, elastic);
+    } else if (!startTime && !elasticCurationId) {
+      elasticCurationId = await elastic.createCuration({
+        curation: {
+          hidden: curationUpdates.hidden,
+          promoted: curationUpdates.promoted,
+          queries: curationUpdates.queries
+        }
+      });
+    }
+
     const updatedCuration = await curationsService.updateCuration({
       ...curation,
       promoted: promoted,
@@ -143,11 +145,8 @@ const updateCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
       endTime: endTime,
       elasticCurationId: elasticCurationId
     });
-    response.curation = updatedCuration;
 
-    if (updatedCuration.elasticCurationId) {
-      await updateExistingElasticCuration(updatedCuration.elasticCurationId, elastic);
-    }
+    response.curation = updatedCuration;
   }
 
   return {

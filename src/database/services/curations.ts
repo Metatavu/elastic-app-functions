@@ -77,7 +77,6 @@ class CurationService {
       .scan({
         TableName: TABLE_NAME,
         FilterExpression: "#curationType = :curationType",
-        ExpressionAttributeNames: { "#curationType": "curationType" },
         ExpressionAttributeValues: { ":curationType":CurationType.CUSTOM }
       })
       .promise();

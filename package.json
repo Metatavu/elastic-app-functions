@@ -20,6 +20,7 @@
     "fast-xml-parser": "4.0.11",
     "franc": "6.0.0",
     "iso-639-3": "3.0.1",
+    "lodash": "4.17.21",
     "luxon": "3.0.3",
     "node-fetch": "3.2.10",
     "string-similarity": "4.0.4",
