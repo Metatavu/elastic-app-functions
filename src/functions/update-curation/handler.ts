@@ -124,16 +124,20 @@ const updateCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
   };
 
   if (!isEqual(curation, curationUpdates)) {
-    if (!startTime && elasticCurationId) {
-      elasticCurationId = await updateExistingElasticCuration(elasticCurationId, curationUpdates, elastic);
-    } else if (!startTime && !elasticCurationId) {
-      elasticCurationId = await elastic.createCuration({
-        curation: {
-          hidden: curationUpdates.hidden,
-          promoted: curationUpdates.promoted,
-          queries: curationUpdates.queries
-        }
-      });
+    if (!startTime) {
+      elasticCurationId = elasticCurationId
+        ? await updateExistingElasticCuration(
+          elasticCurationId,
+          curationUpdates,
+          elastic
+        )
+        : await elastic.createCuration({
+          curation: {
+            hidden: curationUpdates.hidden,
+            promoted: curationUpdates.promoted,
+            queries: curationUpdates.queries
+          }
+        });
     }
 
     const updatedCuration = await curationsService.updateCuration({
