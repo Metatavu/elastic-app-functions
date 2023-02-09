@@ -44,7 +44,8 @@ const scheduleTimedCuration = async () => {
         });
       }
 
-      if (!elasticCurationId && active) {
+      const shouldBeActivated = !elasticCurationId && active;
+      if (shouldBeActivated) {
         const payload = {
           hidden: hidden,
           promoted: promoted,
