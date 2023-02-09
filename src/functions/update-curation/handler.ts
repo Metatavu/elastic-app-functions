@@ -94,7 +94,7 @@ const updateCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
     };
 
     if (!isEqual(foundDocument, updatesToDocument)) {
-      const updatedDocument = await documentService.updateDocument(updatesToDocument)
+      const updatedDocument = await documentService.updateDocument(updatesToDocument);
       if (!startTime) {
         await elastic.updateDocuments({
           documents: [{
