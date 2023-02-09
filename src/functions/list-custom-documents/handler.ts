@@ -35,7 +35,7 @@ const listCustomDocuments: ValidatedEventAPIGatewayProxyEvent<any> = async event
   const { results } = await elastic.searchDocuments({
     query: "",
     page: {
-      size: 1000
+      size: 10000
     },
     filters: {
       id: manuallyCreatedCurationsIds
