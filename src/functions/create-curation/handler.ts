@@ -80,10 +80,11 @@ const createCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
       }
     }
     response.document = document;
+  }
 
-
-    if (!startTime && (!endTime || parseDate(endTime) > now)) {
-      try {
+  if (!startTime && (!endTime || parseDate(endTime) > now)) {
+    try {
+      if (curationType === CurationType.CUSTOM) {
         await elastic.updateDocuments({
           documents: [{
             id: newDocumentId,
@@ -93,19 +94,19 @@ const createCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
             language: language,
           }]
         });
+      }
 
-        elasticCurationId = await elastic.createCuration({
-          curation: {
-            queries: queries,
-            promoted: [newDocumentId],
-            hidden: hidden
-          }
-        });
-      } catch (error) {
-        return {
-          statusCode: 500,
-          body: `Elastic error ${error}`
+      elasticCurationId = await elastic.createCuration({
+        curation: {
+          queries: queries,
+          promoted: [newDocumentId],
+          hidden: hidden
         }
+      });
+    } catch (error) {
+      return {
+        statusCode: 500,
+        body: `Elastic error ${error}`
       }
     }
   }
