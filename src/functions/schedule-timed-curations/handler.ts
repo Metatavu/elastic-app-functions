@@ -63,7 +63,10 @@ const scheduleTimedCuration = async () => {
         });
 
         console.log(`Created curation ${curationId} for scheduled curation ${id}.`);
-      } else if (elasticCurationId && !active) {
+      }
+
+      const shouldBeDeactivated = elasticCurationId && !active;
+      if (shouldBeDeactivated) {
         console.log(`Curation ${elasticCurationId} scheduled to be deactivated. Removing curation from app search...`);
 
         const curation = await elastic.findCuration({ id: elasticCurationId });
