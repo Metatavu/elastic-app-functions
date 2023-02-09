@@ -87,12 +87,12 @@ export class Elastic {
    * @param options options
    * @returns updated curation id
    */
-  public updateCuration = async (options: { curation: PutCurationRequest["body"] }): Promise<string> => {
-    const { curation } = options;
+  public updateCuration = async (options: { curation: PutCurationRequest["body"], curationId: string }): Promise<string> => {
+    const { curation, curationId } = options;
 
     const result = await this.getClient().app.putCuration({
       engine_name: this.options.engineName,
-      curation_id: curation?.id!,
+      curation_id: curationId,
       body: curation
     });
 

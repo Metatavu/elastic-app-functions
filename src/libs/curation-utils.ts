@@ -11,16 +11,18 @@ import { Elastic } from "src/elastic";
  */
 export const updateExistingElasticCuration = async (elasticCurationId: string, curationUpdates: Curation, elastic: Elastic) => {
   const foundCuration = await elastic.findCuration({ id: elasticCurationId });
-  if (foundCuration) {
-    return await elastic.updateCuration({
-      curation: {
-        id: foundCuration.id,
-        queries: curationUpdates.queries,
-        hidden: curationUpdates.hidden,
-        promoted: curationUpdates.promoted
-      }
-    });
+  if (!foundCuration) {
+    throw new Error(`Elastic curation with id ${elasticCurationId} not found`);
   }
+  return await elastic.updateCuration({
+    curationId: elasticCurationId,
+    curation: {
+      id: elasticCurationId,
+      queries: curationUpdates.queries,
+      hidden: curationUpdates.hidden,
+      promoted: curationUpdates.promoted
+    }
+  });
 };
 
 /**
