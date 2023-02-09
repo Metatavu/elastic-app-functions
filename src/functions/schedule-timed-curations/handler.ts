@@ -22,7 +22,6 @@ const scheduleTimedCuration = async () => {
   await Promise.allSettled(timedCurations.map(async timedCuration => {
     const { id, elasticCurationId, startTime, endTime, hidden, promoted, queries, curationType, documentId } = timedCuration;
 
-    const now = new Date();
     const farFuture = (DateTime.local().plus({ years: 100 })).toJSDate();
 
     const start = startTime ? parseDate(startTime) : now;
