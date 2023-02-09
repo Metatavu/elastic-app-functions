@@ -22,9 +22,9 @@ const scheduleTimedCuration = async () => {
   await Promise.allSettled(timedCurations.map(async timedCuration => {
     const { id, elasticCurationId, startTime, endTime, hidden, promoted, queries, curationType, documentId } = timedCuration;
 
-    const start = startTime ? parseDate(startTime) : now;
-    const end = endTime ? parseDate(endTime) : farFuture;
-    const active = start.getTime() <= now.getTime() && end.getTime() >= now.getTime();
+    const isAfterStartDate = !startTime || Date.now() > parseDate(startTime).getTime();
+    const isBeforeEndDate = !endTime || Date.now() < parseDate(endTime).getTime();
+    const active = isAfterStartDate && isBeforeEndDate;
     const activeCustomTimedCuration = !!(!elasticCurationId && active && curationType === CurationType.CUSTOM && documentId);
 
     try {
