@@ -73,7 +73,9 @@ const updateCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
   }
 
   let elasticCurationId = curation.elasticCurationId;
-  let response: CustomCurationResponse = {};
+
+  let documentResponse: Document | undefined = undefined;
+  let curationResponse: Curation = curation;
 
   if (curationType === CurationType.CUSTOM && curation.documentId && hasDocumentAttributes) {
     const foundDocument = await documentService.findDocument(curation.documentId);
@@ -107,7 +109,7 @@ const updateCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
         });
       }
 
-      response.document = updatedDocument;
+      documentResponse = updatedDocument;
     }
   }
 
@@ -150,12 +152,15 @@ const updateCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
       elasticCurationId: elasticCurationId
     });
 
-    response.curation = updatedCuration;
+    curationResponse = updatedCuration;
   }
+
+  const combinedResponse: CustomCurationResponse = {...documentResponse, ... curationResponse};
+
 
   return {
     statusCode: 200,
-    body: JSON.stringify(response)
+    body: JSON.stringify(combinedResponse)
   };
 };
 

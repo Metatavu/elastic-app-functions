@@ -3,7 +3,6 @@ import { curationsService, documentService } from "src/database/services";
 import config from "src/config";
 import { parseDate } from "@libs/date-utils";
 import { getElastic } from "src/elastic";
-import { DateTime } from "luxon";
 import { CurationType } from "@types";
 
 const { ELASTIC_ADMIN_USERNAME, ELASTIC_ADMIN_PASSWORD } = config;
@@ -25,27 +24,26 @@ const scheduleTimedCuration = async () => {
     const isAfterStartDate = !startTime || Date.now() > parseDate(startTime).getTime();
     const isBeforeEndDate = !endTime || Date.now() < parseDate(endTime).getTime();
     const active = isAfterStartDate && isBeforeEndDate;
-    const activeCustomTimedCuration = !!(!elasticCurationId && active && curationType === CurationType.CUSTOM && documentId);
 
     try {
-      if (activeCustomTimedCuration) {
-        const foundDocument = await documentService.findDocument(documentId);
-        if (!foundDocument) {
-          throw new Error(`Could not find custom document ${documentId}.`);
-        }
-        await elastic.updateDocuments({
-          documents: [{
-            id: foundDocument.id,
-            title: foundDocument.title,
-            description: foundDocument.description,
-            links: foundDocument.links,
-            language: foundDocument.language,
-          }]
-        });
-      }
-
       const shouldBeActivated = !elasticCurationId && active;
       if (shouldBeActivated) {
+        if (curationType === CurationType.CUSTOM && documentId) {
+          const foundDocument = await documentService.findDocument(documentId);
+          if (!foundDocument) {
+            throw new Error(`Could not find custom document ${documentId}.`);
+          }
+          await elastic.updateDocuments({
+            documents: [{
+              id: foundDocument.id,
+              title: foundDocument.title,
+              description: foundDocument.description,
+              links: foundDocument.links,
+              language: foundDocument.language,
+            }]
+          });
+        }
+
         const payload = {
           hidden: hidden,
           promoted: promoted,
@@ -93,10 +91,13 @@ const scheduleTimedCuration = async () => {
 
           await documentService.updateDocument({
             ...foundDocument,
-            curationId: ""
+            curationId: undefined
           });
         }
-        await curationsService.deleteCuration(id);
+        curationsService.updateCuration({
+          ...timedCuration,
+          elasticCurationId: undefined
+        });
       }
     } catch (error) {
       console.error(error);

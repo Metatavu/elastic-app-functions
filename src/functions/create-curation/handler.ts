@@ -8,6 +8,8 @@ import { getElastic } from "src/elastic";
 import { CurationType, CustomCurationResponse } from "@types";
 import { validateDocumentIds } from "@libs/curation-utils";
 import { parseDate } from "@libs/date-utils";
+import Document from "src/database/models/document";
+import Curation from "src/database/models/curation";
 
 /**
  * Lambda for creating custom and standard curations
@@ -57,8 +59,11 @@ const createCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
 
   const curationId = uuid();
   let newDocumentId: string | undefined = undefined;
-  let elasticCurationId = "";
-  let response: CustomCurationResponse = {};
+  let elasticCurationId: string | undefined = undefined;
+
+  let documentResponse: Document | undefined = undefined;
+  let curationResponse: Curation | undefined = undefined;
+
   const now = new Date();
 
   if (curationType === CurationType.CUSTOM && hasDocumentAttributes) {
@@ -79,7 +84,7 @@ const createCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
         body: "Failed to create document record"
       }
     }
-    response.document = document;
+    documentResponse = document;
   }
 
   if (!startTime && (!endTime || parseDate(endTime) > now)) {
@@ -99,7 +104,7 @@ const createCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
       elasticCurationId = await elastic.createCuration({
         curation: {
           queries: queries,
-          promoted: [newDocumentId],
+          promoted: newDocumentId ? [newDocumentId] : promoted,
           hidden: hidden
         }
       });
@@ -133,11 +138,12 @@ const createCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
     elasticCurationId: elasticCurationId,
     curationType: curationType
   });
-  response.curation = curation;
+  curationResponse = curation;
+  const combinedResponse: CustomCurationResponse = { ...documentResponse, ... curationResponse }
 
   return {
     statusCode: 200,
-    body: JSON.stringify(response)
+    body: JSON.stringify(combinedResponse)
   };
 };
 

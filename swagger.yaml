@@ -38,7 +38,7 @@ paths:
           content:
             application/json;charset=utf-8:
               schema:
-                $ref: "#/components/schemas/CustomCurationResponse"
+                $ref: "#/components/schemas/Curation"
 
   "/curations/{id}":
     get:
@@ -82,11 +82,11 @@ paths:
         $ref: "#/components/requestBodies/Curation"
       responses:
         "200":
-          description: Updated curation
+          description: Updated curation and also its document when it is custom type
           content:
             application/json;charset=utf-8:
               schema:
-                $ref: "#/components/schemas/CustomCurationResponse"
+                $ref: "#/components/schemas/Curation"
     delete:
       operationId: deleteCuration
       summary: Deletes curation
@@ -261,7 +261,7 @@ components:
       content:
         application/json;charset=utf-8:
           schema:
-            $ref: "#/components/schemas/CurationBody"
+            $ref: "#/components/schemas/Curation"
       description: Payload
       required: true
     ScheduledCrawl:
@@ -325,43 +325,6 @@ components:
           description: Start time of curation
         curationType:
           type: string
-    CurationBody:
-      type: object
-      required:
-        - queries
-        - promoted
-        - hidden
-        - curationType
-      properties:
-        id:
-          type: string
-          format: uuid
-          readOnly: true
-          description: Identifier
-        elasticCurationId:
-          type: string
-        documentId:
-          type: string
-        queries:
-          type: array
-          items:
-            type: string
-        promoted:
-          type: array
-          items:
-            type: string
-        hidden:
-          type: array
-          items:
-            type: string
-        startTime:
-          type: string
-          format: date-time
-          description: Start time of curation
-        endTime:
-          type: string
-          format: date-time
-          description: Start time of curation
         title:
           type: string
         description:
@@ -370,15 +333,6 @@ components:
           type: string
         language:
           type: string
-        curationType:
-          type: string
-    CustomCurationResponse:
-      type: object
-      properties:
-        curation:
-          $ref: "#/components/schemas/Curation"
-        document:
-          $ref: "#/components/schemas/Document"
     ScheduledCrawl:
       type: object
       required:

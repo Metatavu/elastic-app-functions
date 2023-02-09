@@ -130,6 +130,17 @@ export enum CurationType {
  * Interface for custom curation lambda response
  */
 export interface CustomCurationResponse {
-  document?: Document,
-  curation?: Curation
+  id: string;
+  elasticCurationId?: string;
+  documentId?: string;
+  queries: string[];
+  promoted: string[];
+  hidden: string[];
+  startTime?: string;
+  endTime?: string;
+  curationType: CurationType;
+  title?: string;
+  description?: string;
+  links?: string;
+  language?: string;
 };
