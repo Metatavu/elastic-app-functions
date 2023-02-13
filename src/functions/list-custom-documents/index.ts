@@ -7,7 +7,7 @@ const fn: AWSFunction = {
     {
       httpApi: {
         method: "get",
-        path: "/timed-curations/{id}"
+        path: "/documents"
       },
     },
   ],
