@@ -1,8 +1,10 @@
 import { ValidatedEventAPIGatewayProxyEvent } from "@libs/api-gateway";
 import { middyfy } from "@libs/lambda";
 import { getElastic } from "src/elastic";
-import { curationsService } from "src/database/services";
+import { curationsService, documentService } from "src/database/services";
 import { getElasticCredentialsForSession } from "@libs/auth-utils";
+import { CustomCurationResponse } from "@types";
+import Document from "src/database/models/document";
 
 /**
  * Lambda for find curation
@@ -46,9 +48,16 @@ const findCuration: ValidatedEventAPIGatewayProxyEvent<any> = async event => {
     };
   }
 
+  let document: Document | null = null;
+  if (curation.documentId) {
+    document = await documentService.findDocument(curation.documentId);
+  }
+
+  const combinedResponse: CustomCurationResponse = { ...curation, ...document };
+
   return {
     statusCode: 200,
-    body: JSON.stringify(curation)
+    body: JSON.stringify(combinedResponse)
   };
 };
 

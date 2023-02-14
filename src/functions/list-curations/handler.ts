@@ -1,8 +1,10 @@
 import { ValidatedEventAPIGatewayProxyEvent } from "@libs/api-gateway";
 import { middyfy } from "@libs/lambda";
 import { getElastic } from "src/elastic";
-import { curationsService } from "src/database/services";
+import { curationsService, documentService } from "src/database/services";
 import { getElasticCredentialsForSession } from "@libs/auth-utils";
+import Document from "src/database/models/document";
+import { CustomCurationResponse } from "@types";
 
 /**
  * Lambda for listing curations
@@ -31,9 +33,18 @@ const listCurations: ValidatedEventAPIGatewayProxyEvent<any> = async event => {
 
   const curations = await curationsService.listCurations();
 
+  const combinedResponse: CustomCurationResponse[] = await Promise.all(curations.map(async curation => {
+    let documentResponse: Document | null = null;
+    if (curation.documentId) {
+      documentResponse = await documentService.findDocument(curation.documentId);
+    }
+
+    return { ...documentResponse, ...curation }
+  }));
+
   return {
     statusCode: 200,
-    body: JSON.stringify(curations)
+    body: JSON.stringify(combinedResponse)
   };
 };
 
