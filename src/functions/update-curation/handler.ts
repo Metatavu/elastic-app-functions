@@ -45,7 +45,6 @@ const updateCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
       body: "Bad request, missing document values"
     };
   }
-  const { title, description, links, language } = document!;
 
   const auth = await getElasticCredentialsForSession(authHeader);
   if (!auth) {
@@ -84,6 +83,8 @@ const updateCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
         body: `Document ${curation.documentId} not found`
       };
     }
+
+    const { title, description, links, language } = document;
 
     const updatesToDocument: Document = {
       id: curation.documentId,
