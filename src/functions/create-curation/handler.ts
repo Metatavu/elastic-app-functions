@@ -37,7 +37,6 @@ const createCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
       body: "Bad request, missing document values"
     };
   }
-  const { title, description, links, language } = document!;
 
   const auth = await getElasticCredentialsForSession(authHeader);
   if (!auth) {
@@ -50,8 +49,8 @@ const createCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
   const elastic = getElastic(auth);
   if (!(await elastic.hasCurationsAccess())) {
     return {
-      statusCode: 403,
-      body: "Forbidden"
+      statusCode: 401,
+      body: "Unauthorized"
     };
   }
 
@@ -65,6 +64,8 @@ const createCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
   const now = new Date();
 
   if (curationType === CurationType.CUSTOM && document) {
+    const { title, description, links, language } = document;
+
     newDocumentId = uuid();
     promoted.push(newDocumentId);
 
@@ -87,7 +88,9 @@ const createCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
 
   if (!startTime && (!endTime || parseDate(endTime) > now)) {
     try {
-      if (curationType === CurationType.CUSTOM) {
+      if (curationType === CurationType.CUSTOM && document) {
+        const { title, description, links, language } = document;
+
         await elastic.updateDocuments({
           documents: [{
             id: newDocumentId,
