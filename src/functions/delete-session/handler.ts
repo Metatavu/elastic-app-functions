@@ -2,18 +2,18 @@ import type { ValidatedEventAPIGatewayProxyEvent } from "@libs/api-gateway";
 import { middyfy } from "@libs/lambda";
 import { authenticationService } from "src/database/services";
 import { parseBearerAuth } from "@libs/auth-utils";
-import authenticationSchema from "src/schema/authentication";
 
 /**
  * Lambda for deleting Authentication session
  *
  * @param event event
  */
-const deleteAuthenticationSession: ValidatedEventAPIGatewayProxyEvent<typeof authenticationSchema> = async (event) => {
+const deleteAuthenticationSession: ValidatedEventAPIGatewayProxyEvent<any> = async (event) => {
   const { headers } = event;
   const { Authorization, authorization } = headers;
+  const authHeader = Authorization || authorization;
 
-  const token = parseBearerAuth(authorization || Authorization);
+  const token = parseBearerAuth(authHeader!);
   if (!token) {
     return {
       statusCode: 401,
