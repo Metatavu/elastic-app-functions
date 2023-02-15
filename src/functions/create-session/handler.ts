@@ -4,6 +4,7 @@ import { authenticationService } from "src/database/services";
 import { generateToken, parseBasicAuth, parseBearerAuth } from "@libs/auth-utils";
 import { generateExpiryTimestamp, validateTimestamp } from "@libs/date-utils";
 import { v4 as uuid } from "uuid";
+import { getElastic } from "src/elastic";
 
 /**
  * Lambda for creating Authentication session
@@ -70,11 +71,18 @@ const createAuthenticationSession: ValidatedEventAPIGatewayProxyEvent<any> = asy
 
   if (isBasicAuth) {
     const auth = parseBasicAuth(authHeader);
-
     if (!auth) {
       return {
         statusCode: 401,
         body: "Unauthorized"
+      };
+    }
+
+    const elastic = getElastic(auth);
+    if (!(await elastic.hasCurationsAccess())) {
+      return {
+        statusCode: 403,
+        body: "Forbidden"
       };
     }
 
