@@ -10,11 +10,13 @@ const curationSchema = Type.Object({
   hidden: Type.Array(Type.String()),
   startTime: Type.Optional(Type.String()),
   endTime: Type.Optional(Type.String()),
-  title: Type.Optional(Type.String()),
-  links: Type.Optional(Type.String()),
-  description: Type.Optional(Type.String()),
-  language: Type.Optional(Type.String()),
-  curationType: Type.Enum(CurationType)
+  curationType: Type.Enum(CurationType),
+  document: Type.Optional(Type.Object({
+    title: Type.String(),
+    links: Type.String(),
+    description: Type.String(),
+    language: Type.String()
+  }))
 });
 
 export default curationSchema;

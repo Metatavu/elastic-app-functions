@@ -26,10 +26,7 @@ const updateCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
     hidden,
     startTime,
     endTime,
-    title,
-    description,
-    links,
-    language,
+    document,
     curationType
   } = body;
   const id = pathParameters?.id;
@@ -42,13 +39,13 @@ const updateCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
     }
   }
 
-  const hasDocumentAttributes = !!(title && description && links && language);
-  if (curationType === CurationType.CUSTOM && !hasDocumentAttributes) {
+  if (curationType === CurationType.CUSTOM && !document) {
     return {
       statusCode: 400,
       body: "Bad request, missing document values"
     };
   }
+  const { title, description, links, language } = document!;
 
   const auth = await getElasticCredentialsForSession(authHeader);
   if (!auth) {
@@ -79,7 +76,7 @@ const updateCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
   let documentResponse: Document | undefined = undefined;
   let curationResponse: CurationModel = curation;
 
-  if (curationType === CurationType.CUSTOM && curation.documentId && hasDocumentAttributes) {
+  if (curationType === CurationType.CUSTOM && curation.documentId && document) {
     const foundDocument = await documentService.findDocument(curation.documentId);
     if (!foundDocument) {
       return {
@@ -166,12 +163,12 @@ const updateCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
     ...curationResponse,
     startTime: parsedDates.startTime,
     endTime: parsedDates.endTime,
-    document: documentResponse && {
+    document: documentResponse ? {
       description: documentResponse.description,
       title: documentResponse.title,
       links: documentResponse.links,
       language: documentResponse.language
-    }
+    } : undefined
   };
 
 

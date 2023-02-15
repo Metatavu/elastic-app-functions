@@ -25,22 +25,19 @@ const createCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
     hidden,
     startTime,
     endTime,
-    title,
-    description,
-    links,
-    language,
+    document,
     curationType
   } = body;
   const { Authorization, authorization } = headers;
   const authHeader = Authorization || authorization;
 
-  const hasDocumentAttributes = !!(title && description && links && language);
-  if (curationType === CurationType.CUSTOM && !hasDocumentAttributes) {
+  if (curationType === CurationType.CUSTOM && !document) {
     return {
       statusCode: 400,
       body: "Bad request, missing document values"
     };
   }
+  const { title, description, links, language } = document!;
 
   const auth = await getElasticCredentialsForSession(authHeader);
   if (!auth) {
@@ -67,11 +64,11 @@ const createCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
 
   const now = new Date();
 
-  if (curationType === CurationType.CUSTOM && hasDocumentAttributes) {
+  if (curationType === CurationType.CUSTOM && document) {
     newDocumentId = uuid();
     promoted.push(newDocumentId);
 
-    const document = await documentService.createDocument({
+    const createdDocument = await documentService.createDocument({
       id: newDocumentId,
       title: title,
       description: description,
@@ -79,13 +76,13 @@ const createCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
       language: language,
       curationId: curationId
     });
-    if (!document) {
+    if (!createdDocument) {
       return {
         statusCode: 500,
         body: "Failed to create document record"
       }
     }
-    documentResponse = document;
+    documentResponse = createdDocument;
   }
 
   if (!startTime && (!endTime || parseDate(endTime) > now)) {
@@ -149,12 +146,12 @@ const createCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
     ...curationResponse,
     startTime: parsedDates.startTime,
     endTime: parsedDates.endTime,
-    document: documentResponse && {
+    document: documentResponse ? {
       description: documentResponse.description,
       title: documentResponse.title,
       links: documentResponse.links,
       language: documentResponse.language
-    }
+    } : undefined
   };
 
   return {
