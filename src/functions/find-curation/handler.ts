@@ -3,8 +3,9 @@ import { middyfy } from "@libs/lambda";
 import { getElastic } from "src/elastic";
 import { curationsService, documentService } from "src/database/services";
 import { getElasticCredentialsForSession } from "@libs/auth-utils";
-import { CustomCurationResponse } from "@types";
 import Document from "src/database/models/document";
+import { parseDate } from "@libs/date-utils";
+import { Curation } from "src/generated/app-functions-client";
 
 /**
  * Lambda for find curation
@@ -53,7 +54,22 @@ const findCuration: ValidatedEventAPIGatewayProxyEvent<any> = async event => {
     document = await documentService.findDocument(curation.documentId);
   }
 
-  const combinedResponse: CustomCurationResponse = { ...curation, ...document };
+  const parsedDates = {
+    startTime: curation.startTime ? parseDate(curation.startTime) : undefined,
+    endTime: curation.endTime ? parseDate(curation.endTime) : undefined
+  };
+
+  const combinedResponse: Curation = {
+    ...curation,
+    startTime: parsedDates.startTime,
+    endTime: parsedDates.endTime,
+    document: document ? {
+      description: document.description,
+      title: document.title,
+      links: document.links,
+      language: document.language
+    } : undefined
+  };
 
   return {
     statusCode: 200,

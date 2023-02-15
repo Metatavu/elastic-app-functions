@@ -4,7 +4,8 @@ import { getElastic } from "src/elastic";
 import { curationsService, documentService } from "src/database/services";
 import { getElasticCredentialsForSession } from "@libs/auth-utils";
 import Document from "src/database/models/document";
-import { CustomCurationResponse } from "@types";
+import { Curation } from "src/generated/app-functions-client";
+import { parseDate } from "@libs/date-utils";
 
 /**
  * Lambda for listing curations
@@ -33,13 +34,28 @@ const listCurations: ValidatedEventAPIGatewayProxyEvent<any> = async event => {
 
   const curations = await curationsService.listCurations();
 
-  const combinedResponse: CustomCurationResponse[] = await Promise.all(curations.map(async curation => {
+  const combinedResponse: Curation[] = await Promise.all(curations.map(async curation => {
     let documentResponse: Document | null = null;
     if (curation.documentId) {
       documentResponse = await documentService.findDocument(curation.documentId);
     }
 
-    return { ...documentResponse, ...curation }
+    const parsedDates = {
+      startTime: curation.startTime ? parseDate(curation.startTime) : undefined,
+      endTime: curation.endTime ? parseDate(curation.endTime) : undefined
+    };
+
+      return {
+        ...curation,
+        startTime: parsedDates.startTime,
+        endTime: parsedDates.endTime,
+        document: documentResponse ? {
+          description: documentResponse.description,
+          title: documentResponse.title,
+          links: documentResponse.links,
+          language: documentResponse.language
+        } : undefined
+      };
   }));
 
   return {

@@ -1,4 +1,4 @@
-import Curation from "src/database/models/curation";
+import CurationModel from "src/database/models/curation";
 import { Elastic } from "src/elastic";
 
 
@@ -9,7 +9,7 @@ import { Elastic } from "src/elastic";
  * @param curationUpdates curation values to update
  * @param elastic elastic client
  */
-export const updateExistingElasticCuration = async (elasticCurationId: string, curationUpdates: Curation, elastic: Elastic) => {
+export const updateExistingElasticCuration = async (elasticCurationId: string, curationUpdates: CurationModel, elastic: Elastic) => {
   const foundCuration = await elastic.findCuration({ id: elasticCurationId });
   if (!foundCuration) {
     throw new Error(`Elastic curation with id ${elasticCurationId} not found`);

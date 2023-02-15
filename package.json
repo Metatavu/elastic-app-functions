@@ -4,7 +4,8 @@
   "description": "Elastic App search lambda functions",
   "main": "serverless.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build-app-functions-client": "openapi-generator-cli version-manager set 6.0.0 && openapi-generator-cli generate -i swagger.yaml -o src/generated/app-functions-client -c generator-config.json -g typescript-fetch"
   },
   "engines": {
     "node": ">=14.15.0"
@@ -27,6 +28,7 @@
     "uuid": "^8.3.2"
   },
   "devDependencies": {
+    "@openapitools/openapi-generator-cli": "2.5.2",
     "@serverless/typescript": "^3.0.0",
     "@types/aws-lambda": "^8.10.71",
     "@types/crypto-js": "4.1.1",

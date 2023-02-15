@@ -325,14 +325,22 @@ components:
           description: Start time of curation
         curationType:
           type: string
-        title:
-          type: string
-        description:
-          type: string
-        links:
-          type: string
-        language:
-          type: string
+        document:
+          type: object
+          required:
+            - title
+            - description
+            - links
+            - language
+          properties:
+            title:
+              type: string
+            description:
+              type: string
+            links:
+              type: string
+            language:
+              type: string
     ScheduledCrawl:
       type: object
       required:

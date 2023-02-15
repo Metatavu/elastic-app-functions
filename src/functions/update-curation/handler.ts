@@ -4,11 +4,13 @@ import { middyfy } from "@libs/lambda";
 import { getElastic } from "src/elastic";
 import { curationsService, documentService } from "src/database/services";
 import schema from "src/schema/curation";
-import { CurationType, CustomCurationResponse } from "@types";
+import { CurationType } from "@types";
 import { updateExistingElasticCuration } from "@libs/curation-utils";
 import Document from "src/database/models/document";
-import Curation from "src/database/models/curation";
+import CurationModel from "src/database/models/curation";
 import isEqual from "lodash/isEqual";
+import { parseDate } from "@libs/date-utils";
+import { Curation } from "src/generated/app-functions-client";
 
 /**
  * Lambda for updating custom and standard curations
@@ -75,7 +77,7 @@ const updateCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
   let elasticCurationId = curation.elasticCurationId;
 
   let documentResponse: Document | undefined = undefined;
-  let curationResponse: Curation = curation;
+  let curationResponse: CurationModel = curation;
 
   if (curationType === CurationType.CUSTOM && curation.documentId && hasDocumentAttributes) {
     const foundDocument = await documentService.findDocument(curation.documentId);
@@ -113,7 +115,7 @@ const updateCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
     }
   }
 
-  const curationUpdates: Curation = {
+  const curationUpdates: CurationModel = {
     id: curation.id,
     elasticCurationId: curation.id,
     documentId: curation.documentId,
@@ -155,7 +157,22 @@ const updateCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
     curationResponse = updatedCuration;
   }
 
-  const combinedResponse: CustomCurationResponse = {...documentResponse, ... curationResponse};
+  const parsedDates = {
+    startTime: curationResponse.startTime ? parseDate(curationResponse.startTime) : undefined,
+    endTime: curationResponse.endTime ? parseDate(curationResponse.endTime) : undefined
+  };
+
+  const combinedResponse: Curation = {
+    ...curationResponse,
+    startTime: parsedDates.startTime,
+    endTime: parsedDates.endTime,
+    document: documentResponse && {
+      description: documentResponse.description,
+      title: documentResponse.title,
+      links: documentResponse.links,
+      language: documentResponse.language
+    }
+  };
 
 
   return {

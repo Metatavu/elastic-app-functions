@@ -3,7 +3,7 @@ import { CurationType } from "@types";
 /**
  * DynamoDB model for curation
  */
-interface Curation {
+interface CurationModel {
   id: string;
   elasticCurationId?: string;
   documentId?: string;
@@ -15,4 +15,4 @@ interface Curation {
   curationType: CurationType;
 }
 
-export default Curation;
+export default CurationModel;

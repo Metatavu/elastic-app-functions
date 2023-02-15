@@ -1,6 +1,6 @@
 import { CurationType } from "@types";
 import { DocumentClient } from "aws-sdk/clients/dynamodb";
-import Curation from "../models/curation";
+import CurationModel from "../models/curation";
 
 const TABLE_NAME = "curations";
 
@@ -22,7 +22,7 @@ class CurationService {
    * @param curation curation
    * @returns created curation
    */
-  public createCuration = async (curation: Curation): Promise<Curation> => {
+  public createCuration = async (curation: CurationModel): Promise<CurationModel> => {
     await this.docClient
       .put({
         TableName: TABLE_NAME,
@@ -39,7 +39,7 @@ class CurationService {
    * @param id curation id
    * @returns curation or null if not found
    */
-  public findCuration = async (id: string): Promise<Curation | null> => {
+  public findCuration = async (id: string): Promise<CurationModel | null> => {
     const result = await this.docClient
       .get({
         TableName: TABLE_NAME,
@@ -49,7 +49,7 @@ class CurationService {
       })
       .promise();
 
-      return result.Item as Curation;
+      return result.Item as CurationModel;
   }
 
   /**
@@ -57,14 +57,14 @@ class CurationService {
    *
    * @returns list of curations
    */
-  public listCurations = async (): Promise<Curation[]> => {
+  public listCurations = async (): Promise<CurationModel[]> => {
     const result = await this.docClient
       .scan({
         TableName: TABLE_NAME
       })
       .promise();
 
-    return result.Items as Curation[];
+    return result.Items as CurationModel[];
   }
 
   /**
@@ -72,7 +72,7 @@ class CurationService {
    *
    * @returns list of curations
    */
-  public listCustomDocumentCurations = async (): Promise<Curation[]> => {
+  public listCustomDocumentCurations = async (): Promise<CurationModel[]> => {
     const result = await this.docClient
       .scan({
         TableName: TABLE_NAME,
@@ -81,7 +81,7 @@ class CurationService {
       })
       .promise();
 
-    return result.Items as Curation[];
+    return result.Items as CurationModel[];
   }
 
   /**
@@ -90,7 +90,7 @@ class CurationService {
    * @param curation curation to be updated
    * @returns updated curation
    */
-  public updateCuration = async (curation: Curation): Promise<Curation> => {
+  public updateCuration = async (curation: CurationModel): Promise<CurationModel> => {
     await this.docClient
       .put({
         TableName: TABLE_NAME,

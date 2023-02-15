@@ -1,0 +1,13 @@
+apis/AuthenticationApi.ts
+apis/CurationsApi.ts
+apis/DocumentsApi.ts
+apis/ScheduledCrawlApi.ts
+apis/index.ts
+index.ts
+models/Authentication.ts
+models/Curation.ts
+models/CurationDocument.ts
+models/Document.ts
+models/ScheduledCrawl.ts
+models/index.ts
+runtime.ts

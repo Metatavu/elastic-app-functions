@@ -5,11 +5,12 @@ import { documentService, curationsService } from "src/database/services";
 import { v4 as uuid } from "uuid";
 import { getElasticCredentialsForSession } from "@libs/auth-utils";
 import { getElastic } from "src/elastic";
-import { CurationType, CustomCurationResponse } from "@types";
+import { CurationType } from "@types";
 import { validateDocumentIds } from "@libs/curation-utils";
 import { parseDate } from "@libs/date-utils";
 import Document from "src/database/models/document";
-import Curation from "src/database/models/curation";
+import CurationModel from "src/database/models/curation";
+import { Curation } from "src/generated/app-functions-client";
 
 /**
  * Lambda for creating custom and standard curations
@@ -62,7 +63,7 @@ const createCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
   let elasticCurationId: string | undefined = undefined;
 
   let documentResponse: Document | undefined = undefined;
-  let curationResponse: Curation | undefined = undefined;
+  let curationResponse: CurationModel | undefined = undefined;
 
   const now = new Date();
 
@@ -139,7 +140,22 @@ const createCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
     curationType: curationType
   });
   curationResponse = curation;
-  const combinedResponse: CustomCurationResponse = { ...documentResponse, ... curationResponse }
+  const parsedDates = {
+    startTime: curationResponse.startTime ? parseDate(curationResponse.startTime) : undefined,
+    endTime: curationResponse.endTime ? parseDate(curationResponse.endTime) : undefined
+  };
+
+  const combinedResponse: Curation = {
+    ...curationResponse,
+    startTime: parsedDates.startTime,
+    endTime: parsedDates.endTime,
+    document: documentResponse && {
+      description: documentResponse.description,
+      title: documentResponse.title,
+      links: documentResponse.links,
+      language: documentResponse.language
+    }
+  };
 
   return {
     statusCode: 200,
