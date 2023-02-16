@@ -2,7 +2,7 @@ import { ValidatedEventAPIGatewayProxyEvent } from "@libs/api-gateway";
 import { getElasticCredentialsForSession } from "@libs/auth-utils";
 import { middyfy } from "@libs/lambda";
 import { getElastic } from "src/elastic";
-import { curationsService } from "src/database/services";
+import { curationsService, documentService } from "src/database/services";
 import { CurationType } from "@types";
 
 /**
@@ -54,11 +54,18 @@ const deleteCuration: ValidatedEventAPIGatewayProxyEvent<any> = async event => {
   }
 
   if (curation.curationType === CurationType.CUSTOM && curation.documentId) {
-    const foundDocument = await elastic.findDocument({ documentId: curation.documentId });
-    if (foundDocument) {
+    const foundElasticDocument = await elastic.findDocument({ documentId: curation.documentId });
+    if (foundElasticDocument) {
       await elastic.deleteDocuments({documentIds: [curation.documentId]});
     } else {
       console.warn(`Could not find elastic document ${curation.documentId}, cannot remove it.`);
+    }
+
+    const foundDocument = await documentService.findDocument(curation.documentId);
+    if (foundDocument) {
+      await documentService.deleteDocument(curation.documentId);
+    } else {
+      console.warn(`Could not find document ${curation.documentId}, cannot remove it.`);
     }
   }
 
