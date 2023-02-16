@@ -32,6 +32,10 @@ export interface FindCurationRequest {
     id: string;
 }
 
+export interface ListCurationsRequest {
+    curationType?: string;
+}
+
 export interface UpdateCurationRequest {
     curation: Curation;
     id: string;
@@ -168,8 +172,12 @@ export class CurationsApi extends runtime.BaseAPI {
      * Lists curations 
      * Lists curations
      */
-    async listCurationsRaw(initOverrides?: RequestInit | runtime.InitOverideFunction): Promise<runtime.ApiResponse<Array<Curation>>> {
+    async listCurationsRaw(requestParameters: ListCurationsRequest, initOverrides?: RequestInit | runtime.InitOverideFunction): Promise<runtime.ApiResponse<Array<Curation>>> {
         const queryParameters: any = {};
+
+        if (requestParameters.curationType !== undefined) {
+            queryParameters['curationType'] = requestParameters.curationType;
+        }
 
         const headerParameters: runtime.HTTPHeaders = {};
 
@@ -195,8 +203,8 @@ export class CurationsApi extends runtime.BaseAPI {
      * Lists curations 
      * Lists curations
      */
-    async listCurations(initOverrides?: RequestInit | runtime.InitOverideFunction): Promise<Array<Curation>> {
-        const response = await this.listCurationsRaw(initOverrides);
+    async listCurations(requestParameters: ListCurationsRequest = {}, initOverrides?: RequestInit | runtime.InitOverideFunction): Promise<Array<Curation>> {
+        const response = await this.listCurationsRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

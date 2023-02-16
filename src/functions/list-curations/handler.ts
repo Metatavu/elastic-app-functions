@@ -13,8 +13,10 @@ import { parseDate } from "@libs/date-utils";
  * @param event event
  */
 const listCurations: ValidatedEventAPIGatewayProxyEvent<any> = async event => {
-  const { headers: { authorization, Authorization } } = event;
+  const { headers: { authorization, Authorization }, queryStringParameters } = event;
   const authHeader = Authorization || authorization;
+
+  const curationTypeFilter = queryStringParameters?.curationType;
 
   const auth = await getElasticCredentialsForSession(authHeader);
   if (!auth) {
@@ -32,7 +34,11 @@ const listCurations: ValidatedEventAPIGatewayProxyEvent<any> = async event => {
     };
   }
 
-  const curations = await curationsService.listCurations();
+  const allCurations = await curationsService.listCurations();
+  let curations = allCurations;
+  if (curationTypeFilter) {
+    curations = allCurations.filter(curation => curation.curationType === curationTypeFilter);
+  }
 
   const combinedResponse: Curation[] = await Promise.all(curations.map(async curation => {
     let documentResponse: Document | null = null;

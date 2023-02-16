@@ -118,8 +118,8 @@ const updateCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
     elasticCurationId: curation.id,
     documentId: curation.documentId,
     queries: queries,
-    promoted: promoted,
-    hidden: hidden,
+    promoted: curationType === CurationType.CUSTOM ? curation.promoted : promoted,
+    hidden: curationType === CurationType.CUSTOM ? curation.hidden : hidden,
     startTime: startTime,
     endTime: endTime,
     curationType: curationType
@@ -143,12 +143,7 @@ const updateCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
     }
 
     const updatedCuration = await curationsService.updateCuration({
-      ...curation,
-      promoted: promoted,
-      hidden: hidden,
-      queries: queries,
-      startTime: startTime,
-      endTime: endTime,
+      ...curationUpdates,
       elasticCurationId: elasticCurationId
     });
 
