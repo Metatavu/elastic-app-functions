@@ -69,21 +69,23 @@ const createCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
     newDocumentId = uuid();
     promoted.push(newDocumentId);
 
-    const createdDocument = await documentService.createDocument({
-      id: newDocumentId,
-      title: title,
-      description: description,
-      links: links,
-      language: language,
-      curationId: curationId
-    });
-    if (!createdDocument) {
+    try {
+      const createdDocument = await documentService.createDocument({
+        id: newDocumentId,
+        title: title,
+        description: description,
+        links: links,
+        language: language,
+        curationId: curationId
+      });
+
+      documentResponse = createdDocument;
+    } catch (error) {
       return {
         statusCode: 500,
-        body: "Failed to create document record"
+        body: `Failed to create document record with id ${newDocumentId}, ${error}`
       }
     }
-    documentResponse = createdDocument;
   }
 
   if (!startTime && (!endTime || parseDate(endTime) > now)) {
@@ -128,39 +130,46 @@ const createCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
     }
   }
 
-  const curation = await curationsService.createCuration({
-    id: curationId,
-    promoted: promoted,
-    hidden: hidden,
-    queries: queries,
-    startTime: startTime,
-    endTime: endTime,
-    documentId: newDocumentId,
-    elasticCurationId: elasticCurationId,
-    curationType: curationType
-  });
-  curationResponse = curation;
-  const parsedDates = {
-    startTime: curationResponse.startTime ? parseDate(curationResponse.startTime) : undefined,
-    endTime: curationResponse.endTime ? parseDate(curationResponse.endTime) : undefined
-  };
+  try {
+    const curation = await curationsService.createCuration({
+      id: curationId,
+      promoted: promoted,
+      hidden: hidden,
+      queries: queries,
+      startTime: startTime,
+      endTime: endTime,
+      documentId: newDocumentId,
+      elasticCurationId: elasticCurationId,
+      curationType: curationType
+    });
+    curationResponse = curation;
+    const parsedDates = {
+      startTime: curationResponse.startTime ? parseDate(curationResponse.startTime) : undefined,
+      endTime: curationResponse.endTime ? parseDate(curationResponse.endTime) : undefined
+    };
 
-  const combinedResponse: Curation = {
-    ...curationResponse,
-    startTime: parsedDates.startTime,
-    endTime: parsedDates.endTime,
-    document: documentResponse ? {
-      description: documentResponse.description,
-      title: documentResponse.title,
-      links: documentResponse.links,
-      language: documentResponse.language
-    } : undefined
-  };
+    const combinedResponse: Curation = {
+      ...curationResponse,
+      startTime: parsedDates.startTime,
+      endTime: parsedDates.endTime,
+      document: documentResponse ? {
+        description: documentResponse.description,
+        title: documentResponse.title,
+        links: documentResponse.links,
+        language: documentResponse.language
+      } : undefined
+    };
 
-  return {
-    statusCode: 200,
-    body: JSON.stringify(combinedResponse)
-  };
+    return {
+      statusCode: 200,
+      body: JSON.stringify(combinedResponse)
+    };
+  } catch (error) {
+    return {
+      statusCode: 500,
+      body: `Failed to create curation record ${error}`
+    }
+  }
 };
 
 export const main = middyfy(createCuration);
