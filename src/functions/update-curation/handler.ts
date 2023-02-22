@@ -98,31 +98,30 @@ const updateCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
 
       if (!isEqual(foundDocument, updatesToDocument)) {
         try {
-          const updatedDocument = await documentService.updateDocument(updatesToDocument);
-          if (!startTime) {
-            try {
-              await elastic.updateDocuments({
-                documents: [{
-                  id: curation.documentId,
-                  title: title,
-                  description: description,
-                  links: links,
-                  language: language
-                }]
-              });
-            } catch (error) {
-              return {
-                statusCode: 500,
-                body: `Error updating elastic document with id ${curation.documentId}, ${error}`
-              }
-            }
-
-            documentResponse = updatedDocument;
-            }
+          documentResponse = await documentService.updateDocument(updatesToDocument);
         } catch (error) {
           return {
             statusCode: 500,
             body: `Error updating document record with id ${curation.documentId}, ${error}`
+          };
+        }
+
+        if (!startTime) {
+          try {
+            await elastic.updateDocuments({
+              documents: [{
+                id: curation.documentId,
+                title: title,
+                description: description,
+                links: links,
+                language: language
+              }]
+            });
+          } catch (error) {
+            return {
+              statusCode: 500,
+              body: `Error updating elastic document with id ${curation.documentId}, ${error}`
+            };
           }
         }
       }
