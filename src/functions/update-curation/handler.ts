@@ -27,7 +27,8 @@ const updateCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
     startTime,
     endTime,
     document,
-    curationType
+    curationType,
+    groupId
   } = body;
   const id = pathParameters?.id;
   const authHeader = Authorization || authorization;
@@ -142,7 +143,8 @@ const updateCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
     hidden: curationType === CurationType.CUSTOM ? curation.hidden : hidden,
     startTime: startTime,
     endTime: endTime,
-    curationType: curationType
+    curationType: curationType,
+    groupId: groupId
   };
 
   if (!isEqual(curation, curationUpdates)) {

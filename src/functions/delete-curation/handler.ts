@@ -5,6 +5,7 @@ import { getElastic } from "src/elastic";
 import { curationsService, documentService } from "src/database/services";
 import { CurationType } from "@types";
 
+// TODO: Delete all curations sharing a groupId?
 /**
  * Lambda for deleting curations
  *

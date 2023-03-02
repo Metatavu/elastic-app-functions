@@ -21,6 +21,13 @@ paths:
           description: Filter by curationType
           schema:
             type: string
+        - name: groupId
+          required: false
+          in: query
+          description: Filter by groupId
+          schema:
+            type: string
+            format: uuid
       responses:
         "200":
           description: A list of curations
@@ -332,6 +339,9 @@ components:
           description: Start time of curation
         curationType:
           type: string
+        groupId:
+          type: string
+          format: uuid
         document:
           type: object
           required:

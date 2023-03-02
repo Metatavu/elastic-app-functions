@@ -10,6 +10,7 @@ const curationSchema = Type.Object({
   hidden: Type.Array(Type.String()),
   startTime: Type.Optional(Type.String()),
   endTime: Type.Optional(Type.String()),
+  groupId: Type.Optional(Type.String({ format: "uuid" })),
   curationType: Type.Enum(CurationType),
   document: Type.Optional(Type.Object({
     title: Type.String(),

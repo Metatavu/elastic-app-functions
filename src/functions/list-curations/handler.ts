@@ -17,6 +17,7 @@ const listCurations: ValidatedEventAPIGatewayProxyEvent<any> = async event => {
   const authHeader = Authorization || authorization;
 
   const curationTypeFilter = queryStringParameters?.curationType;
+  const groupIdFilter = queryStringParameters?.groupId;
 
   const auth = await getElasticCredentialsForSession(authHeader);
   if (!auth) {
@@ -39,6 +40,10 @@ const listCurations: ValidatedEventAPIGatewayProxyEvent<any> = async event => {
   if (curationTypeFilter) {
     curations = allCurations.filter(curation => curation.curationType === curationTypeFilter);
   }
+  // For now the filtering by groupId will "override" the curationTypeFilter
+  if (groupIdFilter) {
+    curations = allCurations.filter(curation => curation.groupId === groupIdFilter);
+  }
 
   const combinedResponse: Curation[] = await Promise.all(curations.map(async curation => {
     let documentResponse: Document | null = null;
@@ -51,17 +56,17 @@ const listCurations: ValidatedEventAPIGatewayProxyEvent<any> = async event => {
       endTime: curation.endTime ? parseDate(curation.endTime) : undefined
     };
 
-      return {
-        ...curation,
-        startTime: parsedDates.startTime,
-        endTime: parsedDates.endTime,
-        document: documentResponse ? {
-          description: documentResponse.description,
-          title: documentResponse.title,
-          links: documentResponse.links,
-          language: documentResponse.language
-        } : undefined
-      };
+    return {
+      ...curation,
+      startTime: parsedDates.startTime,
+      endTime: parsedDates.endTime,
+      document: documentResponse ? {
+        description: documentResponse.description,
+        title: documentResponse.title,
+        links: documentResponse.links,
+        language: documentResponse.language
+      } : undefined
+    };
   }));
 
   return {
