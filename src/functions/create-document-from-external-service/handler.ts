@@ -47,7 +47,6 @@ const getPaginatedElasticResults = async (elastic: Elastic, externalServiceIds: 
   } while (!retrievedAllDocuments)
   
   return retrievedDocuments;
-  
 };
 
 /**
