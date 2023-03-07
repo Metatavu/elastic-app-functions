@@ -3,7 +3,7 @@ import { middyfy } from "@libs/lambda";
 import schema from "src/schema/curation";
 import { documentService, curationsService } from "src/database/services";
 import { v4 as uuid } from "uuid";
-import { getElasticCredentialsForSession } from "@libs/auth-utils";
+import { getElasticCredentialsForSession, returnUnauthorized } from "@libs/auth-utils";
 import { getElastic } from "src/elastic";
 import { CurationType } from "@types";
 import { validateDocumentIds } from "@libs/curation-utils";
@@ -40,18 +40,12 @@ const createCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
 
   const auth = await getElasticCredentialsForSession(authHeader);
   if (!auth) {
-    return {
-      statusCode: 401,
-      body: "Unauthorized"
-    };
+    return returnUnauthorized();
   }
 
   const elastic = getElastic(auth);
   if (!(await elastic.hasCurationsAccess())) {
-    return {
-      statusCode: 401,
-      body: "Unauthorized"
-    };
+    return returnUnauthorized();
   }
 
   const curationId = uuid();

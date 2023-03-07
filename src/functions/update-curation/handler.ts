@@ -1,5 +1,5 @@
 import { ValidatedEventAPIGatewayProxyEvent } from "@libs/api-gateway";
-import { getElasticCredentialsForSession } from "@libs/auth-utils";
+import { getElasticCredentialsForSession, returnForbidden, returnUnauthorized } from "@libs/auth-utils";
 import { middyfy } from "@libs/lambda";
 import { getElastic } from "src/elastic";
 import { curationsService, documentService } from "src/database/services";
@@ -48,18 +48,12 @@ const updateCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
 
   const auth = await getElasticCredentialsForSession(authHeader);
   if (!auth) {
-    return {
-      statusCode: 401,
-      body: "Unauthorized"
-    };
+    return returnUnauthorized();
   }
 
   const elastic = getElastic(auth);
   if (!(await elastic.hasCurationsAccess())) {
-    return {
-      statusCode: 401,
-      body: "Unauthorized"
-    };
+    return returnForbidden();
   }
 
   const curation = await curationsService.findCuration(id);

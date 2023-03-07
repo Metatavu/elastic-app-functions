@@ -18,8 +18,7 @@ const INDEX_CHUNK_SIZE = 100;
 const getPaginatedElasticResults = async (elastic: Elastic) => {
   let currentPageNumber = 1;
   let retrievedAllDocuments = false;
-  const retrievedDocuments: { [key: string]: any }[] = [];
-  const retrievedIds: string[] = [];
+  const retrievedDocuments: Document[] = [];
   
   do {
     console.log(`Getting results page ${currentPageNumber} from Elastic...`);
@@ -72,8 +71,6 @@ const updateDocumentsLanguages = async () => {
     
     await Promise.allSettled(chunk.map(async document => {
       const detectedLanguage = await detectLanguageForDocument(document);
-      console.log(`detectedLanguage: ${detectedLanguage}`)
-      console.log(`document language: ${document.language}`)
       
       if (detectedLanguage !== document.language) {
         updatedDocuments.push({

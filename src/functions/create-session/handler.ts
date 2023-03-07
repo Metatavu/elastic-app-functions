@@ -1,7 +1,7 @@
 import type { ValidatedEventAPIGatewayProxyEvent } from "@libs/api-gateway";
 import { middyfy } from "@libs/lambda";
 import { authenticationService } from "src/database/services";
-import { generateToken, parseBasicAuth, parseBearerAuth, returnUnauthorized } from "@libs/auth-utils";
+import { generateToken, parseBasicAuth, parseBearerAuth, returnForbidden, returnUnauthorized } from "@libs/auth-utils";
 import { generateExpiryTimestamp, validateTimestamp } from "@libs/date-utils";
 import { v4 as uuid } from "uuid";
 import { getElastic } from "src/elastic";
@@ -18,7 +18,7 @@ const createAuthenticationSession: ValidatedEventAPIGatewayProxyEvent<any> = asy
   const isBasicAuth = authHeader?.toLowerCase()?.startsWith("basic");
   const isBearerAuth = authHeader?.toLowerCase()?.startsWith("bearer");
 
-  if (!isBearerAuth && !isBasicAuth) {
+  if (!(isBearerAuth || isBasicAuth)) {
     return returnUnauthorized();
   }
 
@@ -36,10 +36,7 @@ const createAuthenticationSession: ValidatedEventAPIGatewayProxyEvent<any> = asy
     if (!validateTimestamp(foundSession.expiresAt)) {
       await authenticationService.deleteSession(foundSession.token);
 
-      return {
-        statusCode: 401,
-        body: "Unauthorized"
-      }
+      return returnUnauthorized()
     }
 
     const tokenExpiry: number = generateExpiryTimestamp();
@@ -68,10 +65,7 @@ const createAuthenticationSession: ValidatedEventAPIGatewayProxyEvent<any> = asy
 
     const elastic = getElastic(auth);
     if (!(await elastic.hasCurationsAccess())) {
-      return {
-        statusCode: 403,
-        body: "Forbidden"
-      };
+      return returnForbidden();
     }
 
     const token: string = generateToken();
