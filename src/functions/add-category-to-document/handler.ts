@@ -24,19 +24,19 @@ const getContentCategory = (category: string | undefined) => {
 
 /**
  * Resolves TPR ID from document
- * 
+ *
  * @param document document
  * @returns TPR ID or null
  */
 const resolveServiceDocumentsExternalId = async (document: Document) => {
   const pageResponse = await getPageResponse(document);
-  
+
   if (!pageResponse) {
     return null;
   }
-  
+
   const externalId = await getExternalIdFromElement(pageResponse);
-  
+
   return externalId;
 };
 
@@ -48,16 +48,16 @@ const resolveServiceDocumentsExternalId = async (document: Document) => {
  */
 const resolveDocumentCategory = async (document: Document) => {
   const pageResponse = await getPageResponse(document);
-  
+
   if (!pageResponse) {
     return;
   }
 
   const categoryAttribute = await getCategoryAttribute(pageResponse)
-  
+
   if (!categoryAttribute) {
     console.warn(`Couldn't resolve category type for ${document.url}`);
-    
+
     return ContentCategory.UNCATEGORIZED;
   }
 
@@ -72,7 +72,7 @@ const addCategoryToDocuments = async () => {
     username: ELASTIC_ADMIN_USERNAME,
     password: ELASTIC_ADMIN_PASSWORD
   });
-  
+
   const departments = await getDepartmentsFromRegistry();
 
   const { results, meta } = await elastic.searchDocuments({
@@ -97,17 +97,17 @@ const addCategoryToDocuments = async () => {
   for (const document of searchResultsToDocuments(results)) {
     let updatedDocument: Document;
     const category = await resolveDocumentCategory(document);
-    
+
     if (category) {
       updatedDocument = {
         ...document,
         id: document.id,
         meta_content_category: category
       };
-      
+
       if (category === ContentCategory.SERVICE) {
         const externalServiceId = await resolveServiceDocumentsExternalId(document);
-        
+
         if (externalServiceId) {
           const foundRegistryDepartment = departments?.find(department => department.id === externalServiceId);
           updatedDocument = {
@@ -116,7 +116,7 @@ const addCategoryToDocuments = async () => {
           };
         }
       }
-      
+
       updateDocuments.push(updatedDocument);
     }
   }

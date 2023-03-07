@@ -76,24 +76,28 @@ export const getElasticCredentialsForSession = async (authHeader: string | undef
     return undefined;
   };
 
-  const authenticationSession = await authenticationService.findSession(token);
-  if (!authenticationSession) {
+  try {
+    const authenticationSession = await authenticationService.findSession(token);
+    if (!authenticationSession) {
+      return undefined;
+    }
+
+    const isValid = validateTimestamp(authenticationSession.expiresAt);
+    if (!isValid) {
+      await authenticationService.deleteSession(authenticationSession.token);
+
+      return undefined;
+    }
+
+    const auth: BasicAuth = {
+      username: authenticationSession.username,
+      password: authenticationSession.password
+    };
+
+    return auth;
+  } catch {
     return undefined;
   }
-
-  const isValid = validateTimestamp(authenticationSession.expiresAt);
-  if (!isValid) {
-    await authenticationService.deleteSession(authenticationSession.token);
-
-    return undefined;
-  }
-
-  const auth: BasicAuth = {
-    username: authenticationSession.username,
-    password: authenticationSession.password
-  };
-
-  return auth;
 }
 
 /**
