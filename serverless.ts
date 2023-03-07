@@ -1,29 +1,4 @@
 import type { AWS } from "@serverless/typescript";
-
-import findCuration from "@functions/find-curation";
-import listCurations from "@functions/list-curations";
-import createCuration from "@functions/create-curation";
-import updateCuration from "@functions/update-curation";
-import deleteCuration from "@functions/delete-curation";
-import scheduleTimedCuration from "@functions/schedule-timed-curations";
-import addCategoryToDocuments from "@functions/add-category-to-document";
-import detectDocumentLanguages from "@functions/detect-document-languages";
-import detectNewsPublished from "@functions/detect-news-published";
-import detectBreadcrumbs from "@functions/detect-breadcrumbs";
-import createSession from "@functions/create-session";
-import deleteSession from "@functions/delete-session";
-import findScheduledCrawl from "@functions/scheduled-crawls/find-scheduled-crawl";
-import listScheduledCrawls from "@functions/scheduled-crawls/list-scheduled-crawls";
-import createScheduledCrawl from "@functions/scheduled-crawls/create-scheduled-crawl";
-import updateScheduledCrawl from "@functions/scheduled-crawls/update-scheduled-crawl";
-import deleteScheduledCrawl from "@functions/scheduled-crawls/delete-scheduled-crawl";
-import triggerScheduledCrawl from "@functions/scheduled-crawls/trigger-scheduled-crawl";
-import addContactDocumentsToSQS from "@functions/add-contact-documents-to-sqs";
-import processContactDocumentFromSQS from "@functions/process-contact-documents-from-sqs";
-import addExternalServiceIdToServices from "@functions/add-external-service-id-to-services"
-import createDocumentFromExternalService from "@functions/create-document-from-external-service";
-import listManuallyCreatedDocuments from "@functions/list-custom-documents";
-
 import config from "src/config";
 import {
   findCuration,
@@ -48,8 +23,7 @@ import {
   processContactDocumentFromSQS,
   addExternalServiceIdToServices,
   createDocumentFromExternalService,
-  listDocumentsByIds,
-  listManuallyCreatedDocuments
+  listCustomDocuments
 } from "@functions";
 
 
@@ -139,7 +113,7 @@ const serverlessConfiguration: AWS = {
     deleteSession,
     addExternalServiceIdToServices,
     createDocumentFromExternalService,
-    listManuallyCreatedDocuments
+    listCustomDocuments
   },
   package: { individually: true },
   custom: {
