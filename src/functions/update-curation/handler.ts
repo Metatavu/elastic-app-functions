@@ -27,7 +27,8 @@ const updateCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
     startTime,
     endTime,
     document,
-    curationType
+    curationType,
+    language
   } = body;
   const id = pathParameters?.id;
   const authHeader = Authorization || authorization;
@@ -62,33 +63,33 @@ const updateCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
     };
   }
 
-  const curation = await curationsService.findCuration(id);
-  if (!curation) {
+  const existingCuration = await curationsService.findCuration(id);
+  if (!existingCuration) {
     return {
       statusCode: 404,
       body: `Curation ${id} not found`
     };
   }
 
-  let elasticCurationId = curation.elasticCurationId;
+  let elasticCurationId = existingCuration.elasticCurationId;
 
   let documentResponse: Document | undefined = undefined;
-  let curationResponse: CurationModel = curation;
+  let curationResponse: CurationModel = existingCuration;
 
-  if (curationType === CurationType.CUSTOM && curation.documentId && document) {
+  if (curationType === CurationType.CUSTOM && existingCuration.documentId && document) {
     try {
-      const foundDocument = await documentService.findDocument(curation.documentId);
+      const foundDocument = await documentService.findDocument(existingCuration.documentId);
       if (!foundDocument) {
         return {
           statusCode: 404,
-          body: `Document ${curation.documentId} not found`
+          body: `Document ${existingCuration.documentId} not found`
         };
       }
 
       const { title, description, links, language } = document;
 
       const updatesToDocument: Document = {
-        id: curation.documentId,
+        id: existingCuration.documentId,
         description: description,
         language: language,
         links: links,
@@ -102,7 +103,7 @@ const updateCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
         } catch (error) {
           return {
             statusCode: 500,
-            body: `Error updating document record with id ${curation.documentId}, ${error}`
+            body: `Error updating document record with id ${existingCuration.documentId}, ${error}`
           };
         }
 
@@ -110,7 +111,7 @@ const updateCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
           try {
             await elastic.updateDocuments({
               documents: [{
-                id: curation.documentId,
+                id: existingCuration.documentId,
                 title: title,
                 description: description,
                 links: links,
@@ -120,7 +121,7 @@ const updateCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
           } catch (error) {
             return {
               statusCode: 500,
-              body: `Error updating elastic document with id ${curation.documentId}, ${error}`
+              body: `Error updating elastic document with id ${existingCuration.documentId}, ${error}`
             };
           }
         }
@@ -128,39 +129,40 @@ const updateCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
     } catch (error) {
       return {
         statusCode: 500,
-        body: `Error finding document with id ${curation.documentId}`
+        body: `Error finding document with id ${existingCuration.documentId}`
       };
     }
   }
 
   const curationUpdates: CurationModel = {
-    id: curation.id,
-    elasticCurationId: curation.id,
-    documentId: curation.documentId,
+    id: existingCuration.id,
+    elasticCurationId: existingCuration.id,
+    documentId: existingCuration.documentId,
     queries: queries,
-    promoted: curationType === CurationType.CUSTOM ? curation.promoted : promoted,
-    hidden: curationType === CurationType.CUSTOM ? curation.hidden : hidden,
+    promoted: curationType === CurationType.CUSTOM ? existingCuration.promoted : promoted,
+    hidden: curationType === CurationType.CUSTOM ? existingCuration.hidden : hidden,
     startTime: startTime,
     endTime: endTime,
-    curationType: curationType
+    curationType: curationType,
+    language: language
   };
 
-  if (!isEqual(curation, curationUpdates)) {
+  if (!isEqual(existingCuration, curationUpdates)) {
     if (!startTime) {
       try {
         elasticCurationId = elasticCurationId
-        ? await updateExistingElasticCuration(
-          elasticCurationId,
-          curationUpdates,
-          elastic
-        )
-        : await elastic.createCuration({
-          curation: {
-            hidden: curationUpdates.hidden,
-            promoted: curationUpdates.promoted,
-            queries: curationUpdates.queries
-          }
-        });
+          ? await updateExistingElasticCuration(
+            elasticCurationId,
+            curationUpdates,
+            elastic
+          )
+          : await elastic.createCuration({
+            curation: {
+              hidden: curationUpdates.hidden,
+              promoted: curationUpdates.promoted,
+              queries: curationUpdates.queries
+            }
+          });
       } catch (error) {
         return {
           statusCode: 500,

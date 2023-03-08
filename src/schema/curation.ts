@@ -11,6 +11,7 @@ const curationSchema = Type.Object({
   startTime: Type.Optional(Type.String()),
   endTime: Type.Optional(Type.String()),
   curationType: Type.Enum(CurationType),
+  language: Type.Optional(Type.String()),
   document: Type.Optional(Type.Object({
     title: Type.String(),
     links: Type.String(),
