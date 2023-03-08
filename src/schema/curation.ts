@@ -12,6 +12,7 @@ const curationSchema = Type.Object({
   endTime: Type.Optional(Type.String()),
   groupId: Type.Optional(Type.String({ format: "uuid" })),
   curationType: Type.Enum(CurationType),
+  language: Type.Optional(Type.String()),
   document: Type.Optional(Type.Object({
     title: Type.String(),
     links: Type.String(),

@@ -27,7 +27,8 @@ const createCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
     endTime,
     document,
     curationType,
-    groupId
+    groupId,
+    language
   } = body;
   const { Authorization, authorization } = headers;
   const authHeader = Authorization || authorization;
@@ -142,7 +143,8 @@ const createCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
       documentId: newDocumentId,
       elasticCurationId: elasticCurationId,
       curationType: curationType,
-      groupId: groupId
+      groupId: groupId,
+      language: language
     });
     curationResponse = curation;
     const parsedDates = {

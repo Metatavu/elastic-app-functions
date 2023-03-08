@@ -342,6 +342,8 @@ components:
         groupId:
           type: string
           format: uuid
+        language:
+          type: string
         document:
           type: object
           required:
