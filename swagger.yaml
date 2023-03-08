@@ -296,6 +296,7 @@ components:
     Curation:
       type: object
       required:
+        - name
         - queries
         - promoted
         - hidden
@@ -306,6 +307,9 @@ components:
           format: uuid
           readOnly: true
           description: Identifier
+        name:
+          type: string
+          description: Name of curation
         elasticCurationId:
           type: string
         documentId:

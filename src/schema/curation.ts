@@ -2,9 +2,10 @@ import { Type } from "@sinclair/typebox";
 import { CurationType } from "@types";
 
 /**
- * Schema object for timed curation REST entity
+ * Schema object for curation REST entity
  */
 const curationSchema = Type.Object({
+  name: Type.String(),
   queries: Type.Array(Type.String()),
   promoted: Type.Array(Type.String()),
   hidden: Type.Array(Type.String()),

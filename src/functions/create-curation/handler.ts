@@ -20,6 +20,7 @@ import { Curation } from "src/generated/app-functions-client";
 const createCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async event => {
   const { body, headers } = event;
   const {
+    name,
     queries,
     promoted,
     hidden,
@@ -134,6 +135,7 @@ const createCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
   try {
     const curation = await curationsService.createCuration({
       id: curationId,
+      name: name,
       promoted: promoted,
       hidden: hidden,
       queries: queries,

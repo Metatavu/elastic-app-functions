@@ -33,6 +33,12 @@ export interface Curation {
      */
     readonly id?: string;
     /**
+     * Name of curation
+     * @type {string}
+     * @memberof Curation
+     */
+    name: string;
+    /**
      * 
      * @type {string}
      * @memberof Curation
@@ -105,6 +111,7 @@ export function CurationFromJSONTyped(json: any, ignoreDiscriminator: boolean): 
     return {
         
         'id': !exists(json, 'id') ? undefined : json['id'],
+        'name': json['name'],
         'elasticCurationId': !exists(json, 'elasticCurationId') ? undefined : json['elasticCurationId'],
         'documentId': !exists(json, 'documentId') ? undefined : json['documentId'],
         'queries': json['queries'],
@@ -127,6 +134,7 @@ export function CurationToJSON(value?: Curation | null): any {
     }
     return {
         
+        'name': value.name,
         'elasticCurationId': value.elasticCurationId,
         'documentId': value.documentId,
         'queries': value.queries,

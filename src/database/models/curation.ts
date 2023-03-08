@@ -5,6 +5,7 @@ import { CurationType } from "@types";
  */
 interface CurationModel {
   id: string;
+  name: string;
   elasticCurationId?: string;
   language?: string;
   documentId?: string;
