@@ -15,6 +15,7 @@ interface CurationModel {
   startTime?: string;
   endTime?: string;
   curationType: CurationType;
+  groupId?: string;
 }
 
 export default CurationModel;

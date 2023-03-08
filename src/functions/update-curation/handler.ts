@@ -29,6 +29,7 @@ const updateCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
     endTime,
     document,
     curationType,
+    groupId,
     language
   } = body;
   const id = pathParameters?.id;
@@ -146,6 +147,7 @@ const updateCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
     startTime: startTime,
     endTime: endTime,
     curationType: curationType,
+    groupId: groupId,
     language: language
   };
 
