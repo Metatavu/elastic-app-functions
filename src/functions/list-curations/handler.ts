@@ -40,7 +40,6 @@ const listCurations: ValidatedEventAPIGatewayProxyEvent<any> = async event => {
   if (curationTypeFilter) {
     curations = allCurations.filter(curation => curation.curationType === curationTypeFilter);
   }
-  // For now the filtering by groupId will "override" the curationTypeFilter
   if (groupIdFilter) {
     curations = allCurations.filter(curation => curation.groupId === groupIdFilter);
   }
