@@ -56,9 +56,27 @@ const createCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
     };
   }
 
+  if (groupId) {
+    try {
+      const groupedCurations = await curationsService.listGroupCurations(groupId);
+      if (!groupedCurations.length) {
+        return {
+          statusCode: 404,
+          body: `No curations found with group ID: ${groupId}`
+        };
+      }
+    } catch (error) {
+      return {
+        statusCode: 500,
+        body: `Error while listing curations with group ID: ${groupId}, ${error}`
+      };
+    }
+  }
+
   const curationId = uuid();
   let newDocumentId: string | undefined = undefined;
   let elasticCurationId: string | undefined = undefined;
+  let validGroupId = groupId || uuid();
 
   let documentResponse: Document | undefined = undefined;
   let curationResponse: CurationModel | undefined = undefined;
@@ -143,7 +161,7 @@ const createCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
       documentId: newDocumentId,
       elasticCurationId: elasticCurationId,
       curationType: curationType,
-      groupId: groupId,
+      groupId: validGroupId,
       language: language
     });
     curationResponse = curation;

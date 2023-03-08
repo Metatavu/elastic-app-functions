@@ -85,6 +85,23 @@ class CurationService {
   }
 
   /**
+   * Lists curations with groupId
+   *
+   * @returns list of curations
+   */
+  public listGroupCurations = async (groupId: string): Promise<CurationModel[]> => {
+    const result = await this.docClient
+      .scan({
+        TableName: TABLE_NAME,
+        FilterExpression: "#groupId = :groupId",
+        ExpressionAttributeValues: { ":groupId":groupId }
+      })
+      .promise();
+
+    return result.Items as CurationModel[];
+  }
+
+  /**
    * Updates curation
    *
    * @param curation curation to be updated
