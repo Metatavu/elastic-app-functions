@@ -82,6 +82,12 @@ export interface Curation {
     curationType: string;
     /**
      * 
+     * @type {string}
+     * @memberof Curation
+     */
+    language?: string;
+    /**
+     * 
      * @type {CurationDocument}
      * @memberof Curation
      */
@@ -107,6 +113,7 @@ export function CurationFromJSONTyped(json: any, ignoreDiscriminator: boolean): 
         'startTime': !exists(json, 'startTime') ? undefined : (new Date(json['startTime'])),
         'endTime': !exists(json, 'endTime') ? undefined : (new Date(json['endTime'])),
         'curationType': json['curationType'],
+        'language': !exists(json, 'language') ? undefined : json['language'],
         'document': !exists(json, 'document') ? undefined : CurationDocumentFromJSON(json['document']),
     };
 }
@@ -128,6 +135,7 @@ export function CurationToJSON(value?: Curation | null): any {
         'startTime': value.startTime === undefined ? undefined : (value.startTime.toISOString()),
         'endTime': value.endTime === undefined ? undefined : (value.endTime.toISOString()),
         'curationType': value.curationType,
+        'language': value.language,
         'document': CurationDocumentToJSON(value.document),
     };
 }

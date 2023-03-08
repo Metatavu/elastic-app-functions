@@ -332,6 +332,8 @@ components:
           description: Start time of curation
         curationType:
           type: string
+        language:
+          type: string
         document:
           type: object
           required:
