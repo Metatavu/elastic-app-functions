@@ -3,7 +3,7 @@ import { middyfy } from "@libs/lambda";
 import scheduledCrawlSchema from "src/schema/scheduled-crawl";
 import { scheduledCrawlService } from "src/database/services";
 import { v4 as uuid } from "uuid";
-import { getElasticCredentialsForSession } from "@libs/auth-utils";
+import { getElasticCredentialsForSession, returnForbidden, returnUnauthorized } from "@libs/auth-utils";
 import { getElastic } from "src/elastic";
 
 /**
@@ -19,18 +19,12 @@ const createScheduledCrawl: ValidatedEventAPIGatewayProxyEvent<typeof scheduledC
 
   const auth = await getElasticCredentialsForSession(authHeader);
   if (!auth) {
-    return {
-      statusCode: 401,
-      body: "Unauthorized"
-    };
+    return returnUnauthorized();
   }
 
   const elastic = getElastic(auth);
   if (!(await elastic.hasScheduledCrawlAccess())) {
-    return {
-      statusCode: 403,
-      body: "Forbidden"
-    };
+    return returnForbidden();
   }
 
   const scheduledCrawl = await scheduledCrawlService.createScheduledCrawl({

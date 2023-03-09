@@ -1,7 +1,7 @@
 import type { ValidatedEventAPIGatewayProxyEvent } from "@libs/api-gateway";
 import { middyfy } from "@libs/lambda";
 import { authenticationService } from "src/database/services";
-import { parseBearerAuth } from "@libs/auth-utils";
+import { parseBearerAuth, returnUnauthorized } from "@libs/auth-utils";
 
 /**
  * Lambda for deleting Authentication session
@@ -15,10 +15,7 @@ const deleteAuthenticationSession: ValidatedEventAPIGatewayProxyEvent<any> = asy
 
   const token = parseBearerAuth(authHeader!);
   if (!token) {
-    return {
-      statusCode: 401,
-      body: "Unauthorized"
-    };
+    return returnUnauthorized();
   };
 
   const authenticationSession = await authenticationService.findSession(token);
