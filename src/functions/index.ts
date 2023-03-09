@@ -21,5 +21,4 @@ export { default as addContactDocumentsToSQS } from "./add-contact-documents-to-
 export { default as processContactDocumentFromSQS } from "./process-contact-documents-from-sqs";
 export { default as addExternalServiceIdToServices } from "./add-external-service-id-to-services";
 export { default as createDocumentFromExternalService } from "./create-document-from-external-service";
-export { default as listDocumentsByIds } from "./list-documents-by-ids";
 export { default as updateDocumentsLanguages } from "./update-documents-languages";
