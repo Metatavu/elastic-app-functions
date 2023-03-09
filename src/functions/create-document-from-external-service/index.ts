@@ -3,6 +3,7 @@ import { AWSFunction } from "src/types";
 
 const fn: AWSFunction = {
   handler: `${handlerPath(__dirname)}/handler.main`,
+  name: "createDocFromExternalService",
   events: [
     {
       schedule: {
