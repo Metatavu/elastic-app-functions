@@ -4,7 +4,8 @@
   "description": "Elastic App search lambda functions",
   "main": "serverless.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build-app-functions-client": "openapi-generator-cli version-manager set 6.0.0 && openapi-generator-cli generate -i swagger.yaml -o src/generated/app-functions-client -c generator-config.json -g typescript-fetch"
   },
   "engines": {
     "node": ">=14.15.0"
@@ -15,19 +16,25 @@
     "@middy/http-json-body-parser": "^2.5.3",
     "@sinclair/typebox": "0.25.10",
     "cheerio": "1.0.0-rc.12",
+    "crypto-js": "4.1.1",
     "envalid": "^7.3.1",
     "fast-xml-parser": "4.0.11",
     "franc": "6.0.0",
     "iso-639-3": "3.0.1",
+    "lodash": "4.17.21",
     "luxon": "3.0.3",
     "node-fetch": "3.2.10",
+    "string-similarity": "4.0.4",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
+    "@openapitools/openapi-generator-cli": "2.5.2",
     "@serverless/typescript": "^3.0.0",
     "@types/aws-lambda": "^8.10.71",
+    "@types/crypto-js": "4.1.1",
     "@types/luxon": "3.1.0",
     "@types/node": "^14.14.25",
+    "@types/string-similarity": "4.0.0",
     "@types/uuid": "9.0.0",
     "esbuild": "^0.14.11",
     "serverless": "^3.0.0",

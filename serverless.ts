@@ -1,25 +1,31 @@
 import type { AWS } from "@serverless/typescript";
-
-import findTimedCuration from "@functions/find-timed-curation";
-import listTimedCurations from "@functions/list-timed-curations";
-import createTimedCuration from "@functions/create-timed-curation";
-import updateTimedCuration from "@functions/update-timed-curation";
-import deleteTimedCuration from "@functions/delete-timed-curation";
-import scheduleTimedCuration from "@functions/schedule-timed-curations";
-import addCategoryToDocuments from "@functions/add-category-to-document";
-import detectDocumentLanguages from "@functions/detect-document-languages";
-import detectNewsPublished from "@functions/detect-news-published";
-import detectBreadcrumbs from "@functions/detect-breadcrumbs";
-import findScheduledCrawl from "@functions/scheduled-crawls/find-scheduled-crawl";
-import listScheduledCrawls from "@functions/scheduled-crawls/list-scheduled-crawls";
-import createScheduledCrawl from "@functions/scheduled-crawls/create-scheduled-crawl";
-import updateScheduledCrawl from "@functions/scheduled-crawls/update-scheduled-crawl";
-import deleteScheduledCrawl from "@functions/scheduled-crawls/delete-scheduled-crawl";
-import triggerScheduledCrawl from "@functions/scheduled-crawls/trigger-scheduled-crawl";
-import addContactDocumentsToSQS from "@functions/add-contact-documents-to-sqs";
-import processContactDocumentFromSQS from "@functions/process-contact-documents-from-sqs";
-
 import config from "src/config";
+import {
+  findCuration,
+  listCurations,
+  createCuration,
+  updateCuration,
+  deleteCuration,
+  scheduleTimedCuration,
+  addCategoryToDocuments,
+  detectDocumentLanguages,
+  detectNewsPublished,
+  detectBreadcrumbs,
+  createSession,
+  deleteSession,
+  findScheduledCrawl,
+  listScheduledCrawls,
+  createScheduledCrawl,
+  updateScheduledCrawl,
+  deleteScheduledCrawl,
+  triggerScheduledCrawl,
+  addContactDocumentsToSQS,
+  processContactDocumentFromSQS,
+  addExternalServiceIdToServices,
+  createDocumentFromExternalService,
+  listCustomDocuments
+} from "@functions";
+
 
 const serverlessConfiguration: AWS = {
   service: "elastic-app-functions",
@@ -44,7 +50,9 @@ const serverlessConfiguration: AWS = {
       ELASTIC_ADMIN_USERNAME: config.ELASTIC_ADMIN_USERNAME,
       ELASTIC_ADMIN_PASSWORD: config.ELASTIC_ADMIN_PASSWORD,
       CONTACT_PERSONS_URL: config.CONTACT_PERSONS_URL,
-      CONTACT_SYNC_INTERVAL_IN_DAYS: config.CONTACT_SYNC_INTERVAL_IN_DAYS.toString()
+      CONTACT_SYNC_INTERVAL_IN_DAYS: config.CONTACT_SYNC_INTERVAL_IN_DAYS.toString(),
+      AUTHENTICATION_EXPIRY_IN_MINS: config.AUTHENTICATION_EXPIRY_IN_MINS.toString(),
+      SUOMIFI_ORGANIZATION_ID: config.SUOMIFI_ORGANIZATION_ID
     },
     iam: {
       role: {
@@ -59,10 +67,13 @@ const serverlessConfiguration: AWS = {
               "dynamodb:PutItem",
               "dynamodb:UpdateItem",
               "dynamodb:DeleteItem",
+              "dynamodb:UpdateTimeToLive"
             ],
             Resource: [
-              { "Fn::GetAtt": [ "TimedCurations", "Arn" ] },
-              { "Fn::GetAtt": [ "ScheduledCrawls", "Arn" ] }
+              { "Fn::GetAtt": [ "Curations", "Arn" ] },
+              { "Fn::GetAtt": [ "ScheduledCrawls", "Arn" ] },
+              { "Fn::GetAtt": [ "AuthenticationSessions", "Arn" ] },
+              { "Fn::GetAtt": [ "Documents", "Arn" ] }
             ],
           },
           {
@@ -80,11 +91,11 @@ const serverlessConfiguration: AWS = {
     }
   },
   functions: {
-    findTimedCuration,
-    listTimedCurations,
-    createTimedCuration,
-    updateTimedCuration,
-    deleteTimedCuration,
+    findCuration,
+    listCurations,
+    createCuration,
+    updateCuration,
+    deleteCuration,
     scheduleTimedCuration,
     addCategoryToDocuments,
     detectDocumentLanguages,
@@ -97,7 +108,12 @@ const serverlessConfiguration: AWS = {
     deleteScheduledCrawl,
     triggerScheduledCrawl,
     addContactDocumentsToSQS,
-    processContactDocumentFromSQS
+    processContactDocumentFromSQS,
+    createSession,
+    deleteSession,
+    addExternalServiceIdToServices,
+    createDocumentFromExternalService,
+    listCustomDocuments
   },
   package: { individually: true },
   custom: {
@@ -114,11 +130,11 @@ const serverlessConfiguration: AWS = {
   },
   resources: {
     Resources: {
-      TimedCurations: {
+      Curations: {
         Type: "AWS::DynamoDB::Table",
         DeletionPolicy: "Delete",
         Properties: {
-          TableName: "timed-curations",
+          TableName: "curations",
           AttributeDefinitions: [{ AttributeName: "id", AttributeType: "S" }],
           KeySchema: [{ AttributeName: "id", KeyType: "HASH" }],
           ProvisionedThroughput: {
@@ -138,6 +154,36 @@ const serverlessConfiguration: AWS = {
             ReadCapacityUnits: 1,
             WriteCapacityUnits: 1
           },
+        },
+      },
+      Documents: {
+        Type: "AWS::DynamoDB::Table",
+        DeletionPolicy: "Delete",
+        Properties: {
+          TableName: "documents",
+          AttributeDefinitions: [{ AttributeName: "id", AttributeType: "S" }],
+          KeySchema: [{ AttributeName: "id", KeyType: "HASH" }],
+          ProvisionedThroughput: {
+            ReadCapacityUnits: 1,
+            WriteCapacityUnits: 1
+          },
+        },
+      },
+      AuthenticationSessions: {
+        Type: "AWS::DynamoDB::Table",
+        DeletionPolicy: "Delete",
+        Properties: {
+          TableName: "authentication-sessions",
+          AttributeDefinitions: [{ AttributeName: "token", AttributeType: "S" }],
+          KeySchema: [{ AttributeName: "token", KeyType: "HASH" }],
+          ProvisionedThroughput: {
+            ReadCapacityUnits: 1,
+            WriteCapacityUnits: 1
+          },
+          TimeToLiveSpecification: {
+            AttributeName: "expiresAt",
+            Enabled: true
+          }
         },
       },
       HelsinkiSearchContactPersonQueue: {

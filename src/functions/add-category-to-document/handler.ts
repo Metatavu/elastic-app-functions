@@ -1,9 +1,9 @@
-import fetch from "node-fetch";
-import * as cheerio from "cheerio";
 import { ContentCategory, getElastic, Document } from "src/elastic";
 import config from "src/config";
 import { middyfy } from "@libs/lambda";
 import { searchResultsToDocuments } from "@libs/document-utils";
+import { getDepartmentsFromRegistry } from "@libs/departments-registry-utils";
+import { getCategoryAttribute, getExternalIdFromElement, getPageResponse } from "@libs/webpage-utils";
 
 const { ELASTIC_ADMIN_USERNAME, ELASTIC_ADMIN_PASSWORD } = config;
 const BATCH_SIZE = 10;
@@ -20,7 +20,25 @@ const getContentCategory = (category: string | undefined) => {
     case "tpr_service": return ContentCategory.SERVICE;
     default: return ContentCategory.UNCATEGORIZED;
   }
-}
+};
+
+/**
+ * Resolves TPR ID from document
+ *
+ * @param document document
+ * @returns TPR ID or null
+ */
+const resolveServiceDocumentsExternalId = async (document: Document) => {
+  const pageResponse = await getPageResponse(document);
+
+  if (!pageResponse) {
+    return null;
+  }
+
+  const externalId = await getExternalIdFromElement(pageResponse);
+
+  return externalId;
+};
 
 /**
  * Resolves category for a document
@@ -28,29 +46,23 @@ const getContentCategory = (category: string | undefined) => {
  * @param document document
  * @returns category type or null if category could not be resolved
  */
-const resolveDocumentCategory = async (document: Document): Promise<ContentCategory | null> => {
-  const { id, url } = document;
+const resolveDocumentCategory = async (document: Document) => {
+  const pageResponse = await getPageResponse(document);
 
-  if (!url) {
-    console.error(`Document ${id} does not contain URL`);
-    return null;
+  if (!pageResponse) {
+    return;
   }
 
-  const pageResponse = await fetch(new URL(url as string).toString());
-  const contentType = pageResponse.headers.get("content-type");
+  const categoryAttribute = await getCategoryAttribute(pageResponse)
 
-  if (!contentType?.startsWith("text/html")) {
-    console.warn(`Could resolve category type for ${url}`);
+  if (!categoryAttribute) {
+    console.warn(`Couldn't resolve category type for ${document.url}`);
 
     return ContentCategory.UNCATEGORIZED;
   }
 
-  const pageContent = await pageResponse.text();
-  const $ = cheerio.load(pageContent);
-  const categoryElement = $("head").find("meta[name=helfi_content_type]");
-
-  return getContentCategory(categoryElement.attr("content"));
-}
+  return getContentCategory(categoryAttribute);
+};
 
 /**
  * Scheduled lambda for adding category to elastic documents without one
@@ -61,10 +73,12 @@ const addCategoryToDocuments = async () => {
     password: ELASTIC_ADMIN_PASSWORD
   });
 
+  const departments = await getDepartmentsFromRegistry();
+
   /*
     Temporarily changed this to only update NEWS category documents.
-    To revert, remove line 76.
-   */
+    To revert, remove line 90.
+  */
   const { results, meta } = await elastic.searchDocuments({
     query: "",
     page: {
@@ -86,13 +100,29 @@ const addCategoryToDocuments = async () => {
   const updateDocuments: Document[] = [];
 
   for (const document of searchResultsToDocuments(results)) {
+    let updatedDocument: Document;
     const category = await resolveDocumentCategory(document);
+
     if (category) {
-      updateDocuments.push({
+      updatedDocument = {
         ...document,
         id: document.id,
         meta_content_category: category
-      });
+      };
+
+      if (category === ContentCategory.SERVICE) {
+        const externalServiceId = await resolveServiceDocumentsExternalId(document);
+
+        if (externalServiceId) {
+          const foundRegistryDepartment = departments?.find(department => department.id === externalServiceId);
+          updatedDocument = {
+            ...updatedDocument,
+            external_service_id: foundRegistryDepartment?.id
+          };
+        }
+      }
+
+      updateDocuments.push(updatedDocument);
     }
   }
 

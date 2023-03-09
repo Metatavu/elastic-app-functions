@@ -1,4 +1,5 @@
 import type { AWS } from "@serverless/typescript";
+import { ContentCategory } from "src/elastic";
 
 /**
  * AWS function type
@@ -58,3 +59,67 @@ export interface XMLPerson {
  * Contact parsed from XML person
  */
 export type Contact = Omit<XMLPerson, "@_mecm_id"> & { id: string; };
+
+/**
+ * Drupal settings JSON with property to decipher content categories for service and unit
+ */
+export type DrupalSettingsJson = {
+  path?: {
+    currentPath?: string | null;
+  };
+};
+
+/**
+ * Type for Suomi.fi Services API response
+ */
+export type SuomiFiResponseWithMeta<T> = {
+  pageNumber: number;
+  pageSize: number;
+  pageCount: number;
+  itemList: T[];
+};
+
+/**
+ * Enum for supported languages for Suomi.fi Services
+ */
+export enum SupportedLanguages {
+  FI = "fi",
+  SV = "sv",
+  EN = "en"
+}
+
+/**
+ * Type for Suomi.fi Services
+ */
+export type Service = {
+  id: string;
+  sourceId: number;
+  serviceNames: {
+    language: string;
+    value: string;
+  }[];
+  serviceDescriptions: {
+    language: string;
+    value: string;
+    type: string;
+  }[];
+};
+
+/**
+ * Type for TPR Service document
+ */
+export type ServiceDocument = {
+  title: string;
+  meta_content_category: ContentCategory;
+  meta_description: string;
+  language: SupportedLanguages;
+  external_url: string;
+};
+
+/**
+ * Enum for curation type
+ */
+export enum CurationType {
+  CUSTOM = "custom",
+  STANDARD = "standard"
+};

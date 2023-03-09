@@ -1,5 +1,5 @@
 import { Client } from "@elastic/enterprise-search";
-import { CreateCurationRequest, DeleteDocumentsResponse, SearchRequest, SearchResponse } from "@elastic/enterprise-search/lib/api/app/types";
+import { CreateCurationRequest, DeleteDocumentsResponse, PutCurationRequest, SearchRequest, SearchResponse } from "@elastic/enterprise-search/lib/api/app/types";
 import { BasicAuth } from "@libs/auth-utils";
 import config from "src/config";
 
@@ -21,7 +21,8 @@ export enum ContentCategory {
   UNIT = "unit",
   NEWS = "news",
   UNCATEGORIZED = "uncategorized",
-  CONTACT = "contact"
+  CONTACT = "contact",
+  EXTERNAL = "service_external_link"
 }
 
 /**
@@ -35,7 +36,7 @@ export interface AppSearchResponse extends SearchResponse {
  * Document
  */
 export type Document = {
-  id: string;
+  id?: string;
   [k: string]: unknown;
 }
 
@@ -74,6 +75,24 @@ export class Elastic {
 
     const result = await this.getClient().app.createCuration({
       engine_name: this.options.engineName,
+      body: curation
+    });
+
+    return result.id;
+  };
+
+  /**
+   * Updates curation
+   *
+   * @param options options
+   * @returns updated curation id
+   */
+  public updateCuration = async (options: { curation: PutCurationRequest["body"], curationId: string }): Promise<string> => {
+    const { curation, curationId } = options;
+
+    const result = await this.getClient().app.putCuration({
+      engine_name: this.options.engineName,
+      curation_id: curationId,
       body: curation
     });
 

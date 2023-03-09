@@ -4,108 +4,122 @@ info:
   description: Elastic App search lambda functions
   version: 1.0.0
 security:
-  - Basic: []
+  - BearerAuth: []
 paths:
-  "/timed-curations":
+  "/curations":
     get:
-      operationId: listTimedCurations
-      summary: Lists timed curations
+      operationId: listCurations
+      summary: Lists curations
       description: |
-        Lists timed curations
+        Lists curations
       tags:
-        - TimedCurations
+        - Curations
+      parameters:
+        - name: curationType
+          required: false
+          in: query
+          description: Filter by curationType
+          schema:
+            type: string
+        - name: groupId
+          required: false
+          in: query
+          description: Filter by groupId
+          schema:
+            type: string
+            format: uuid
       responses:
         "200":
-          description: A list of timed curations
+          description: A list of curations
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/TimedCuration"
+                  $ref: "#/components/schemas/Curation"
     post:
-      operationId: createTimedCuration
-      summary: create new timed curation
+      operationId: createCuration
+      summary: create new curation
       description: |
-        Creates new timed curation
+        Creates new curation
       tags:
-        - TimedCurations
+        - Curations
       requestBody:
-        $ref: "#/components/requestBodies/TimedCuration"
+        $ref: "#/components/requestBodies/Curation"
       responses:
         "200":
-          description: Created timed curation
+          description: Created curation
           content:
             application/json;charset=utf-8:
               schema:
-                $ref: "#/components/schemas/TimedCuration"
+                $ref: "#/components/schemas/Curation"
 
-  "/timed-curations/{id}":
+  "/curations/{id}":
     get:
-      operationId: findTimedCuration
-      summary: Find timed curation
+      operationId: findCuration
+      summary: Find curation
       description: |
-        Find timed curation
+        Find curation
       tags:
-        - TimedCurations
+        - Curations
       parameters:
         - name: id
           required: true
           in: path
-          description: timed curation id
+          description: curation id
           schema:
             type: string
             format: uuid
       responses:
         "200":
-          description: Found timed curation
+          description: Found curation
           content:
             application/json;charset=utf-8:
               schema:
-                $ref: "#/components/schemas/TimedCuration"
+                $ref: "#/components/schemas/Curation"
     put:
-      operationId: updateTimedCuration
-      summary: Updates timed curation
+      operationId: updateCuration
+      summary: Updates curation
       description: |
-        Updates timed curations
+        Updates curations
       tags:
-        - TimedCurations
+        - Curations
       parameters:
         - name: id
           required: true
           in: path
-          description: timed curation id
+          description: timed id
           schema:
             type: string
             format: uuid
       requestBody:
-        $ref: "#/components/requestBodies/TimedCuration"
+        $ref: "#/components/requestBodies/Curation"
       responses:
         "200":
-          description: Updated timed curation
+          description: Updated curation and also its document when it is custom type
           content:
             application/json;charset=utf-8:
               schema:
-                $ref: "#/components/schemas/TimedCuration"
+                $ref: "#/components/schemas/Curation"
     delete:
-      operationId: deleteTimedCuration
-      summary: Deletes timed curation
+      operationId: deleteCuration
+      summary: Deletes curation
       description: |
-        Deletes timed curation
+        Deletes curation
       tags:
-        - TimedCurations
+        - Curations
       parameters:
         - name: id
           required: true
           in: path
-          description: timed curation id
+          description: curation id
           schema:
             type: string
             format: uuid
       responses:
         "204":
           description: Empty content indicating a successful removal
-  
+
   "/scheduled-crawl":
     get:
       operationId: listScheduledCrawls
@@ -206,13 +220,62 @@ paths:
         "204":
           description: Empty content indicating a successful removal
 
+  "/login":
+    post:
+      operationId: login
+      summary: Create session authentication
+      description: |
+        Create session authentication
+      security:
+        - Basic: []
+        - BearerAuth: []
+      tags:
+        - Authentication
+      responses:
+        "201":
+          description: Logged in
+          content:
+            application/json;charset=utf-8:
+              schema:
+                $ref: "#/components/schemas/Authentication"
+
+  "/logout":
+    post:
+      operationId: logout
+      summary: Deletes session authentication
+      description: |
+        Deletes session authentication
+      tags:
+        - Authentication
+      responses:
+        "204":
+          description: Empty content indicating a successful removal
+
+  "/documents":
+    get:
+      operationId: listsManuallyCreatedDocuments
+      summary: Lists manually created documents
+      description: |
+        Lists manually created documents
+      tags:
+        - Documents
+      responses:
+        "200":
+          description: A list of manually created documents
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Document"
+
 components:
   requestBodies:
-    TimedCuration:
+    Curation:
       content:
         application/json;charset=utf-8:
           schema:
-            $ref: "#/components/schemas/TimedCuration"
+            $ref: "#/components/schemas/Curation"
       description: Payload
       required: true
     ScheduledCrawl:
@@ -222,25 +285,42 @@ components:
             $ref: "#/components/schemas/ScheduledCrawl"
       description: Payload
       required: true
+    Document:
+      content:
+        application/json;charset=utf-8:
+          schema:
+            $ref: "#/components/schemas/Document"
+      description: Payload
+      required: true
   securitySchemes:
     Basic:
       type: http
       scheme: Basic
+    BearerAuth:
+      type: http
+      scheme: bearer
   schemas:
-    TimedCuration:
+    Curation:
       type: object
       required:
+        - name
         - queries
         - promoted
         - hidden
-        - startTime
-        - endTime
+        - curationType
       properties:
         id:
           type: string
           format: uuid
           readOnly: true
           description: Identifier
+        name:
+          type: string
+          description: Name of curation
+        elasticCurationId:
+          type: string
+        documentId:
+          type: string
         queries:
           type: array
           items:
@@ -261,6 +341,29 @@ components:
           type: string
           format: date-time
           description: Start time of curation
+        curationType:
+          type: string
+        groupId:
+          type: string
+          format: uuid
+        language:
+          type: string
+        document:
+          type: object
+          required:
+            - title
+            - description
+            - links
+            - language
+          properties:
+            title:
+              type: string
+            description:
+              type: string
+            links:
+              type: string
+            language:
+              type: string
     ScheduledCrawl:
       type: object
       required:
@@ -281,3 +384,30 @@ components:
             type: string
         frequency:
           type: number
+    Authentication:
+      type: object
+      required:
+        - token
+        - expiry
+      properties:
+        token:
+          type: string
+          readOnly: true
+          description: Identifier
+        expiry:
+          type: number
+    Document:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+          description: Identifier
+        title:
+          type: string
+        description:
+          type: string
+        links:
+          type: string
+        language:
+          type: string

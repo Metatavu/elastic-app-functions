@@ -1,13 +1,14 @@
 import { middyfy } from "@libs/lambda";
-import { timedCurationsService } from "src/database/services";
+import { curationsService, documentService } from "src/database/services";
 import config from "src/config";
 import { parseDate } from "@libs/date-utils";
 import { getElastic } from "src/elastic";
+import { CurationType } from "@types";
 
 const { ELASTIC_ADMIN_USERNAME, ELASTIC_ADMIN_PASSWORD } = config;
 
 /**
- * Scheduled lambda for managing curations based on timed curations
+ * Scheduled lambda for managing timed curations
  */
 const scheduleTimedCuration = async () => {
   const elastic = getElastic({
@@ -15,47 +16,91 @@ const scheduleTimedCuration = async () => {
     password: ELASTIC_ADMIN_PASSWORD
   });
 
-  const timedCurations = await timedCurationsService.listTimedCurations();
+  const timedCurations = (await curationsService.listCurations()).filter(curation => curation.startTime || curation.endTime);
 
-  await Promise.all(timedCurations.map(async timedCuration => {
-    const { id, curationId, startTime, endTime, hidden, promoted, queries } = timedCuration;
+  await Promise.allSettled(timedCurations.map(async timedCuration => {
+    const { id, elasticCurationId, startTime, endTime, hidden, promoted, queries, curationType, documentId } = timedCuration;
 
-    const now = new Date();
-    const start = parseDate(startTime);
-    const end = parseDate(endTime);
-    const active = start.getTime() <= now.getTime() && end.getTime() >= now.getTime();
+    const isAfterStartDate = !startTime || Date.now() > parseDate(startTime).getTime();
+    const isBeforeEndDate = !endTime || Date.now() < parseDate(endTime).getTime();
+    const active = isAfterStartDate && isBeforeEndDate;
 
-    if (!curationId && active) {
-      const payload = {
-        hidden: hidden,
-        promoted: promoted,
-        queries: queries
-      };
+    try {
+      const shouldBeActivated = !elasticCurationId && active;
+      if (shouldBeActivated) {
+        if (curationType === CurationType.CUSTOM && documentId) {
+          const foundDocument = await documentService.findDocument(documentId);
+          if (!foundDocument) {
+            throw new Error(`Could not find custom document ${documentId}.`);
+          }
+          await elastic.updateDocuments({
+            documents: [{
+              id: foundDocument.id,
+              title: foundDocument.title,
+              description: foundDocument.description,
+              links: foundDocument.links,
+              language: foundDocument.language,
+            }]
+          });
+        }
 
-      console.log(`Creating curation for scheduled curation ${id}...`);
+        const payload = {
+          hidden: hidden,
+          promoted: promoted,
+          queries: queries
+        };
 
-      const curationId = await elastic.createCuration({
-        curation: payload
-      });
+        console.log(`Creating curation for scheduled curation ${id}...`);
 
-      timedCurationsService.updateTimedCuration({
-        ...timedCuration,
-        curationId: curationId
-      });
+        const curationId = await elastic.createCuration({
+          curation: payload
+        });
 
-      console.log(`Created curation ${curationId} for scheduled curation ${id}.`);
-    } else if (curationId && !active) {
-      console.log(`Curation ${curationId} scheduled to be deactivated. Removing curation from app search...`);
+        curationsService.updateCuration({
+          ...timedCuration,
+          elasticCurationId: curationId
+        });
 
-      const curation = await elastic.findCuration({ id: curationId });
-      if (curation) {
-        await elastic.deleteCuration({ id: curationId });
-        console.info(`Curation ${curationId} removed.`);
-      } else {
-        console.warn(`Could not find curation ${curationId}, cannot remove it.`);
+        console.log(`Created curation ${curationId} for scheduled curation ${id}.`);
       }
 
-      await timedCurationsService.deleteTimedCuration(id);
+      const shouldBeDeactivated = elasticCurationId && !active;
+      if (shouldBeDeactivated) {
+        console.log(`Curation ${elasticCurationId} scheduled to be deactivated. Removing curation from app search...`);
+
+        const curation = await elastic.findCuration({ id: elasticCurationId });
+        if (!curation) {
+          throw new Error(`Could not find curation ${elasticCurationId}, cannot remove it.`);
+        }
+
+        await elastic.deleteCuration({ id: elasticCurationId });
+        console.info(`Curation ${elasticCurationId} removed.`);
+
+        if (curationType === CurationType.CUSTOM && documentId) {
+          const foundDocument = await documentService.findDocument(documentId);
+          if (!foundDocument) {
+            throw new Error(`Could not find document ${documentId}.`);
+          }
+
+          const foundElasticDocument = await elastic.findDocument({ documentId: documentId });
+          if (!foundElasticDocument) {
+            throw new Error(`Could not find expired elastic custom document ${documentId}, so cannot remove it.`);
+          }
+
+          await elastic.deleteDocuments({documentIds: [documentId]});
+
+          await documentService.updateDocument({
+            ...foundDocument,
+            curationId: undefined
+          });
+        }
+        curationsService.updateCuration({
+          ...timedCuration,
+          elasticCurationId: undefined
+        });
+      }
+    } catch (error) {
+      console.error(error);
     }
   }));
 };
