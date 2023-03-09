@@ -88,6 +88,7 @@ const addCategoryToDocuments = async () => {
       all: [
         { url_host: "www.hel.fi" },
         { all: { url_path_dir2: ["uutiset", "news", "nyheter"] } },
+        { all: { url_path_dir2: ["uutiset", "news", "nyheter"] } },
         { none: { "meta_content_category": Object.values(ContentCategory) } }
       ]
     }
