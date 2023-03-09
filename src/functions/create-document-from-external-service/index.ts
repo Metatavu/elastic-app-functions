@@ -3,7 +3,7 @@ import { AWSFunction } from "src/types";
 
 const fn: AWSFunction = {
   handler: `${handlerPath(__dirname)}/handler.main`,
-  name: "createDocFromExternalService",
+  name: "elastic-app-functions-${opt:stage}-createDocFromExternalService",
   events: [
     {
       schedule: {
