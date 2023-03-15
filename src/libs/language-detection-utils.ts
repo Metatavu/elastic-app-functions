@@ -29,34 +29,48 @@ const detectLanguageFromContents = (bodyContent: string) => {
  * @param url URL
  * @returns language or null if not detected
  */
-const detectLanguageFromMetaTags = async (url: string) => {
-  const documentUrl = new URL(url);
-  const pageResponse = await fetch(documentUrl.toString());
-  const contentType = pageResponse.headers.get("content-type");
-  if (contentType?.startsWith("text/html")) {
-    const pageContent = await pageResponse.text();
-    const $ = cheerio.load(pageContent);
-    
-    const htmlLangValue = $("html").attr("lang");
-    
-    if (htmlLangValue) {
-      return htmlLangValue;
+const detectLanguageFromMetaTags = (url: string) => {
+  return new Promise<string | undefined>(async resolve => {
+    try {
+      const timeout = setTimeout(() => resolve(undefined), 5000);
+      
+      const documentUrl = new URL(url);
+      const pageResponse = await fetch(documentUrl.toString());
+      const contentType = pageResponse.headers.get("content-type");
+      if (contentType?.startsWith("text/html")) {
+        const pageContent = await pageResponse.text();
+        const $ = cheerio.load(pageContent);
+        
+        const htmlLangValue = $("html").attr("lang");
+        
+        if (htmlLangValue) {
+          
+        clearTimeout(timeout);
+          return resolve(htmlLangValue);
+        }
+        
+        const element = $("script[data-drupal-selector=drupal-settings-json]");
+
+        if (!element.length) return;
+      
+        const jsonString = element.html();
+      
+        if (!jsonString?.length) return;
+      
+        clearTimeout(timeout);
+        return resolve(JSON.parse(jsonString)?.path?.currentLanguage);
+      } else {
+
+        clearTimeout(timeout);
+        console.warn(`Failed to resolve language for ${url} with content type ${contentType}`);
+        return resolve(undefined);
+      }
+    } catch (e) {
+      console.log("Caught", e);
+      return resolve(undefined);
     }
-    
-    const element = $("script[data-drupal-selector=drupal-settings-json]");
-
-    if (!element.length) return;
+  });
   
-    const jsonString = element.html();
-  
-    if (!jsonString?.length) return;
-  
-    return JSON.parse(jsonString)?.path?.currentLanguage;
-  } else {
-
-    console.warn(`Failed to resolve language for ${url} with content type ${contentType}`);
-    return;
-  }
 };
 
 /**
