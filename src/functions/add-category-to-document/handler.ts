@@ -93,9 +93,12 @@ const addCategoryToDocuments = async () => {
     }
   });
 
-  console.log(`Indexing of next ${meta.page.size} of uncategorized ${meta.page.total_results} results`);
+  if (!results.length) {
+    console.log("No uncategorized documents found.");
+    return;
+  }
 
-  if (!results.length) return;
+  console.log(`Indexing of next ${meta.page.size} of uncategorized ${meta.page.total_results} results`);
 
   const updateDocuments: Document[] = [];
 

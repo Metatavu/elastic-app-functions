@@ -7,7 +7,7 @@ const fn: AWSFunction = {
     {
       schedule: {
         rate: [
-          "cron(0 3 ? * SAT *)"
+          "rate(1 day)"
         ]
       }
     }

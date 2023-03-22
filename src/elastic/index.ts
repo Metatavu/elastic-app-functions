@@ -139,6 +139,8 @@ export class Elastic {
     return this.getClient().app.indexDocuments({
       engine_name: this.options.engineName,
       documents: documents
+    }, {
+      requestTimeout: 60_000
     }) as Promise<UpsertDocumentResponse[]>;
   }
 
@@ -308,9 +310,9 @@ export const getElastic = (auth: BasicAuth) => {
   const { ELASTIC_URL, ELASTIC_APP_ENGINE } = config;
 
   return new Elastic({
-    "url": ELASTIC_URL,
-    "engineName": ELASTIC_APP_ENGINE,
-    "username": auth.username,
-    "password": auth.password
+    url: ELASTIC_URL,
+    engineName: ELASTIC_APP_ENGINE,
+    username: auth.username,
+    password: auth.password
   });
 }
