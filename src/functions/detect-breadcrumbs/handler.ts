@@ -3,6 +3,7 @@ import * as cheerio from "cheerio";
 import { getElastic } from "src/elastic";
 import config from "src/config";
 import { middyfy } from "@libs/lambda";
+import { searchResultsToDocuments } from "@libs/document-utils";
 
 const { ELASTIC_ADMIN_USERNAME, ELASTIC_ADMIN_PASSWORD } = config;
 const BATCH_SIZE = 10;
@@ -133,17 +134,11 @@ const detectBreadcrumbs = async () => {
 
   if (!results.length) return;
 
-  // Search result values are stored in { raw: "value" } format, this flattens them
-  const flattenedDocuments = results.map(result =>
-    Object.keys(result).reduce<{ [key: string]: any }>((document, key) => {
-      const value = result[key]?.raw;
-      return value ? { ...document, [key]: value } : document;
-    }, {})
-  );
+  const documents = searchResultsToDocuments(results);
 
   const updateDocuments = [];
 
-  for (const document of flattenedDocuments) {
+  for (const document of documents) {
     const breadcrumbs = await detectBreadcrumbsFromDocument(document);
     if (breadcrumbs) {
       updateDocuments.push({
