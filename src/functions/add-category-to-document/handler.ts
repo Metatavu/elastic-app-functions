@@ -75,10 +75,6 @@ const addCategoryToDocuments = async () => {
 
   const departments = await getDepartmentsFromRegistry();
 
-  /*
-    Temporarily changed this to only update NEWS category documents.
-    To revert, remove line 90.
-  */
   const { results, meta } = await elastic.searchDocuments({
     query: "",
     page: {
@@ -87,7 +83,6 @@ const addCategoryToDocuments = async () => {
     filters: {
       all: [
         { url_host: "www.hel.fi" },
-        { all: { url_path_dir2: ["uutiset", "news", "nyheter"] } },
         { none: { "meta_content_category": Object.values(ContentCategory) } }
       ]
     }
