@@ -30,7 +30,7 @@ const isRateExceededError = <T>(error: T): error is (T & { statusCode: 429 }) =>
  * @returns awaited operation
  */
 const executeOperation = async <T>(queue: PQueue, operation: () => Promise<T>, attemptsLeft: number, previousError?: unknown): Promise<T> => {
-  if (!attemptsLeft) throw Error("Error in queue: ", { cause: previousError });
+  if (!attemptsLeft) throw Error("Error in queue.", { cause: previousError });
 
   try {
     return await queue.add(() => operation()) as T;
