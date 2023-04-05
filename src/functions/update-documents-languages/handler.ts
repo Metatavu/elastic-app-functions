@@ -35,15 +35,16 @@ const getPaginatedElasticResults = async (elastic: Elastic) => {
         { url: "asc" }
       ],
       filters: {
-        any: [{
-          meta_content_category: ["service", "unit", "news", "uncategorized"]
-        }],
-        none: [{
-          language: ["fi", "en", "sv"]
+        all: [{
+          any: [{
+            meta_content_category: ["service", "unit", "news", "uncategorized"]
+          }]
         }, {
-          // All content types can be ignored as intended documents
-          // do not have any content type in Elastic document.
-          content_type: ALL_CONTENT_TYPES
+          none: [{
+            // All content types can be ignored as intended documents
+            // do not have any content type in Elastic document.
+            content_type: ALL_CONTENT_TYPES
+          }]
         }]
       }
     });

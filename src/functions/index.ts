@@ -4,7 +4,7 @@ export { default as updateCuration } from "./update-curation";
 export { default as deleteCuration } from "./delete-curation";
 export { default as findCuration } from "./find-curation";
 export { default as scheduleTimedCuration } from "./schedule-timed-curations";
-export { default as addCategoryToDocuments } from "./add-category-to-document";
+export { default as addCategoryToDocuments } from "./add-category-to-documents";
 export { default as detectDocumentLanguages } from "./detect-document-languages";
 export { default as detectNewsPublished } from "./detect-news-published";
 export { default as detectBreadcrumbs } from "./detect-breadcrumbs";
