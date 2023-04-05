@@ -3,6 +3,7 @@ import { AWSFunction } from "@types";
 
 const fn: AWSFunction = {
   handler: `${handlerPath(__dirname)}/handler.main`,
+  timeout: 900,
   events: [
     {
       schedule: {
