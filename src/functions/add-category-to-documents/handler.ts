@@ -66,10 +66,6 @@ const addCategoryToDocuments = async () => {
 
   const departments = await getDepartmentsFromRegistry();
 
-  /*
-    Temporarily changed this to only update NEWS category documents.
-    To revert, remove line 81.
-  */
   const { results, meta } = await elastic.searchDocuments({
     query: "",
     page: {
@@ -78,7 +74,6 @@ const addCategoryToDocuments = async () => {
     filters: {
       all: [
         { url_host: "www.hel.fi" },
-        // { all: { url_path_dir2: ["uutiset", "news", "nyheter"] } },
         { none: { meta_content_category: Object.values(ContentCategory) } }
       ]
     }
@@ -116,18 +111,18 @@ const addCategoryToDocuments = async () => {
         return updatedDocument;
       } catch (error) {
         const { message, cause } = error as Error;
-        console.error(`Failed to resolve document category. ID: ${document.id}, URL: ${document.url}. Reason: ${message} ${cause}`);
+        console.error(`Failed to resolve document category. ID: ${document.id}, URL: ${document.url}. Reason: ${message} ${cause ?? ""}`);
         throw error;
       }
     }
   );
 
   const resolveDocumentCategoryResults = await runInQueue(resolveDocumentCategoryRequests, {
-    retryCount: 1,
-    concurrency: 20,
+    retryCount: 2,
+    concurrency: 10,
     carryoverConcurrencyCount: true,
-    intervalCap: 20,
-    interval: 4_000
+    intervalCap: 10,
+    interval: 1_000
   });
 
   const documentsWithResolvedCategory = resolveDocumentCategoryResults
@@ -147,7 +142,8 @@ const addCategoryToDocuments = async () => {
         console.log(`Updated ${totalUpdated} / ${documentsWithResolvedCategory.length} documents to Elastic.`);
         return updatedDocument;
       } catch (error) {
-        console.error(`Failed to update documents to Elastic. Reason: ${(error as Error).cause}`);
+        const { message, cause } = error as Error;
+        console.error(`Failed to update documents to Elastic. Reason: ${message} ${cause ?? ""}`);
         throw error;
       }
     }

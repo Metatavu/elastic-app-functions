@@ -8,7 +8,7 @@ const fn: AWSFunction = {
     {
       schedule: {
         rate: [
-          "rate(10 minutes)"
+          "rate(5 minutes)"
         ]
       }
     }

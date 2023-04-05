@@ -4,33 +4,29 @@ import { ContentCategory, getElastic } from "src/elastic";
 import config from "src/config";
 import { middyfy } from "@libs/lambda";
 import { DateTime } from "luxon";
-import { parseHelFiNewsDate } from "@libs/date-utils";
+import { searchResultsToDocuments } from "@libs/document-utils";
 
 const { ELASTIC_ADMIN_USERNAME, ELASTIC_ADMIN_PASSWORD } = config;
 const BATCH_SIZE = 10;
 
 /**
- * Detects language for given URL
+ * Tries to resolve published date of news page from page content
  *
- * @param url URL
- * @returns language or null if not detected
+ * @param url URL of the news page
+ * @returns language or null if failed to resolve
  */
-const detectNewsPublishedDateFromUrl = async (url: string): Promise<DateTime | null> => {
+const tryToResolvePublishedDateFromPageContent = async (url: string): Promise<DateTime | null> => {
   const documentUrl = new URL(url);
   const pageResponse = await fetch(documentUrl.toString());
   const contentType = pageResponse.headers.get("content-type");
 
-  if (contentType?.startsWith("text/html")) {
-    const pageContent = await pageResponse.text();
-    const $ = cheerio.load(pageContent);
-    const publishedElement = $("time[itemprop='datePublished']");
-    if (publishedElement.length) {
-      const dateString = publishedElement.attr("datetime");
-      if (dateString) return parseHelFiNewsDate(dateString);
-    }
-  }
+  if (!contentType?.startsWith("text/html")) return null;
 
-  return null;
+  const pageContent = await pageResponse.text();
+  const $ = cheerio.load(pageContent);
+  const dateString = $("meta[property='article:published_time']")?.attr("content");
+
+  return dateString ? DateTime.fromISO(dateString) : null;
 }
 
 /**
@@ -47,7 +43,7 @@ const detectNewsPublishedDateFromDocument = async (document: any): Promise<DateT
     return null;
   }
 
-  const result = await detectNewsPublishedDateFromUrl(url);
+  const result = await tryToResolvePublishedDateFromPageContent(url);
   if (!result) {
     console.warn(`Failed to resolve language for ${url}`);
   }
@@ -92,17 +88,9 @@ const detectNewsPublished = async () => {
 
   if (!results.length) return;
 
-  // Search result values are stored in { raw: "value" } format, this flattens them
-  const flattenedDocuments = results.map(result =>
-    Object.keys(result).reduce<{ [key: string]: any }>((document, key) => {
-      const value = result[key]?.raw;
-      return value ? { ...document, [key]: value } : document;
-    }, {})
-  );
-
   const updateDocuments = [];
 
-  for (const document of flattenedDocuments) {
+  for (const document of searchResultsToDocuments(results)) {
     const publishDate = await detectNewsPublishedDateFromDocument(document);
     if (publishDate && publishDate.isValid) {
       updateDocuments.push({
