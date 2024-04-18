@@ -7,10 +7,6 @@ import {
   updateCuration,
   deleteCuration,
   scheduleTimedCuration,
-  addCategoryToDocuments,
-  detectDocumentLanguages,
-  detectNewsPublished,
-  detectBreadcrumbs,
   createSession,
   deleteSession,
   findScheduledCrawl,
@@ -23,8 +19,7 @@ import {
   processContactDocumentFromSQS,
   addExternalServiceIdToServices,
   createDocumentFromExternalService,
-  listCustomDocuments,
-  updateDocumentsLanguages
+  listCustomDocuments
 } from "@functions";
 
 
@@ -98,10 +93,6 @@ const serverlessConfiguration: AWS = {
     updateCuration,
     deleteCuration,
     scheduleTimedCuration,
-    addCategoryToDocuments,
-    detectDocumentLanguages,
-    detectNewsPublished,
-    detectBreadcrumbs,
     findScheduledCrawl,
     listScheduledCrawls,
     createScheduledCrawl,
@@ -114,8 +105,7 @@ const serverlessConfiguration: AWS = {
     deleteSession,
     addExternalServiceIdToServices,
     createDocumentFromExternalService,
-    listCustomDocuments,
-    updateDocumentsLanguages
+    listCustomDocuments
   },
   package: { individually: true },
   custom: {

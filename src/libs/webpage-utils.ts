@@ -50,17 +50,6 @@ export const getPageResponse = async ({ id, url }: Document) => {
 };
 
 /**
- * Gets Documents category attribute from pages meta tags
- *
- * @param pageResponse Response
- * @return category attribute
- */
-export const getCategoryAttribute = async (pageResponse: Response) => {
-  const categoryElement = await getHeadElement(pageResponse, "meta[name=helfi_content_type]");
-  return categoryElement?.attr("content");
-};
-
-/**
  * Gets external ID from crawled pages headers drupal-settings-json script element.
  *
  * Results null if no external ID is found in there.
