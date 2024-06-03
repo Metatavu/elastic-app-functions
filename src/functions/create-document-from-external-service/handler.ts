@@ -2,7 +2,7 @@ import { getDepartmentsFromRegistry } from "@libs/departments-registry-utils";
 import { createDocumentsFromService, searchResultsToDocuments } from "@libs/document-utils";
 import { middyfy } from "@libs/lambda";
 import { runInQueue } from "@libs/queue-utils";
-import { compareServices, getSuomifiServicesByOrganization } from "@libs/suomifi-utils";
+import { compareServices, getSuomiFiServicesByOrganization } from "@libs/suomifi-utils";
 import { ServiceDocument, SupportedLanguages } from "@types";
 import _ from "lodash";
 import config from "src/config";
@@ -59,12 +59,12 @@ const createDocumentFromExternalService = async () => {
     username: ELASTIC_ADMIN_USERNAME,
     password: ELASTIC_ADMIN_PASSWORD
   });
-  const suomifiServices = await getSuomifiServicesByOrganization(SUOMIFI_ORGANIZATION_ID);
-  console.log(`Found ${suomifiServices?.length} Suomi.fi services`);
+  const suomiFiServices = await getSuomiFiServicesByOrganization(SUOMIFI_ORGANIZATION_ID);
+  console.log(`Found ${suomiFiServices?.length} Suomi.fi services`);
   const departments = await getDepartmentsFromRegistry();
   console.log(`Found ${departments?.length} TPR services`);
 
-  if (!suomifiServices || !departments) return;
+  if (!suomiFiServices || !departments) return;
 
   const externalServiceIds = departments.map(department => department.id.toString());
   const searchResults = await getPaginatedElasticResults(elastic, externalServiceIds)
@@ -77,10 +77,10 @@ const createDocumentFromExternalService = async () => {
 
   console.log(`[${new Date()}] Starting to process non indexed services...`);
   await Promise.all(filteredDepartments.map(async department => {
-    const matchingSuomifiService = suomifiServices.find(service => compareServices(service, department, SupportedLanguages.FI));
+    const matchingSuomiFiService = suomiFiServices.find(service => compareServices(service, department, SupportedLanguages.FI));
 
-    if (matchingSuomifiService) {
-      const createdDocuments = await createDocumentsFromService(matchingSuomifiService, department);
+    if (matchingSuomiFiService) {
+      const createdDocuments = await createDocumentsFromService(matchingSuomiFiService, department);
       matchingDocuments.push(...createdDocuments);
       console.log(`Created document (${matchingDocuments.length}) for ${department.title}`);
     }
