@@ -85,7 +85,7 @@ export const compareServices = (service: Service, department: Department, langua
 };
 
 /**
- * Returns whichever summary is sorther and longer than the other
+ * Returns whichever summary is shorter and longer than the other
  *
  * @params summary1 summary1
  * @params summary2 summary2
