@@ -65,6 +65,40 @@ export class Elastic {
   }
 
   /**
+   * Gets paginated Elastic Search results filtered by given filters and query.
+   *
+   * @param options options
+   * @returns Search results
+   */
+  public getPaginatedSearchResults = async (options: any): Promise<Array<{[key: string]: any;}>> => {
+
+    let currentPageNumber = 1;
+    let retrievedAllDocuments = false;
+    const retrievedDocuments: { [key: string]: any }[] = [];
+
+    do {
+      const { results, meta } = await this.searchDocuments({
+        query: options.query,
+        page: {
+          size: 1000,
+          current: currentPageNumber
+        },
+        filters: options.filters
+      });
+
+      if (meta.page.current === meta.page.total_pages) {
+        retrievedAllDocuments = true;
+      } else {
+        currentPageNumber++;
+      }
+
+      retrievedDocuments.push(...results);
+    } while (!retrievedAllDocuments)
+
+    return retrievedDocuments;
+  };
+
+  /**
    * Creates new curation
    *
    * @param options options
