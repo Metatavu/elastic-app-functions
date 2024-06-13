@@ -76,8 +76,8 @@ class CurationService {
     const result = await this.docClient
       .scan({
         TableName: TABLE_NAME,
-        FilterExpression: "#curationType = :curationType",
-        ExpressionAttributeValues: { ":curationType":CurationType.CUSTOM }
+        FilterExpression: "curationType = :curationType",
+        ExpressionAttributeValues: { ":curationType": CurationType.CUSTOM }
       })
       .promise();
 
@@ -93,8 +93,8 @@ class CurationService {
     const result = await this.docClient
       .scan({
         TableName: TABLE_NAME,
-        FilterExpression: "#groupId = :groupId",
-        ExpressionAttributeValues: { ":groupId":groupId }
+        FilterExpression: "groupId = :groupId",
+        ExpressionAttributeValues: { ":groupId": groupId }
       })
       .promise();
 
