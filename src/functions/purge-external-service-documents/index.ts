@@ -4,6 +4,7 @@ import { AWSFunction } from "src/types";
 const fn: AWSFunction = {
   handler: `${handlerPath(__dirname)}/handler.main`,
   name: "elastic-app-functions-${opt:stage}-purgeExternalServiceDocs",
+  timeout: 900,
   events: [
     {
       schedule: {
