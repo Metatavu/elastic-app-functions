@@ -3,11 +3,12 @@ import { AWSFunction } from "src/types";
 
 const fn: AWSFunction = {
   handler: `${handlerPath(__dirname)}/handler.main`,
+  timeout: 30,
   events: [
     {
       httpApi: {
         method: "get",
-        path: "/curations"
+        path: "/curations",
       },
     },
   ],

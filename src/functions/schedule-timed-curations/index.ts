@@ -3,14 +3,13 @@ import { AWSFunction } from "src/types";
 
 const fn: AWSFunction = {
   handler: `${handlerPath(__dirname)}/handler.main`,
+  timeout: 30,
   events: [
     {
       schedule: {
-        rate: [
-          "rate(15 minutes)"
-        ]
-      }
-    }
+        rate: ["rate(15 minutes)"],
+      },
+    },
   ],
 };
 
