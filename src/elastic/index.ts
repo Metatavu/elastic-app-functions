@@ -70,7 +70,7 @@ export class Elastic {
    * @param options options
    * @returns Search results
    */
-  public getPaginatedSearchResults = async (options: any): Promise<Array<{[key: string]: any;}>> => {
+  public getPaginatedSearchResults = async (options: any): Promise<Array<{ [key: string]: any; }>> => {
 
     let currentPageNumber = 1;
     let retrievedAllDocuments = false;
@@ -102,7 +102,7 @@ export class Elastic {
    * Creates new curation
    *
    * @param options options
-   * @returns created curation
+   * @returns ID of created curation
    */
   public createCuration = async (options: { curation: CreateCurationRequest["body"] }): Promise<string> => {
     const { curation } = options;

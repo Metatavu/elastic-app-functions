@@ -133,7 +133,7 @@ const updateCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
   const curationUpdates: CurationModel = {
     id: existingCuration.id,
     name: name,
-    elasticCurationId: existingCuration.id,
+    elasticCurationId: existingCuration.elasticCurationId,
     documentId: existingCuration.documentId,
     queries: queries,
     promoted: curationType === CurationType.CUSTOM ? existingCuration.promoted : promoted,
