@@ -34,6 +34,7 @@ export interface FindCurationRequest {
 
 export interface ListCurationsRequest {
     curationType?: string;
+    groupId?: string;
 }
 
 export interface UpdateCurationRequest {
@@ -177,6 +178,10 @@ export class CurationsApi extends runtime.BaseAPI {
 
         if (requestParameters.curationType !== undefined) {
             queryParameters['curationType'] = requestParameters.curationType;
+        }
+
+        if (requestParameters.groupId !== undefined) {
+            queryParameters['groupId'] = requestParameters.groupId;
         }
 
         const headerParameters: runtime.HTTPHeaders = {};

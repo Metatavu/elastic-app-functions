@@ -21,6 +21,7 @@ import {
   createDocumentFromExternalService,
   listCustomDocuments,
   purgeExternalServiceDocuments,
+  curationDocumentValidation
 } from "@functions";
 
 
@@ -108,6 +109,7 @@ const serverlessConfiguration: AWS = {
     createDocumentFromExternalService,
     listCustomDocuments,
     purgeExternalServiceDocuments,
+    curationDocumentValidation
   },
   package: { individually: true },
   custom: {
