@@ -18,3 +18,4 @@ export { default as processContactDocumentFromSQS } from "./process-contact-docu
 export { default as addExternalServiceIdToServices } from "./add-external-service-id-to-services";
 export { default as createDocumentFromExternalService } from "./create-document-from-external-service";
 export { default as purgeExternalServiceDocuments } from "./purge-external-service-documents";
+export { default as curationDocumentValidation } from "./curation-document-validation";
