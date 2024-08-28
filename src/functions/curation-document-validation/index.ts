@@ -9,7 +9,6 @@ const fn: AWSFunction = {
     {
       schedule: {
         rate: [
-          // TODO: Should this be updated?
           "cron(0 3 ? * * *)"
         ]
       }
