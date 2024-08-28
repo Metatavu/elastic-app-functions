@@ -333,6 +333,10 @@ components:
           type: array
           items:
             type: string
+        invalidDocuments:
+          type: array
+          items:
+            type: string
         startTime:
           type: string
           format: date-time

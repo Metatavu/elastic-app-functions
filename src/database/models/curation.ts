@@ -12,6 +12,7 @@ interface CurationModel {
   queries: string[];
   promoted: string[];
   hidden: string[];
+  invalidDocuments?: string[];
   startTime?: string;
   endTime?: string;
   curationType: CurationType;

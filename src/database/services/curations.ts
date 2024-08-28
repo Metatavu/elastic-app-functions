@@ -68,6 +68,23 @@ class CurationService {
   }
 
   /**
+   * Lists standard document curations
+   *
+   * @returns list of curations
+   */
+  public listStandardDocumentCurations = async (): Promise<CurationModel[]> => {
+    const result = await this.docClient
+      .scan({
+        TableName: TABLE_NAME,
+        FilterExpression: "curationType = :curationType",
+        ExpressionAttributeValues: { ":curationType": CurationType.STANDARD }
+      })
+      .promise();
+
+    return result.Items as CurationModel[];
+  }
+
+  /**
    * Lists custom document curations
    *
    * @returns list of curations

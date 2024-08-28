@@ -69,6 +69,12 @@ export interface Curation {
      */
     hidden: Array<string>;
     /**
+     * 
+     * @type {Array<string>}
+     * @memberof Curation
+     */
+    invalidDocuments?: Array<string>;
+    /**
      * Start time of curation
      * @type {Date}
      * @memberof Curation
@@ -86,6 +92,12 @@ export interface Curation {
      * @memberof Curation
      */
     curationType: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Curation
+     */
+    groupId?: string;
     /**
      * 
      * @type {string}
@@ -117,9 +129,11 @@ export function CurationFromJSONTyped(json: any, ignoreDiscriminator: boolean): 
         'queries': json['queries'],
         'promoted': json['promoted'],
         'hidden': json['hidden'],
+        'invalidDocuments': !exists(json, 'invalidDocuments') ? undefined : json['invalidDocuments'],
         'startTime': !exists(json, 'startTime') ? undefined : (new Date(json['startTime'])),
         'endTime': !exists(json, 'endTime') ? undefined : (new Date(json['endTime'])),
         'curationType': json['curationType'],
+        'groupId': !exists(json, 'groupId') ? undefined : json['groupId'],
         'language': !exists(json, 'language') ? undefined : json['language'],
         'document': !exists(json, 'document') ? undefined : CurationDocumentFromJSON(json['document']),
     };
@@ -140,9 +154,11 @@ export function CurationToJSON(value?: Curation | null): any {
         'queries': value.queries,
         'promoted': value.promoted,
         'hidden': value.hidden,
+        'invalidDocuments': value.invalidDocuments,
         'startTime': value.startTime === undefined ? undefined : (value.startTime.toISOString()),
         'endTime': value.endTime === undefined ? undefined : (value.endTime.toISOString()),
         'curationType': value.curationType,
+        'groupId': value.groupId,
         'language': value.language,
         'document': CurationDocumentToJSON(value.document),
     };
