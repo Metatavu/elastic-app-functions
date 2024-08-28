@@ -20,7 +20,7 @@ const curationDocumentValidation = async() => {
     console.log("Curations", curations);
     if (!curations) throw new Error("Error listing curations");
 
-    curations.map(async curation => {
+    for (const curation of curations) {
       const invalidDocuments: string[] = [];
 
       await Promise.allSettled(curation.promoted.map(async promotedDocument => {
@@ -44,7 +44,7 @@ const curationDocumentValidation = async() => {
           invalidDocuments: invalidDocuments
         });
       }
-    })
+    }
   } catch (error) {
     console.error("Error while validating curation documents", error);
   }
