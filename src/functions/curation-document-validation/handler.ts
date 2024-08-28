@@ -17,12 +17,12 @@ const curationDocumentValidation = async() => {
     });
 
     const curations = await curationsService.listStandardDocumentCurations();
+    console.log("Curations", curations);
     if (!curations) throw new Error("Error listing curations");
 
     curations.map(async curation => {
       const invalidDocuments: string[] = [];
 
-      // TODO: Should there be additional handling here for rejected promises?
       await Promise.allSettled(curation.promoted.map(async promotedDocument => {
         const foundDocument = await elastic.findDocument({ documentId: promotedDocument });
         if (!foundDocument) {
@@ -36,6 +36,7 @@ const curationDocumentValidation = async() => {
           invalidDocuments.push(hiddenDocument);
         }
       }))
+      console.log(`${invalidDocuments.length} invalid documents found`);
 
       if (!isEqual(invalidDocuments, curation.invalidDocuments)) {
         await curationsService.updateCuration({
