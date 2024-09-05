@@ -17,7 +17,6 @@ const curationDocumentValidation = async() => {
     });
 
     const curations = await curationsService.listStandardDocumentCurations();
-    console.log("Curations", curations);
     if (!curations) throw new Error("Error listing curations");
 
     for (const curation of curations) {
@@ -36,7 +35,6 @@ const curationDocumentValidation = async() => {
           invalidDocuments.push(hiddenDocument);
         }
       }))
-      console.log(`${invalidDocuments.length} invalid documents found`);
 
       if (!isEqual(invalidDocuments, curation.invalidDocuments)) {
         await curationsService.updateCuration({
