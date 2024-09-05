@@ -30,7 +30,8 @@ const updateCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
     document,
     curationType,
     groupId,
-    language
+    language,
+    invalidDocuments
   } = body;
   const id = pathParameters?.id;
   const authHeader = Authorization || authorization;
@@ -142,7 +143,8 @@ const updateCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
     endTime: endTime,
     curationType: curationType,
     groupId: groupId,
-    language: language
+    language: language,
+    invalidDocuments: invalidDocuments
   };
 
   if (!isEqual(existingCuration, curationUpdates)) {
