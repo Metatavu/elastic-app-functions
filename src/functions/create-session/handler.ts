@@ -19,21 +19,26 @@ const createAuthenticationSession: ValidatedEventAPIGatewayProxyEvent<any> = asy
   const isBearerAuth = authHeader?.toLowerCase()?.startsWith("bearer");
 
   if (!(isBearerAuth || isBasicAuth)) {
+    console.warn("No authentication header provided");
     return returnUnauthorized();
   }
 
   if (isBearerAuth) {
+    console.info("Bearer auth used");
     const token = parseBearerAuth(authHeader!);
     if (!token) {
+      console.warn("Invalid bearer token");
       return returnUnauthorized();
     }
 
     const foundSession = await authenticationService.findSession(token);
     if (!foundSession) {
+      console.warn("No previous session found");
       return returnUnauthorized()
     }
 
     if (!validateTimestamp(foundSession.expiresAt)) {
+      console.warn("session already expired");
       await authenticationService.deleteSession(foundSession.token);
 
       return returnUnauthorized()
@@ -51,6 +56,7 @@ const createAuthenticationSession: ValidatedEventAPIGatewayProxyEvent<any> = asy
       expiry: refreshedSession.expiresAt
     };
 
+    console.info("Session refreshed");
     return {
       statusCode: 201,
       body: JSON.stringify(responseToken)
@@ -58,13 +64,16 @@ const createAuthenticationSession: ValidatedEventAPIGatewayProxyEvent<any> = asy
   }
 
   if (isBasicAuth) {
+    console.warn("Basic auth used");
     const auth = parseBasicAuth(authHeader);
     if (!auth) {
+      console.warn("Invalid basic auth provided");
       return returnUnauthorized();
     }
 
     const elastic = getElastic(auth);
     if (!(await elastic.hasCurationsAccess())) {
+      console.warn("User does not have access to curations");
       return returnForbidden();
     }
 
@@ -83,6 +92,8 @@ const createAuthenticationSession: ValidatedEventAPIGatewayProxyEvent<any> = asy
       token: authenticationToken.token,
       expiry: authenticationToken.expiresAt
     }
+
+    console.info("Session created");
 
     return {
       statusCode: 201,
