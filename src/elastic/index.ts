@@ -247,7 +247,8 @@ export class Elastic {
       });
 
       return !!result.results;
-    } catch {
+    } catch (error) {
+      console.error("Error checking curation access", error);
       return false;
     }
   }
