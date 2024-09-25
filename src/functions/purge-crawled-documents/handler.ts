@@ -33,7 +33,8 @@ const checkCrawlRuleAgainstDocumentUrl = (crawlRule: CrawlRule, documentUrl: str
  * @param crawlerDomains crawler domains
  */
 const isDocumentMatchingCrawlRules = async (document: Document, crawlerDomains: CrawlerDomain[]) => {
-  const matchingDomain = crawlerDomains.find((domain) => document.url === domain.name);
+  const documentUrl = new URL(document.url as string);
+  const matchingDomain = crawlerDomains.find((domain) => documentUrl.origin === domain.name);
   if (!matchingDomain) {
     console.info(`Document URL ${document.url} does not match any of the crawler domains.`);
     return true;
