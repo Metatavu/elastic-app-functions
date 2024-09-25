@@ -5,16 +5,6 @@ import { searchResultsToDocuments } from "@libs/document-utils";
 import { DateTime } from "luxon";
 import { CrawlerDomain, CrawlRule } from "@types";
 import fetch from "node-fetch";
-import { Type } from "@sinclair/typebox";
-import { Handler } from "aws-lambda";
-import { ValidatedAPIGatewayProxyEvent } from "@libs/api-gateway";
-
-/**
- * Schema object for purge crawled documents request body
- */
-const purgeCrawledDocumentsSchema = Type.Object({
-  dryRun: Type.Optional(Type.Boolean())
-});
 
 /**
  * Checks whether the document URL matches the crawl rule.
@@ -106,8 +96,9 @@ const fetchCrawledDocumentsWithExpiredPurgeCheck = async (elastic: Elastic) => {
 /**
  * Scheduled lambda for purging crawled documents which do not exist anymore or do not fit to crawl rules
  */
-const purgeCrawledDocuments: Handler<ValidatedAPIGatewayProxyEvent<typeof purgeCrawledDocumentsSchema>> = async (event) => {
-  const { body: { dryRun = true } } = event;
+const purgeCrawledDocuments = async (event: any) => {
+  console.info(JSON.stringify(event, null, 2));
+  const dryRun = true;
 
   try {
     const elastic = getElastic({
