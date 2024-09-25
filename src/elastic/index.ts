@@ -1,6 +1,7 @@
 import { Client } from "@elastic/enterprise-search";
 import { CreateCurationRequest, DeleteDocumentsResponse, PutCurationRequest, SearchRequest, SearchResponse } from "@elastic/enterprise-search/lib/api/app/types";
 import { BasicAuth } from "@libs/auth-utils";
+import { CrawlerDomain } from "@types";
 import config from "src/config";
 
 /**
@@ -65,13 +66,35 @@ export class Elastic {
   }
 
   /**
+   * Lists all crawler domains from Elastic App Search
+   */
+  public listCrawlerDomains = async () => {
+    let currentPageNumber = 1;
+    let retrievedAllDomains = false;
+    const retrievedDomains: CrawlerDomain[] = [];
+
+    do {
+      const response = await this.getClient().app.listCrawlerDomains({
+        engine_name: this.options.engineName,
+        page: { current: currentPageNumber, size: 25 },
+      });
+
+      if (response.meta.page.current === response.meta.page.total_pages) retrievedAllDomains = true;
+      else currentPageNumber++;
+
+      retrievedDomains.push(...response.results);
+    } while (!retrievedAllDomains);
+
+    return retrievedDomains as CrawlerDomain[];
+  };
+
+  /**
    * Gets paginated Elastic Search results filtered by given filters and query.
    *
    * @param options options
    * @returns Search results
    */
   public getPaginatedSearchResults = async (options: any): Promise<Array<{ [key: string]: any; }>> => {
-
     let currentPageNumber = 1;
     let retrievedAllDocuments = false;
     const retrievedDocuments: { [key: string]: any }[] = [];

@@ -23,6 +23,7 @@ import {
   purgeExternalServiceDocuments,
   curationDocumentValidation
 } from "@functions";
+import purgeCrawledDocuments from "@functions/purge-crawled-documents";
 
 
 const serverlessConfiguration: AWS = {
@@ -50,7 +51,8 @@ const serverlessConfiguration: AWS = {
       CONTACT_PERSONS_URL: config.CONTACT_PERSONS_URL,
       CONTACT_SYNC_INTERVAL_IN_DAYS: config.CONTACT_SYNC_INTERVAL_IN_DAYS.toString(),
       AUTHENTICATION_EXPIRY_IN_MINS: config.AUTHENTICATION_EXPIRY_IN_MINS.toString(),
-      SUOMIFI_ORGANIZATION_ID: config.SUOMIFI_ORGANIZATION_ID
+      SUOMIFI_ORGANIZATION_ID: config.SUOMIFI_ORGANIZATION_ID,
+      PURGE_CHECK_INTERVAL_IN_DAYS: config.PURGE_CHECK_INTERVAL_IN_DAYS.toString()
     },
     iam: {
       role: {
@@ -109,7 +111,8 @@ const serverlessConfiguration: AWS = {
     createDocumentFromExternalService,
     listCustomDocuments,
     purgeExternalServiceDocuments,
-    curationDocumentValidation
+    curationDocumentValidation,
+    purgeCrawledDocuments
   },
   package: { individually: true },
   custom: {
