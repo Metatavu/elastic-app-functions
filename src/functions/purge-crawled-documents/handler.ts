@@ -35,7 +35,7 @@ const checkCrawlRuleAgainstDocumentUrl = (crawlRule: CrawlRule, documentUrl: str
 const isDocumentMatchingCrawlRules = async (document: Document, crawlerDomains: CrawlerDomain[]) => {
   const matchingDomain = crawlerDomains.find((domain) => document.url === domain.name);
   if (!matchingDomain) {
-    console.info(`Domain ${matchingDomain} does not match any of the crawler domains.`);
+    console.info(`Document URL ${document.url} does not match any of the crawler domains.`);
     return true;
   }
 
@@ -76,8 +76,11 @@ const fetchCrawledDocumentsWithExpiredPurgeCheck = async (elastic: Elastic) => {
 
   const purgeCheckThresholdDate = DateTime.fromMillis(Date.now()).minus({ days: config.PURGE_CHECK_INTERVAL_IN_DAYS });
 
-  const searchResults = await elastic.getPaginatedSearchResults({
+  const response = await elastic.searchDocuments({
     query: "",
+    page: {
+      size: 1000
+    },
     filters: {
       all: [
         { last_crawled_at: { from: new Date(0).toISOString() } }
@@ -88,9 +91,9 @@ const fetchCrawledDocumentsWithExpiredPurgeCheck = async (elastic: Elastic) => {
     }
   });
 
-  console.info(`Found ${searchResults.length} documents.`);
+  console.info(`Found ${response.results.length} documents.`);
 
-  return searchResultsToDocuments(searchResults);
+  return searchResultsToDocuments(response.results);
 };
 
 /**
