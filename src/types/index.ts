@@ -1,3 +1,4 @@
+import { ListCrawlerDomainsResponse } from "@elastic/enterprise-search/lib/api/app/types";
 import type { AWS } from "@serverless/typescript";
 import { ContentCategory } from "src/elastic";
 
@@ -123,3 +124,13 @@ export enum CurationType {
   CUSTOM = "custom",
   STANDARD = "standard"
 };
+
+/**
+ * Crawler domain
+ */
+export type CrawlerDomain = ListCrawlerDomainsResponse["results"][0];
+
+/**
+ * Crawl rule
+ */
+export type CrawlRule = Required<CrawlerDomain>["default_crawl_rule"];
