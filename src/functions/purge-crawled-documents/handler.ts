@@ -27,17 +27,32 @@ const checkCrawlRuleAgainstDocumentUrl = (crawlRule: CrawlRule, documentUrl: str
 };
 
 /**
+ * Safely parses the URL. Throws an error if the URL is not a string or is invalid.
+ *
+ * @param url url
+ */
+const safeParseUrl = (url: unknown): URL => {
+  if (typeof url !== "string") throw Error(`Non-string URL ${url}`);
+
+  try {
+    return new URL(url);
+  } catch {
+    throw Error(`Invalid URL ${url}`);
+  }
+}
+
+/**
  * Checks whether the document matches the crawl rules.
  *
  * @param document document
  * @param crawlerDomains crawler domains
  */
 const isDocumentMatchingCrawlRules = async (document: Document, crawlerDomains: CrawlerDomain[]) => {
-  const documentUrl = new URL(document.url as string);
+  const documentUrl = safeParseUrl(document.url);
+
   const matchingDomain = crawlerDomains.find((domain) => documentUrl.origin === domain.name);
   if (!matchingDomain) {
-    console.info(`Document URL ${document.url} does not match any of the crawler domains.`);
-    return true;
+    throw Error(`Document URL ${document.url} does not match any of the crawler domains.`);
   }
 
   const domainCrawlRules = matchingDomain.crawl_rules ?? [];
@@ -100,8 +115,7 @@ const fetchCrawledDocumentsWithExpiredPurgeCheck = async (elastic: Elastic) => {
 /**
  * Scheduled lambda for purging crawled documents which do not exist anymore or do not fit to crawl rules
  */
-const purgeCrawledDocuments = async (event: any) => {
-  console.info(JSON.stringify(event, null, 2));
+const purgeCrawledDocuments = async () => {
   const dryRun = true;
 
   try {
@@ -126,8 +140,13 @@ const purgeCrawledDocuments = async (event: any) => {
     for (const document of documentsToBeCheckedForPurge) {
       let shouldPurgeDocument = false;
 
-      const crawlRulesMatch = await isDocumentMatchingCrawlRules(document, crawlerDomains);
-      if (!crawlRulesMatch) shouldPurgeDocument = true;
+      try {
+        const crawlRulesMatch = await isDocumentMatchingCrawlRules(document, crawlerDomains);
+        if (!crawlRulesMatch) shouldPurgeDocument = true;
+      } catch (error) {
+        console.error(`Error while checking crawl rules for document ${document.id}`, error);
+        continue;
+      }
 
       if (!shouldPurgeDocument) {
         const documentUrlExists = await isDocumentUrlExisting(document);
@@ -137,7 +156,7 @@ const purgeCrawledDocuments = async (event: any) => {
       if (!shouldPurgeDocument) continue;
 
       if (dryRun) {
-        console.info(`Document ${document.id} would be purged.`);
+        console.info(`Document ${document.id} with url ${document.url} would be purged.`);
         purgedDocumentCount++;
       } else {
         try {
@@ -145,7 +164,7 @@ const purgeCrawledDocuments = async (event: any) => {
           console.info(`Document ${document.id} purged.`);
           purgedDocumentCount++;
         } catch (error) {
-          console.error("Error while deleting contact documents from Elastic", error);
+          console.error(`Error while deleting document ${document.id} from Elastic`, error);
         }
       }
     }
