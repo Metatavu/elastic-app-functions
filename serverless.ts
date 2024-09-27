@@ -21,15 +21,16 @@ import {
   createDocumentFromExternalService,
   listCustomDocuments,
   purgeExternalServiceDocuments,
-  curationDocumentValidation
+  curationDocumentValidation,
+  purgeCrawledDocuments
 } from "@functions";
-import purgeCrawledDocuments from "@functions/purge-crawled-documents";
 
 
 const serverlessConfiguration: AWS = {
   service: "elastic-app-functions",
   frameworkVersion: "3",
   plugins: [ "serverless-esbuild", "serverless-deployment-bucket", "serverless-dotenv-plugin" ],
+  useDotenv: true,
   provider: {
     name: "aws",
     runtime: "nodejs16.x",
@@ -52,7 +53,8 @@ const serverlessConfiguration: AWS = {
       CONTACT_SYNC_INTERVAL_IN_DAYS: config.CONTACT_SYNC_INTERVAL_IN_DAYS.toString(),
       AUTHENTICATION_EXPIRY_IN_MINS: config.AUTHENTICATION_EXPIRY_IN_MINS.toString(),
       SUOMIFI_ORGANIZATION_ID: config.SUOMIFI_ORGANIZATION_ID,
-      PURGE_CHECK_INTERVAL_IN_DAYS: config.PURGE_CHECK_INTERVAL_IN_DAYS.toString()
+      PURGE_CHECK_INTERVAL_IN_DAYS: config.PURGE_CHECK_INTERVAL_IN_DAYS.toString(),
+      PURGE_CRAWLED_DOCUMENTS_DRY_RUN: config.PURGE_CRAWLED_DOCUMENTS_DRY_RUN.toString()
     },
     iam: {
       role: {

@@ -1,4 +1,4 @@
-import { ListCrawlerDomainsResponse } from "@elastic/enterprise-search/lib/api/app/types";
+import { ListCrawlerDomainsResponse, SearchEsSearchRequest } from "@elastic/enterprise-search/lib/api/app/types";
 import type { AWS } from "@serverless/typescript";
 import { ContentCategory } from "src/elastic";
 
@@ -134,3 +134,30 @@ export type CrawlerDomain = ListCrawlerDomainsResponse["results"][0];
  * Crawl rule
  */
 export type CrawlRule = Required<CrawlerDomain>["default_crawl_rule"];
+
+/**
+ * Search request options for Elastic App Search
+ */
+export type SearchESSearchRequestBody = Required<SearchEsSearchRequest>["body"];
+
+/**
+ * Search response from Elastic App Search
+ */
+export type SearchEsSearchResponse = {
+  took?: number,
+  timed_out?: boolean,
+  _shards?: {
+    total: number,
+    successful: number,
+    skipped: number,
+    failed: number
+  },
+  hits?: {
+    total?: {
+      value?: number,
+      relation?: string
+    },
+    max_score?: number,
+    hits?: { [k: string]: any }[],
+  }
+};
