@@ -15,5 +15,6 @@ export default cleanEnv(process.env, {
   AUTHENTICATION_EXPIRY_IN_MINS: num(),
   SUOMIFI_ORGANIZATION_ID: str(),
   PURGE_CHECK_INTERVAL_IN_DAYS: num(),
+  ELASTIC_APP_SEARCH_PRIVATE_API_KEY: str(),
   PURGE_CRAWLED_DOCUMENTS_DRY_RUN: bool({ default: false }),
 });
