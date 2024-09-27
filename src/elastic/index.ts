@@ -1,7 +1,7 @@
 import { Client } from "@elastic/enterprise-search";
 import { CreateCurationRequest, DeleteDocumentsResponse, PutCurationRequest, SearchRequest, SearchResponse } from "@elastic/enterprise-search/lib/api/app/types";
 import { BasicAuth } from "@libs/auth-utils";
-import { CrawlerDomain } from "@types";
+import { CrawlerDomain, SearchESSearchRequestBody, SearchEsSearchResponse } from "@types";
 import config from "src/config";
 
 /**
@@ -63,6 +63,19 @@ export class Elastic {
    */
   constructor(options: Options) {
     this.options = options;
+  }
+
+  /**
+   * Patches documents to Elastic Search. ID is required for each document.
+   *
+   * @param documents documents
+   * @returns patch response for each document
+   */
+  public patchDocuments = (documents: Document[]) => {
+    return this.getClient().app.putDocuments({
+      engine_name: this.options.engineName,
+      documents: documents
+    });
   }
 
   /**
@@ -167,6 +180,30 @@ export class Elastic {
       engine_name: this.options.engineName,
       body: options
     });
+  }
+
+  /**
+   * Searches documents via Elastic App Search ElasticSearch API
+   *
+   * @param requestBody search request body
+   */
+  public searchDocumentsViaElasticSearchApi = async (requestBody: SearchESSearchRequestBody) => {
+    try {
+      return await this.getClient().app.searchEsSearch(
+        {
+          engine_name: this.options.engineName,
+          body: requestBody
+        } as any, // Types in Elastic Enterprise Search client package are WRONG.
+        {
+          headers: {
+            Authorization: `Bearer ${process.env.ELASTIC_APP_SEARCH_PRIVATE_API_KEY}`
+          }
+        }
+      ) as SearchEsSearchResponse;
+    } catch (error) {
+      console.error("Error searching documents via ElasticSearch API", JSON.stringify(error, null, 2));
+      throw error;
+    }
   }
 
   /**

@@ -19,3 +19,4 @@ export { default as addExternalServiceIdToServices } from "./add-external-servic
 export { default as createDocumentFromExternalService } from "./create-document-from-external-service";
 export { default as purgeExternalServiceDocuments } from "./purge-external-service-documents";
 export { default as curationDocumentValidation } from "./curation-document-validation";
+export { default as purgeCrawledDocuments } from "./purge-crawled-documents";

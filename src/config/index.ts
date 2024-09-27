@@ -1,4 +1,5 @@
-import { cleanEnv, num, str, url } from "envalid";
+import "dotenv/config";
+import { bool, cleanEnv, num, str, url } from "envalid";
 
 /**
  * Validates that environment variables are in place and have correct form
@@ -14,4 +15,5 @@ export default cleanEnv(process.env, {
   AUTHENTICATION_EXPIRY_IN_MINS: num(),
   SUOMIFI_ORGANIZATION_ID: str(),
   PURGE_CHECK_INTERVAL_IN_DAYS: num(),
+  PURGE_CRAWLED_DOCUMENTS_DRY_RUN: bool({ default: false }),
 });
