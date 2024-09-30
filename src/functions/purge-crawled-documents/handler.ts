@@ -114,8 +114,6 @@ const isDocumentUrlAccessible = async (document: Document) => {
  * @param elastic elastic client instance
  */
 const fetchCrawledDocumentsWithExpiredPurgeCheck = async (elastic: Elastic) => {
-  const purgeCheckThresholdDate = DateTime.fromMillis(Date.now()).minus({ days: config.PURGE_CHECK_INTERVAL_IN_DAYS });
-
   try {
     const response = await elastic.searchDocumentsViaElasticSearchApi({
       size: 1000,
@@ -129,8 +127,8 @@ const fetchCrawledDocumentsWithExpiredPurgeCheck = async (elastic: Elastic) => {
           must_not: [{
             range: {
               purge_last_checked_at: {
-                lte: purgeCheckThresholdDate.toISO(),
-                gte: "1900-01-01T00:00:00.000Z"
+                "gte": `now-${config.PURGE_CHECK_INTERVAL_IN_DAYS}d/d`,
+                "lte": "now"
               }
             }
           }],
