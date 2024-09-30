@@ -126,7 +126,7 @@ const fetchCrawledDocumentsWithExpiredPurgeCheck = async (elastic: Elastic) => {
           ],
           must_not: [{
             range: {
-              purge_last_checked_at: {
+              "purge_last_checked_at.date": {
                 "gte": `now-${config.PURGE_CHECK_INTERVAL_IN_DAYS}d/d`,
                 "lte": "now"
               }
