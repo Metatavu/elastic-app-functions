@@ -197,6 +197,7 @@ const purgeCrawledDocuments = async () => {
     const documentsToBeCheckedForPurge = await fetchCrawledDocumentsWithExpiredPurgeCheck(elastic);
     if (documentsToBeCheckedForPurge.length === 0) {
       console.info("No documents need to be checked for purge. Ending task.");
+      console.timeEnd("purge run took time");
       return;
     }
 
