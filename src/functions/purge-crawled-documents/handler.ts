@@ -1,7 +1,6 @@
 import config from "src/config";
 import { middyfy } from "@libs/lambda";
 import { Document, Elastic, getElastic } from "src/elastic";
-import { DateTime } from "luxon";
 import { CrawlerDomain, CrawlRule } from "@types";
 import fetch from "node-fetch";
 
@@ -30,18 +29,26 @@ const regexFromPatternAndRule = (pattern: string, rule: "begins" | "ends" | "con
 };
 
 /**
- * Checks whether the document URL path with search query matches the crawl rule.
+ * Checks whether the document URL path with search query matches the crawl rules
  *
- * @param crawlRule crawl rule
+ * @param crawlRules crawl rules
  * @param documentUrl document URL
- * @returns whether the path with search query matches the crawl rule
+ * @returns whether the path with search query matches given crawl rules
  */
-const checkCrawlRuleAgainstDocumentUrl = (crawlRule: CrawlRule, documentUrl: string) => {
-  const comparedValue = crawlRule.policy === "allow";
-  const url = new URL(documentUrl);
-  const regex = regexFromPatternAndRule(crawlRule.pattern, crawlRule.rule);
-  console.info(`Checking crawl rule: ${crawlRule.policy} ${regex}`);
-  return comparedValue === new RegExp(regex).test(`${url.pathname}${url.search}`);
+const checkCrawlRulesAgainstDocumentUrl = (crawlRules: CrawlRule[], documentUrl: string) => {
+  for (const crawlRule of crawlRules) {
+    const url = new URL(documentUrl);
+
+    const regex = regexFromPatternAndRule(crawlRule.pattern, crawlRule.rule);
+    console.info(`Checking crawl rule: ${crawlRule.policy} ${regex}`);
+
+    const match = new RegExp(regex).test(`${url.pathname}${url.search}`);
+
+    if (crawlRule.policy === "deny" && match) return false;
+    if (crawlRule.policy === "allow" && match) return true;
+  }
+
+  return true;
 };
 
 /**
@@ -80,11 +87,7 @@ const isDocumentMatchingCrawlRules = async (document: DocumentIdAndUrl, crawlerD
     return true;
   }
 
-  for (const crawlRule of domainCrawlRules) {
-    if (!checkCrawlRuleAgainstDocumentUrl(crawlRule, document.url)) return false;
-  }
-
-  return true;
+  return checkCrawlRulesAgainstDocumentUrl(domainCrawlRules, document.url);
 };
 
 /**
