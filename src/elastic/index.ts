@@ -1,5 +1,5 @@
 import { Client } from "@elastic/enterprise-search";
-import { CreateCurationRequest, DeleteDocumentsResponse, PutCurationRequest, SearchRequest, SearchResponse } from "@elastic/enterprise-search/lib/api/app/types";
+import { CreateCrawlerCrawlRequestRequest, CreateCurationRequest, DeleteDocumentsResponse, PutCurationRequest, SearchRequest, SearchResponse } from "@elastic/enterprise-search/lib/api/app/types";
 import { BasicAuth } from "@libs/auth-utils";
 import { CrawlerDomain, SearchESSearchRequestBody, SearchEsSearchResponse } from "@types";
 import config from "src/config";
@@ -343,13 +343,13 @@ export class Elastic {
    * @param options options
    * @returns crawl request id
    */
-  public createCrawlRequest = async (options: { overrides: { seed_urls: string[] } }): Promise<string> => {
+  public createCrawlRequest = async (options: CreateCrawlerCrawlRequestRequest["body"]) => {
     const result = await this.getClient().app.createCrawlerCrawlRequest({
       engine_name: this.options.engineName,
-      body: options as any
+      body: options
     });
 
-    return result.id;
+    return result;
   }
 
   /**
@@ -367,12 +367,12 @@ export class Elastic {
   }
 
   /**
-   * Check if a crawl is currently active
+   * Get currently active crawl
    *
    * @param options options
    * @returns active crawl details or 404
    */
-  public checkIfActiveCrawl = async () => {
+  public getCurrentlyActiveCrawl = async () => {
     return await this.getClient().app.getCrawlerActiveCrawlRequest({
       engine_name: this.options.engineName,
     });

@@ -42,9 +42,7 @@ class ScheduledCrawlService {
     const result = await this.docClient
       .get({
         TableName: TABLE_NAME,
-        Key: {
-          id: id
-        },
+        Key: { id: id },
       })
       .promise();
 
@@ -58,9 +56,7 @@ class ScheduledCrawlService {
    */
   public listScheduledCrawls = async (): Promise<ScheduledCrawl[]> => {
     const result = await this.docClient
-      .scan({
-        TableName: TABLE_NAME
-      })
+      .scan({ TableName: TABLE_NAME })
       .promise();
 
     return result.Items as ScheduledCrawl[];
@@ -92,9 +88,7 @@ class ScheduledCrawlService {
     return this.docClient
       .delete({
         TableName: TABLE_NAME,
-        Key: {
-          id: id
-        },
+        Key: { id: id },
       })
       .promise();
   }

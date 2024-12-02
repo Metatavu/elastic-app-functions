@@ -3,21 +3,22 @@ import { getElasticCredentialsForSession, returnForbidden, returnUnauthorized } 
 import { middyfy } from "@libs/lambda";
 import { getElastic } from "src/elastic";
 import { scheduledCrawlService } from "src/database/services";
-import scheduledCrawlsSchema from "src/schema/scheduled-crawl";
+import { ScheduledCrawl, scheduledCrawlSchema } from "src/schema/scheduled-crawl";
+import { scheduledCrawlDtoToEntity, scheduledCrawlEntityToDto } from "../scheduled-crawl-translator";
 
 /**
  * Lambda for updating scheduled crawls
  *
  * @param event event
  */
-const updateScheduledCrawl: ValidatedEventAPIGatewayProxyEvent<typeof scheduledCrawlsSchema> = async event => {
+const updateScheduledCrawl: ValidatedEventAPIGatewayProxyEvent<typeof scheduledCrawlSchema> = async event => {
   const { pathParameters, body, headers } = event;
   const { authorization, Authorization } = headers;
-  const { name, previousCrawlId, seedURLs, frequency } = body;
-  const id = pathParameters?.id;
+  const idFromPath = pathParameters?.id;
   const authHeader = Authorization || authorization;
 
-  if (!id) {
+  if (!idFromPath) {
+    console.error("No id in path");
     return {
       statusCode: 400,
       body: "Bad request"
@@ -25,16 +26,12 @@ const updateScheduledCrawl: ValidatedEventAPIGatewayProxyEvent<typeof scheduledC
   }
 
   const auth = await getElasticCredentialsForSession(authHeader);
-  if (!auth) {
-    return returnUnauthorized();
-  }
+  if (!auth) return returnUnauthorized();
 
   const elastic = getElastic(auth);
-  if (!(await elastic.hasScheduledCrawlAccess())) {
-    return returnForbidden();
-  }
+  if (!(await elastic.hasScheduledCrawlAccess())) return returnForbidden();
 
-  const scheduledCrawl = await scheduledCrawlService.findScheduledCrawl(id);
+  const scheduledCrawl = await scheduledCrawlService.findScheduledCrawl(idFromPath);
   if (!scheduledCrawl) {
     return {
       statusCode: 404,
@@ -42,24 +39,26 @@ const updateScheduledCrawl: ValidatedEventAPIGatewayProxyEvent<typeof scheduledC
     };
   }
 
+  let payload: ScheduledCrawl;
+  try {
+    payload = scheduledCrawlDtoToEntity(body);
+    if (payload.id !== idFromPath) throw new Error("Id in path does not match id in body");
+  } catch (error) {
+    console.error("Error parsing request body", error);
+    return {
+      statusCode: 400,
+      body: "Bad request"
+    };
+  }
+
   const updatedScheduledCrawl = await scheduledCrawlService.updateScheduledCrawl({
     ...scheduledCrawl,
-    name: name,
-    previousCrawlId: previousCrawlId,
-    seedURLs: seedURLs,
-    frequency: frequency,
+    ...payload,
   });
-
-  const responseUpdatedScheduledCrawl = {
-    id: updatedScheduledCrawl.id,
-    name: updatedScheduledCrawl.name,
-    seedURLs: updatedScheduledCrawl.seedURLs,
-    frequency: updatedScheduledCrawl.frequency,
-  };
 
   return {
     statusCode: 200,
-    body: JSON.stringify(responseUpdatedScheduledCrawl)
+    body: JSON.stringify(scheduledCrawlEntityToDto(updatedScheduledCrawl))
   };
 };
 

@@ -3,6 +3,7 @@ import { middyfy } from "@libs/lambda";
 import { getElastic } from "src/elastic";
 import { scheduledCrawlService } from "src/database/services";
 import { getElasticCredentialsForSession, returnForbidden, returnUnauthorized } from "@libs/auth-utils";
+import { scheduledCrawlEntityToDto } from "../scheduled-crawl-translator";
 
 /**
  * Lambda for listing scheduled crawls
@@ -14,29 +15,16 @@ const listScheduledCrawls: ValidatedEventAPIGatewayProxyEvent<any> = async (even
   const authHeader = Authorization || authorization;
 
   const auth = await getElasticCredentialsForSession(authHeader);
-  if (!auth) {
-    return returnUnauthorized();
-  }
+  if (!auth) return returnUnauthorized();
 
   const elastic = getElastic(auth);
-  if (!(await elastic.hasScheduledCrawlAccess())) {
-    return returnForbidden();
-  }
+  if (!(await elastic.hasScheduledCrawlAccess())) return returnForbidden();
 
   const scheduledCrawls = await scheduledCrawlService.listScheduledCrawls();
 
-  const responseScheduledCrawls = scheduledCrawls.map(row => (
-    {
-      id: row.id,
-      name: row.name,
-      seedURLs: row.seedURLs,
-      frequency: row.frequency,
-    }
-  ));
-
   return {
     statusCode: 200,
-    body: JSON.stringify(responseScheduledCrawls)
+    body: JSON.stringify(scheduledCrawls.map(scheduledCrawlEntityToDto))
   };
 };
 
