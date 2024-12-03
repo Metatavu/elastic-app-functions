@@ -65,11 +65,22 @@ const triggerScheduledCrawl = async () => {
       try {
         const interval = cronParser.parseExpression(scheduledCrawl.scheduleCron);
         const previousTimeToRun = interval.prev().toDate();
+
         console.log(scheduledCrawl.name, "previous time to run", previousTimeToRun);
-        const lastCrawlTime = new Date(scheduledCrawl.previousCrawlCompletedAt || previousTimeToRun.toISOString());
+
+        const lastCrawlTime = new Date(
+          scheduledCrawl.previousCrawlCompletedAt ||
+          scheduledCrawl.createdAt ||
+          new Date().toISOString()
+        );
+
         console.log(scheduledCrawl.name, "last crawl time", lastCrawlTime);
-        console.log(scheduledCrawl.name, "should run", lastCrawlTime.valueOf() < previousTimeToRun.valueOf());
-        return lastCrawlTime.valueOf() < previousTimeToRun.valueOf();
+
+        const isPending = lastCrawlTime.valueOf() < previousTimeToRun.valueOf();
+
+        console.log(scheduledCrawl.name, "is pending", isPending);
+
+        return isPending;
       } catch (error) {
         return false;
       }

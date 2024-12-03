@@ -13,7 +13,7 @@ import { scheduledCrawlDtoToEntity, scheduledCrawlEntityToDto } from "../schedul
  * @param event event
  */
 const createScheduledCrawl: ValidatedEventAPIGatewayProxyEvent<typeof scheduledCrawlSchema> = async (event) => {
-  const { body, headers } = event;
+  const { body, headers, requestContext: { requestTimeEpoch } } = event;
   const { Authorization, authorization } = headers;
   const authHeader = Authorization || authorization;
 
@@ -25,7 +25,10 @@ const createScheduledCrawl: ValidatedEventAPIGatewayProxyEvent<typeof scheduledC
 
   let payload: ScheduledCrawl;
   try {
-    payload = scheduledCrawlDtoToEntity(body);
+    payload = scheduledCrawlDtoToEntity({
+      ...body,
+      createdAt: new Date(requestTimeEpoch).toISOString()
+    });
   } catch (error) {
     console.error("Error parsing request body", error);
     return {

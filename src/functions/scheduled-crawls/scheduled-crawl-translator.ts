@@ -8,17 +8,19 @@ export const scheduledCrawlDtoToEntity = (dto: ScheduledCrawl): ScheduledCrawl =
   return scheduledCrawl;
 };
 
-export const scheduledCrawlEntityToDto = (props: ScheduledCrawl): ScheduledCrawl => {
+export const scheduledCrawlEntityToDto = (entity: ScheduledCrawl): ScheduledCrawl => {
   return {
-    enabled: props.enabled,
-    id: props.id,
-    maxCrawlDepth: props.maxCrawlDepth,
-    name: props.name,
-    priority: props.priority,
-    domainAllowlist: props.domainAllowlist,
-    seedURLs: props.seedURLs,
-    scheduleCron: props.scheduleCron,
-    previousCrawlId: props.previousCrawlId,
-    previousCrawlCompletedAt: props.previousCrawlCompletedAt,
+    enabled: entity.enabled,
+    id: entity.id,
+    maxCrawlDepth: entity.maxCrawlDepth,
+    name: entity.name,
+    priority: entity.priority,
+    domainAllowlist: entity.domainAllowlist,
+    seedURLs: entity.seedURLs,
+    scheduleCron: entity.scheduleCron,
+    previousCrawlId: entity.previousCrawlId,
+    previousCrawlCompletedAt: entity.previousCrawlCompletedAt,
+    createdAt: entity.createdAt,
+    updatedAt: entity.updatedAt
   };
 };

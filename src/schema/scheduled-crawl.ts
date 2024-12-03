@@ -43,6 +43,14 @@ export const scheduledCrawlSchema = Type.Object({
     format: "date-time",
     description: "Timestamp of when the previous crawl was completed. If missing, filled during checking if a new crawl should be started."
   })),
+  createdAt: Type.Optional(Type.String({
+    format: "date-time",
+    description: "Timestamp of when the scheduled crawl was created"
+  })),
+  updatedAt: Type.Optional(Type.String({
+    format: "date-time",
+    description: "Timestamp of when the scheduled crawl was last updated"
+  }))
 });
 
 export type ScheduledCrawl = Static<typeof scheduledCrawlSchema>;
