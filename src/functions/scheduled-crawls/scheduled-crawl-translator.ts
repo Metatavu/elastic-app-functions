@@ -1,4 +1,4 @@
-import { Value } from "@sinclair/typebox/build/cjs/value";
+import { Value } from "@sinclair/typebox/value";
 import { ScheduledCrawl, scheduledCrawlSchema } from "src/schema/scheduled-crawl";
 import cronParser from "cron-parser";
 
