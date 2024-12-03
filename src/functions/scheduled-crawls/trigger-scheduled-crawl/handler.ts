@@ -2,7 +2,7 @@ import { middyfy } from "@libs/lambda";
 import { scheduledCrawlService } from "src/database/services";
 import config from "src/config";
 import { Elastic, getElastic } from "src/elastic";
-import parser from "cron-parser";
+import cronParser from "cron-parser";
 import { ScheduledCrawl } from "src/schema/scheduled-crawl";
 
 const { ELASTIC_ADMIN_USERNAME, ELASTIC_ADMIN_PASSWORD } = config;
@@ -63,10 +63,10 @@ const triggerScheduledCrawl = async () => {
       if (!scheduledCrawl.enabled) return false;
 
       try {
-        const interval = parser.parseExpression(scheduledCrawl.scheduleCron);
-        const lastCrawlTime = new Date(scheduledCrawl.previousCrawlCompletedAt || 0);
+        const interval = cronParser.parseExpression(scheduledCrawl.scheduleCron);
         const previousTimeToRun = interval.prev().toDate();
-        return lastCrawlTime.valueOf() <= previousTimeToRun.valueOf();
+        const lastCrawlTime = new Date(scheduledCrawl.previousCrawlCompletedAt || previousTimeToRun.toISOString());
+        return lastCrawlTime.valueOf() < previousTimeToRun.valueOf();
       } catch (error) {
         return false;
       }
