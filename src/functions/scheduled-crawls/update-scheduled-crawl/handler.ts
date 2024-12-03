@@ -12,7 +12,7 @@ import { scheduledCrawlDtoToEntity, scheduledCrawlEntityToDto } from "../schedul
  * @param event event
  */
 const updateScheduledCrawl: ValidatedEventAPIGatewayProxyEvent<typeof scheduledCrawlSchema> = async event => {
-  const { pathParameters, body, headers } = event;
+  const { pathParameters, body, headers, requestContext: { requestTimeEpoch } } = event;
   const { authorization, Authorization } = headers;
   const idFromPath = pathParameters?.id;
   const authHeader = Authorization || authorization;
@@ -41,7 +41,10 @@ const updateScheduledCrawl: ValidatedEventAPIGatewayProxyEvent<typeof scheduledC
 
   let payload: ScheduledCrawl;
   try {
-    payload = scheduledCrawlDtoToEntity(body);
+    payload = scheduledCrawlDtoToEntity({
+      ...body,
+      updatedAt: new Date(requestTimeEpoch).toISOString()
+    });
     if (payload.id !== idFromPath) throw new Error("Id in path does not match id in body");
   } catch (error) {
     console.error("Error parsing request body", error);
