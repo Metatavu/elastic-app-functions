@@ -1,12 +1,6 @@
 /**
  * DynamoDB model for scheduled crawl
  */
-interface ScheduledCrawl {
-  id: string;
-  previousCrawlId?: string;
-  name: string;
-  seedURLs: string[];
-  frequency: number;
-}
+import { ScheduledCrawl } from "src/schema/scheduled-crawl";
 
 export default ScheduledCrawl;
