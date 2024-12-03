@@ -65,7 +65,10 @@ const triggerScheduledCrawl = async () => {
       try {
         const interval = cronParser.parseExpression(scheduledCrawl.scheduleCron);
         const previousTimeToRun = interval.prev().toDate();
+        console.log(scheduledCrawl.name, "previous time to run", previousTimeToRun);
         const lastCrawlTime = new Date(scheduledCrawl.previousCrawlCompletedAt || previousTimeToRun.toISOString());
+        console.log(scheduledCrawl.name, "last crawl time", lastCrawlTime);
+        console.log(scheduledCrawl.name, "should run", lastCrawlTime.valueOf() < previousTimeToRun.valueOf());
         return lastCrawlTime.valueOf() < previousTimeToRun.valueOf();
       } catch (error) {
         return false;
