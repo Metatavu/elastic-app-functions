@@ -70,7 +70,7 @@ const processContactDocumentFromSQS = async (event: SQSEvent): Promise<SQSBatchR
       return list;
     }, []);
 
-    const results = await elastic.updateDocuments({ documents: documents });
+    const results = await elastic.upsertDocuments({ documents: documents });
 
     results.forEach(({ errors, id }) => {
       if (errors.length || !id) {

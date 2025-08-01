@@ -108,7 +108,7 @@ const createCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
       if (curationType === CurationType.CUSTOM && document) {
         const { title, description, links, language } = document;
 
-        await elastic.updateDocuments({
+        const response = await elastic.upsertDocuments({
           documents: [{
             id: newDocumentId,
             title: title,
@@ -117,6 +117,12 @@ const createCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
             language: language,
           }]
         });
+
+        const documentResult = response.at(0);
+
+        if (!!documentResult?.errors.length) {
+          throw new Error(`Failed to create document to Elastic App Search: ${JSON.stringify(documentResult.errors)}`);
+        }
       }
 
       elasticCurationId = await elastic.createCuration({
@@ -129,7 +135,7 @@ const createCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
     } catch (error) {
       return {
         statusCode: 500,
-        body: `Elastic error ${error}`
+        body: `Elastic error: ${error}`
       }
     }
   }

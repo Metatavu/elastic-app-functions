@@ -72,7 +72,7 @@ const addExternalServiceIdToServices = async () => {
 
   await runInQueue(updatedDocumentsChunks.map(chunk =>
     async () => {
-      const result = await elastic.updateDocuments({
+      const result = await elastic.upsertDocuments({
         documents: chunk
       });
       console.log(`Updated ${result.length}`);

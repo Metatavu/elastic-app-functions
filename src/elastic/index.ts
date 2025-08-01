@@ -224,12 +224,13 @@ export class Elastic {
   }
 
   /**
-   * Updates documents to Elastic search
+   * Upserts documents to Elastic search
    *
    * @param options options
-   * @param options.document document to update
+   * @param options.document document to upsert
+   * @returns upsert response for each document
    */
-  public updateDocuments = async ({ documents }: { documents: Document[]; }): Promise<UpsertDocumentResponse[]> => {
+  public upsertDocuments = async ({ documents }: { documents: Document[]; }): Promise<UpsertDocumentResponse[]> => {
     return this.getClient().app.indexDocuments({
       engine_name: this.options.engineName,
       documents: documents
