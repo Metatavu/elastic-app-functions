@@ -92,7 +92,7 @@ const createDocumentFromExternalService = async () => {
 
   await runInQueue(matchingDocumentsChunks.map(documents =>
     async () => {
-      const result = await elastic.updateDocuments({
+      const result = await elastic.upsertDocuments({
         documents: documents
       });
 

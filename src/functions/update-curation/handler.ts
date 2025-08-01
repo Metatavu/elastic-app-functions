@@ -106,7 +106,7 @@ const updateCuration: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async 
 
         if (!startTime) {
           try {
-            await elastic.updateDocuments({
+            await elastic.upsertDocuments({
               documents: [{
                 id: existingCuration.documentId,
                 title: title,

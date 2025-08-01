@@ -33,7 +33,7 @@ const scheduleTimedCuration = async () => {
           if (!foundDocument) {
             throw new Error(`Could not find custom document ${documentId}.`);
           }
-          await elastic.updateDocuments({
+          await elastic.upsertDocuments({
             documents: [{
               id: foundDocument.id,
               title: foundDocument.title,
